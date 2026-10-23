@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Brighton Heights School — Teacher Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--P:#0d1f3c;--PL:#1e3d6b;--GOLD:#b8902a;--bg:#f5f7fc;--card:#fff;--text:#0d1a2e;--muted:#64748b;--soft:#374151;--bdr:#e2e8f2;--inp:#f5f7fc;--ok:#15803d;--err:#dc2626;--warn:#b45309;--sbg:#0d1f3c}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.lw{display:flex;width:860px;max-width:95vw;min-height:520px;border-radius:16px;overflow:hidden;box-shadow:0 6px 36px rgba(13,31,60,.14);animation:fadeUp .45s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ll{flex:1;background:var(--P);padding:48px 36px;display:flex;flex-direction:column;justify-content:space-between}
+.li{width:50px;height:50px;background:rgba(255,255,255,.13);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;border:1px solid rgba(255,255,255,.18)}
+.ll h1{font-size:1.55rem;color:#fff;font-weight:700;line-height:1.25;margin-bottom:8px}
+.ll .sub{font-size:.78rem;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase}
+.feats{display:flex;flex-direction:column;gap:13px;margin-bottom:24px}
+.fi{display:flex;align-items:center;gap:12px}
+.fii{width:32px;height:32px;background:rgba(255,255,255,.11);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fit{font-size:.81rem;color:rgba(255,255,255,.78);line-height:1.45}
+.lq{font-size:.79rem;color:rgba(255,255,255,.52);font-style:italic;line-height:1.65;border-left:2px solid rgba(255,255,255,.22);padding-left:12px}
+.lr{flex:1.1;background:#fff;padding:48px 44px;display:flex;flex-direction:column;justify-content:center}
+.rbadge{display:inline-flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #c8d0e0;color:var(--P);font-size:.69rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:14px}
+.lr h2{font-size:1.45rem;color:var(--P);font-weight:700;margin-bottom:5px}
+.lr .desc{font-size:.82rem;color:var(--muted);margin-bottom:28px}
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:.73rem;font-weight:600;color:var(--P);margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase}
+.fg input{width:100%;padding:12px 14px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;color:var(--text);font-size:.88rem;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s,box-shadow .2s;outline:none}
+.fg input::placeholder{color:#b8c5d6}
+.fg input:focus{border-color:var(--P);box-shadow:0 0 0 3px rgba(13,31,60,.09)}
+.btn-lp{width:100%;padding:13px;background:var(--P);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:600;border:none;border-radius:8px;cursor:pointer;margin-top:8px;transition:background .2s}
+.btn-lp:hover{background:var(--PL)}
+.btn-lp:disabled{opacity:.6;cursor:not-allowed}
+.l-alert{padding:11px 14px;border-radius:8px;font-size:.81rem;margin-bottom:14px;display:none;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;color:var(--err)}
+.l-alert.show{display:flex}
+@media(max-width:700px){.ll{display:none}.lr{padding:32px 24px 48px}.lw{border-radius:12px;min-height:auto}}
+/* PORTAL */
+#portalScreen{display:none;height:100vh;overflow:hidden;flex-direction:row}
+#portalScreen.open{display:flex}
+.sidebar{width:240px;flex-shrink:0;background:var(--sbg);display:flex;flex-direction:column;height:100vh;overflow-y:auto;z-index:10;position:relative}
+.sb-brand{padding:26px 22px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-brand .logo{font-size:20px;margin-bottom:4px}
+.sb-brand h2{font-size:1rem;color:#fff;font-weight:700}
+.sb-brand span{font-size:.68rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em}
+.sb-nav{padding:14px 10px;flex:1}
+.nav-label{font-size:.62rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;padding:0 12px;margin:14px 0 5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:all .2s;font-size:.85rem;color:rgba(255,255,255,.65);margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.15);color:#fff;font-weight:600}
+.nav-item .ni{font-size:15px;width:20px;text-align:center}
+.sb-footer{padding:14px 10px;border-top:1px solid rgba(255,255,255,.1)}
+.ucard{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.08)}
+.uav{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:.83rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ur{font-size:.7rem;color:rgba(255,255,255,.5)}
+.btn-out{margin-top:8px;width:100%;padding:9px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.7);font-size:.8rem;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all .2s}
+.btn-out:hover{border-color:rgba(220,38,38,.5);color:#dc2626}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:18px 28px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:#fff;flex-shrink:0}
+.topbar h1{font-size:1.2rem;color:var(--P);font-weight:700}
+.topbar p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.content{flex:1;overflow-y:auto;padding:26px 28px}
+.section{display:none;animation:fadeIn .25s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:18px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--P)}
+.stat-icon{font-size:22px;margin-bottom:10px}
+.stat-num{font-size:1.7rem;font-weight:700;color:var(--P)}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:2px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.sec-hdr h2{font-size:1.15rem;font-weight:700;color:var(--P)}
+.sec-hdr p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.btn{padding:8px 16px;border-radius:7px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--P);color:#fff}
+.btn-p:hover{background:var(--PL)}
+.btn-p:disabled{opacity:.45;cursor:not-allowed}
+.btn-danger{background:#fef2f2;color:var(--err);border:1px solid #fecaca}
+.btn-danger:hover{background:#fee2e2}
+.btn-edit{background:#eff6ff;color:var(--P);border:1px solid var(--bdr)}
+.btn-edit:hover{background:#d0dcf0}
+.btn-warn{background:#fffbeb;color:var(--warn);border:1px solid #fde68a}
+.btn-warn:hover{background:#fef3c7}
+.btn-print{background:#fffbeb;color:var(--warn);border:1px solid #fde68a}
+.btn-sm{padding:6px 12px;font-size:.76rem}
+.act-btns{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+/* AVAILABILITY TOGGLE — simple clear buttons */
+.btn-active{background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;padding:6px 14px;border-radius:7px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;transition:all .2s}
+.btn-active:hover{background:#15803d;color:#fff}
+.btn-inactive{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;padding:6px 14px;border-radius:7px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;transition:all .2s}
+.btn-inactive:hover{background:#dc2626;color:#fff}
+.table-wrap{background:#fff;border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead{background:#f5f7fc}
+th{padding:11px 15px;text-align:left;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bdr)}
+td{padding:12px 15px;font-size:.84rem;color:var(--soft);border-bottom:1px solid #f5f7fc;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600}
+.b-green{background:#f0fdf4;color:var(--ok)}
+.b-blue{background:#eff6ff;color:var(--P)}
+.b-gold{background:#fffbeb;color:var(--warn)}
+.b-red{background:#fef2f2;color:var(--err)}
+.b-gray{background:#f5f7fc;color:#7f8c8d}
+.empty-state{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty-icon{font-size:34px;margin-bottom:12px}
+.empty-state p{font-size:.85rem}
+.s-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.s-bar input,.s-bar select{flex:1;min-width:160px;padding:9px 14px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;color:var(--text);font-size:.84rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
+.s-bar input:focus,.s-bar select:focus{border-color:var(--P)}
+.mon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.mon-card{background:#fff;border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center}
+.mon-card.submitted{border-color:#bbf7d0}
+.mon-card.pending{border-color:#fde68a}
+.mc-name{font-size:.82rem;font-weight:600;color:var(--P);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-st{font-size:.72rem;font-weight:600}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border:1px solid var(--bdr);border-radius:16px;padding:30px;width:500px;max-width:94vw;max-height:90vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h3{font-size:1.1rem;font-weight:700;color:var(--P);margin-bottom:6px}
+.modal>p{font-size:.82rem;color:var(--muted);margin-bottom:20px}
+.form-group{margin-bottom:15px}
+.form-group label{display:block;font-size:.73rem;font-weight:600;color:var(--P);margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;color:var(--text);font-size:.88rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
+.form-group input::placeholder,.form-group textarea::placeholder{color:#b8c5d6}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--P);box-shadow:0 0 0 3px rgba(13,31,60,.09)}
+.form-group textarea{resize:vertical;min-height:80px}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;gap:10px;margin-top:22px}
+.modal-actions button{flex:1;padding:11px;justify-content:center}
+.btn-cancel{background:transparent;border:1.5px solid var(--bdr);color:var(--muted);border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--P);color:var(--P)}
+/* PW MODAL */
+#pwModal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#pwModal.show{display:flex}
+.pw-box{background:#fff;border-radius:14px;padding:32px;width:400px;max-width:92vw;box-shadow:0 8px 40px rgba(0,0,0,.2);animation:slideUp .25s ease}
+.pw-box h3{font-size:1.05rem;font-weight:700;color:var(--P);margin-bottom:6px}
+.pw-box p{font-size:.82rem;color:var(--muted);margin-bottom:20px}
+.pw-box input{width:100%;padding:11px 14px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;color:var(--text);font-size:.88rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
+.pw-box input:focus{border-color:var(--P)}
+.pw-err{font-size:.79rem;color:var(--err);margin-top:8px;display:none}
+.pw-err.show{display:block}
+.pw-acts{display:flex;gap:10px;margin-top:20px}
+.pw-acts button{flex:1;padding:11px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s}
+/* QUESTION ITEMS */
+.q-item{background:#f8fafc;border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-bottom:10px}
+.q-num{font-size:.72rem;color:var(--P);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.q-opt{padding:6px 10px;border-radius:6px;font-size:.79rem;border:1px solid var(--bdr)}
+.q-opt.correct{background:#f0fdf4;border-color:#bbf7d0;color:var(--ok);font-weight:600}
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:700;padding:12px 18px;border-radius:8px;font-size:.83rem;font-weight:500;display:none;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+.toast.show{display:flex}
+.toast.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+.toast.error{background:#fef2f2;border:1px solid #fecaca;color:var(--err)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-dark{border-color:rgba(13,31,60,.2);border-top-color:var(--P)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border-radius:7px;background:#f5f7fc;border:1px solid var(--bdr)}
+.hamburger span{display:block;width:18px;height:2px;background:var(--P);border-radius:2px}
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.sb-ov.open{display:block}
+@media print{.sidebar,.topbar,.sec-hdr .btn,.act-btns,.s-bar,.btn-print,.modal-overlay,#pwModal,.toast,.hamburger,.sb-ov{display:none!important}body{background:#fff!important;overflow:auto!important}.main{width:100%!important}.content{padding:10px!important}}
+.print-hdr{display:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(13,31,60,.15);border-radius:10px}
+@media(max-width:768px){
+  body{overflow:auto}
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:240px;z-index:10;transition:left .3s ease;height:100vh}
+  .sidebar.open{left:0}
+  .main{width:100%;min-height:100vh;overflow:auto}
+  .topbar{padding:14px 16px}
+  .hamburger{display:flex}
+  .content{padding:16px 14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .table-wrap{overflow-x:auto}
+  table{min-width:520px}
+  .sec-hdr{flex-direction:column;align-items:flex-start}
+  .modal{padding:22px 16px}
+  .modal-actions,.pw-acts{flex-direction:column}
+  .opts-grid,.q-opts{grid-template-columns:1fr}
+  .mon-grid{grid-template-columns:repeat(2,1fr)}
+  .toast{bottom:14px;right:14px;left:14px}
+}
+
+    /* ── CUSTOM DIALOG SYSTEM ── */
+    .dlg-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px);padding:20px}
+    .dlg-ov.show{display:flex}
+    .dlg{background:#fff;border-radius:16px;padding:32px 28px;width:400px;max-width:100%;box-shadow:0 16px 48px rgba(0,0,0,.22);animation:dlgIn .28s ease}
+    @keyframes dlgIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .dlg-icon{font-size:38px;text-align:center;margin-bottom:14px}
+    .dlg h3{font-size:1.05rem;font-weight:700;color:var(--P);margin-bottom:8px;text-align:center}
+    .dlg p{font-size:.84rem;color:var(--muted);line-height:1.65;text-align:center;margin-bottom:22px}
+    .dlg-rules{background:#eef1f8;border-radius:10px;padding:14px 16px;margin-bottom:20px;text-align:left}
+    .dlg-rules li{font-size:.81rem;color:var(--soft);line-height:1.7;margin-left:16px}
+    .dlg-stat{display:flex;gap:10px;margin-bottom:20px;justify-content:center}
+    .dlg-stat-item{flex:1;background:#eef1f8;border-radius:10px;padding:12px 10px;text-align:center}
+    .dlg-stat-item .dsn{font-size:1.5rem;font-weight:700}
+    .dlg-stat-item .dsl{font-size:.72rem;color:var(--muted);margin-top:3px}
+    .dlg-btns{display:flex;gap:10px;flex-direction:column}
+    .dlg-btn{width:100%;padding:12px;border-radius:9px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .dlg-btn-primary{background:var(--P);color:#fff}
+    .dlg-btn-primary:hover{background:var(--PL)}
+    .dlg-btn-secondary{background:#fff;border:1.5px solid var(--bdr);color:var(--muted)}
+    .dlg-btn-secondary:hover{border-color:var(--P);color:var(--P)}
+    .dlg-btn-danger{background:#fff;border:1.5px solid #fecaca;color:var(--err)}
+    .dlg-btn-danger:hover{background:var(--err);color:#fff}
+
+    /* ── QUESTION TABS & BULK ── */
+    .q-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--bdr)}
+    .q-tab{padding:10px 20px;font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+    .q-tab.active{color:var(--P);border-bottom-color:var(--P)}
+    .q-tab:hover{color:var(--P)}
+    .q-panel{display:none}.q-panel.active{display:block}
+
+    /* Image upload */
+    .img-upload-area{border:2px dashed var(--bdr);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--inp);margin-bottom:4px}
+    .img-upload-area:hover,.img-upload-area.drag{border-color:var(--P);background:#f5f7fc}
+    .img-upload-area p{font-size:.82rem;color:var(--muted);margin-top:6px}
+    .img-preview{max-width:100%;max-height:200px;border-radius:8px;display:block;margin:8px auto 0;border:1px solid var(--bdr)}
+    .img-remove{font-size:.75rem;color:var(--err);cursor:pointer;margin-top:4px;display:inline-block}
+    .q-image{max-width:100%;max-height:180px;border-radius:8px;display:block;margin-bottom:12px;border:1px solid var(--bdr)}
+
+    /* Group question sub-items */
+    .grp-q-row{background:#f8fafc;border:1px solid var(--bdr);border-radius:10px;padding:14px;position:relative}
+    .grp-q-row .grp-q-num{font-size:.7rem;font-weight:700;color:var(--P);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+    .q-group-banner{background:#eff6ff;border:1px solid #c8d0e0;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.8rem;color:var(--P);font-weight:500}
+    .q-group-img{max-width:100%;border-radius:8px;display:block;margin-bottom:12px;border:1px solid var(--bdr)}
+
+
+    .bulk-preview{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;margin-top:14px}
+    .bulk-q{background:#f8fafc;border:1px solid var(--bdr);border-radius:8px;padding:12px;font-size:.82rem;position:relative}
+    .bulk-q .bq-num{font-size:.7rem;font-weight:700;color:var(--P);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+    .bulk-q .bq-text{color:var(--text);margin-bottom:6px;line-height:1.5}
+    .bulk-q .bq-opts{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    .bulk-q .bq-opt{font-size:.78rem;color:var(--soft);padding:3px 6px;border-radius:4px}
+    .bulk-q .bq-opt.correct{background:#f0fdf4;color:var(--ok);font-weight:600}
+    .bulk-q .bq-err{background:#fef2f2;border-color:#fecaca}
+    .bulk-q .bq-err-msg{font-size:.73rem;color:var(--err);margin-top:5px}
+    .bulk-info{background:#eff6ff;border:1px solid #c8d0e0;border-radius:9px;padding:12px 14px;font-size:.8rem;color:var(--P);margin-bottom:14px;line-height:1.7}
+    .bulk-info code{background:rgba(13,31,60,.1);padding:1px 5px;border-radius:4px;font-size:.78rem}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="lw">
+    <div class="ll">
+      <div>
+        <div class="li">👨‍🏫</div>
+        <h1>Brighton Heights School<br/>Teacher Portal</h1>
+        <p class="sub">CBT Examination System</p>
+      </div>
+      <div>
+        <div class="feats">
+          <div class="fi"><div class="fii">📋</div><div class="fit">Create and manage CBT exams for your classes</div></div>
+          <div class="fi"><div class="fii">📈</div><div class="fit">Track student performance with detailed analytics</div></div>
+          <div class="fi"><div class="fii">🔴</div><div class="fit">Monitor live exam sessions as students write</div></div>
+        </div>
+        <p class="lq">"Shaping minds, one lesson at a time."</p>
+      </div>
+    </div>
+    <div class="lr">
+      <div class="rbadge">👨‍🏫 Teacher Portal</div>
+      <h2>Good to See You</h2>
+      <p class="desc">Sign in to your teacher account</p>
+      <div class="l-alert" id="lAlert"><span>⚠</span><span id="lMsg"></span></div>
+      <div class="fg"><label>Email Address</label><input type="email" id="emailIn" placeholder="teacher@testdemo.edu" autocomplete="off"/></div>
+      <div class="fg"><label>Password</label><input type="password" id="pwIn" placeholder="Enter your password"/></div>
+      <button class="btn-lp" id="loginBtn">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div id="portalScreen">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-brand"><div class="logo">👨‍🏫</div><h2>Brighton Heights School</h2><span>Teacher Portal</span></div>
+    <nav class="sb-nav">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" id="ni-home" data-sec="home"><span class="ni">🏠</span> Dashboard</div>
+      <div class="nav-label">Exams</div>
+      <div class="nav-item" id="ni-exams" data-sec="exams"><span class="ni">📋</span> My Exams</div>
+      <div class="nav-item" id="ni-questions" data-sec="questions"><span class="ni">❓</span> Add Questions</div>
+      <div class="nav-item" id="ni-monitor" data-sec="monitor"><span class="ni">🔴</span> Live Monitor</div>
+      <div class="nav-label">Results</div>
+      <div class="nav-item" id="ni-results" data-sec="results"><span class="ni">📊</span> Results</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="ucard"><div class="uav" id="uAv">T</div><div><div class="un" id="uName">Teacher</div><div class="ur">Teacher</div></div></div>
+      <button class="btn-out" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
+  <div class="sb-ov" id="sbOv"></div>
+  <div class="main">
+    <div class="topbar">
+      <div><h1 id="tbTitle">Dashboard</h1><p id="tbSub">Here's your teaching overview</p></div>
+      <div class="tb-right"><span style="font-size:.8rem;color:var(--muted)" id="dateDisp"></span><div class="hamburger" id="hamBtn"><span></span><span></span><span></span></div></div>
+    </div>
+    <div class="content">
+
+      <!-- HOME -->
+      <div class="section active" id="section-home">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="stExams">—</div><div class="stat-label">My Exams</div></div>
+          <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-num" id="stSubs">—</div><div class="stat-label">My Subjects</div></div>
+          <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-num" id="stResults">—</div><div class="stat-label">Submissions</div></div>
+          <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num" id="stActive">—</div><div class="stat-label">Active Now</div></div>
+        </div>
+        <div class="table-wrap" style="margin-bottom:24px">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-size:.88rem;font-weight:700;color:var(--P)">📚 My Assigned Subjects</div>
+          <div id="subjectsList"><div class="empty-state"><div class="empty-icon">📚</div><p>No subjects assigned yet</p></div></div>
+        </div>
+        <div class="table-wrap">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-size:.88rem;font-weight:700;color:var(--P)">📢 School Announcements</div>
+          <div id="annList"><div class="empty-state"><div class="empty-icon">📢</div><p>No announcements</p></div></div>
+        </div>
+      </div>
+
+      <!-- MY EXAMS -->
+      <div class="section" id="section-exams">
+        <div class="sec-hdr">
+          <div><h2>My Exams</h2><p>Click the toggle to make an exam Active (students can write) or Inactive (hidden)</p></div>
+          <button class="btn btn-p" id="openCreateExamBtn">＋ Create Exam</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Title</th><th>Subject</th><th>Class</th><th>Duration</th><th>Questions</th><th>Availability</th><th>Actions</th></tr></thead>
+            <tbody id="examsBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><p>No exams yet</p></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- QUESTIONS -->
+      <div class="section" id="section-questions">
+        <div class="sec-hdr"><div><h2>Add Questions</h2><p>Select an exam then add questions to it</p></div></div>
+        <div class="table-wrap" style="padding:20px;margin-bottom:20px">
+          <div class="form-group" style="margin-bottom:0"><label>Select Exam</label><select id="qExamSel"><option value="">— Choose an exam —</option></select></div>
+        </div>
+        <div id="qPanel" style="display:none">
+          <div class="sec-hdr">
+            <div><h2 id="qExamTitle" style="font-size:1rem">Questions</h2><p id="qCount">0 questions</p></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-edit btn-sm" id="openBulkBtn">📋 Bulk Import</button>
+              <button class="btn btn-warn btn-sm" id="openGroupBtn">🖼️ Group / Quantitative</button>
+              <button class="btn btn-p" id="openAddQBtn">＋ Add Question</button>
+            </div>
+          </div>
+          <div id="qList"><div class="empty-state"><div class="empty-icon">❓</div><p>No questions yet</p></div></div>
+        </div>
+      </div>
+
+      <!-- MONITOR -->
+      <div class="section" id="section-monitor">
+        <div class="sec-hdr">
+          <div><h2>Live Monitor</h2><p>Track student progress during active exams</p></div>
+          <button class="btn btn-warn btn-sm" id="refreshMonBtn">🔄 Refresh</button>
+        </div>
+        <div class="table-wrap" style="padding:20px;margin-bottom:20px">
+          <div class="form-group" style="margin-bottom:0"><label>Select Exam to Monitor</label><select id="monSel"><option value="">— Choose an exam —</option></select></div>
+        </div>
+        <div id="monPanel"><div class="empty-state"><div class="empty-icon">🔴</div><p>Select an exam to monitor</p></div></div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="section" id="section-results">
+        <div class="print-hdr" id="prtHdr"><h2>Brighton Heights School — Results Report</h2><p id="prtDate"></p><p id="prtTeacher"></p></div>
+        <div class="sec-hdr">
+          <div><h2>Results</h2><p>View exam results for your classes</p></div>
+          <button class="btn btn-print btn-sm" id="printBtn">🖨️ Print</button>
+        </div>
+        <div class="s-bar">
+          <input type="text" id="rSearch" placeholder="🔍 Search by student name..."/>
+          <select id="rExamFilter"><option value="">All Exams</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Exam</th><th>Score</th><th>%</th><th>Time</th><th>Submitted</th><th>Action</th></tr></thead>
+            <tbody id="resultsBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📊</div><p>No results yet</p></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── DIALOG: Sign Out ── -->
+  <div class="dlg-ov" id="dlgSignOut">
+    <div class="dlg">
+      <div class="dlg-icon">🚪</div>
+      <h3>Sign Out?</h3>
+      <p>Are you sure you want to sign out of the teacher portal?</p>
+      <div class="dlg-btns">
+        <button class="dlg-btn dlg-btn-danger" id="dlgSignOutConfirm">Yes, Sign Out</button>
+        <button class="dlg-btn dlg-btn-secondary" id="dlgSignOutCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CREATE EXAM MODAL -->
+<div class="modal-overlay" id="examModal">
+  <div class="modal">
+    <h3>Create New Exam</h3>
+    <p>Exam starts Inactive. Toggle Active when students are ready to write.</p>
+    <div class="form-group"><label>Exam Title</label><input type="text" id="eTitle" placeholder="e.g. First Term Mathematics Exam"/></div>
+    <div class="form-group"><label>Subject</label><select id="eSubject"><option value="">— Select Subject —</option></select></div>
+    <div class="form-group"><label>Duration (minutes)</label><input type="number" id="eDuration" placeholder="e.g. 60" min="5" max="300"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancelExamBtn">Cancel</button>
+      <button class="btn btn-p" id="saveExamBtn">Create Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT EXAM MODAL -->
+<div class="modal-overlay" id="editExamModal">
+  <div class="modal">
+    <h3>Edit Exam</h3>
+    <p>Update exam title or duration</p>
+    <input type="hidden" id="editExamId"/>
+    <div class="form-group"><label>Exam Title</label><input type="text" id="editETitle"/></div>
+    <div class="form-group"><label>Duration (minutes)</label><input type="number" id="editEDur" min="5" max="300"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancelEditExamBtn">Cancel</button>
+      <button class="btn btn-p" id="saveEditExamBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD QUESTION MODAL -->
+<div class="modal-overlay" id="questionModal">
+  <div class="modal" style="width:540px">
+    <h3>Add Question</h3>
+    <p id="qModalSub">Question <span id="qModalNum">1</span> — fill in and click <strong>Save &amp; Next</strong> to add another, or <strong>Save &amp; Close</strong> when done.</p>
+    <!-- Diagram/Image upload -->
+    <div class="form-group">
+      <label>Diagram / Image <span style="color:var(--muted);font-weight:400;text-transform:none">(optional — for maths, science diagrams etc.)</span></label>
+      <div class="img-upload-area" id="qImgArea">
+        <span style="font-size:28px">🖼️</span>
+        <p>Click to upload or drag &amp; drop an image<br/><span style="font-size:.74rem">PNG, JPG, GIF — stored as base64, no external service needed</span></p>
+        <input type="file" id="qImgFile" accept="image/*" style="display:none"/>
+      </div>
+      <img id="qImgPreview" class="img-preview" style="display:none"/>
+      <span class="img-remove" id="qImgRemove" style="display:none">✕ Remove image</span>
+      <input type="hidden" id="qImgData"/>
+    </div>
+    <div class="form-group"><label>Question Text</label><textarea id="qText" placeholder="Type the question here..." style="min-height:70px"></textarea></div>
+    <div class="opts-grid">
+      <div class="form-group"><label>Option A</label><input type="text" id="qA" placeholder="Option A"/></div>
+      <div class="form-group"><label>Option B</label><input type="text" id="qB" placeholder="Option B"/></div>
+      <div class="form-group"><label>Option C</label><input type="text" id="qC" placeholder="Option C"/></div>
+      <div class="form-group"><label>Option D</label><input type="text" id="qD" placeholder="Option D"/></div>
+    </div>
+    <div class="form-group"><label>Correct Answer</label>
+      <select id="qAns"><option value="">— Select —</option><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select>
+    </div>
+    <div class="modal-actions" style="flex-direction:column;gap:8px">
+      <button class="btn btn-p" id="saveQNextBtn" style="width:100%;padding:11px;justify-content:center">✅ Save &amp; Add Next Question</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-edit" id="saveQCloseBtn" style="flex:1;padding:10px;justify-content:center">Save &amp; Close</button>
+        <button class="btn-cancel" id="cancelQBtn" style="flex:1;padding:10px">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT QUESTION MODAL -->
+<div class="modal-overlay" id="editQModal">
+  <div class="modal" style="width:540px">
+    <h3>Edit Question</h3>
+    <p>Update question, options, and diagram if needed</p>
+    <input type="hidden" id="editQId"/>
+    <div class="form-group">
+      <label>Diagram / Image <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></label>
+      <div class="img-upload-area" id="editQImgArea">
+        <span style="font-size:28px">🖼️</span>
+        <p>Click to upload or drag &amp; drop<br/><span style="font-size:.74rem">Replaces existing image if any</span></p>
+        <input type="file" id="editQImgFile" accept="image/*" style="display:none"/>
+      </div>
+      <img id="editQImgPreview" class="img-preview" style="display:none"/>
+      <span class="img-remove" id="editQImgRemove" style="display:none">✕ Remove image</span>
+      <input type="hidden" id="editQImgData"/>
+    </div>
+    <div class="form-group"><label>Question Text</label><textarea id="editQText" style="min-height:70px"></textarea></div>
+    <div class="opts-grid">
+      <div class="form-group"><label>Option A</label><input type="text" id="editQA"/></div>
+      <div class="form-group"><label>Option B</label><input type="text" id="editQB"/></div>
+      <div class="form-group"><label>Option C</label><input type="text" id="editQC"/></div>
+      <div class="form-group"><label>Option D</label><input type="text" id="editQD"/></div>
+    </div>
+    <div class="form-group"><label>Correct Answer</label>
+      <select id="editQAns"><option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancelEditQBtn">Cancel</button>
+      <button class="btn btn-p" id="saveEditQBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK IMPORT MODAL -->
+<div class="modal-overlay" id="bulkModal">
+  <div class="modal" style="width:600px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <h3 style="margin-bottom:0">📋 Bulk Import Questions</h3>
+      <button id="bulkHelpToggle" style="background:#eff6ff;border:1px solid #c8d0e0;color:var(--P);border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">? Format Guide</button>
+    </div>
+    <p style="margin-bottom:14px">Paste your questions, click <strong>Parse &amp; Preview</strong>, then save.</p>
+
+    <!-- Format guide — hidden by default -->
+    <div class="bulk-info" id="bulkHelp" style="display:none">
+      <strong>Accepted format (copy straight from Word, Google Docs, past papers):</strong><br/><br/>
+      <code>1. What is the capital of Nigeria?</code><br/>
+      <code>A. Lagos &nbsp; B. Abuja &nbsp; C. Kano &nbsp; D. Ibadan</code><br/>
+      <code>Answer: B</code><br/><br/>
+      Options can be on <strong>one line</strong> or <strong>separate lines</strong> — both work.<br/>
+      Answer line: <code>Answer: B</code> or <code>Ans: B</code><br/>
+      Numbers: <code>1.</code> &nbsp;<code>1)</code> &nbsp;<code>1 </code> — all accepted.
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px">
+      <label>Paste Questions Here</label>
+      <textarea id="bulkText" placeholder="1. What is the capital of Nigeria?&#10;A. Lagos  B. Abuja  C. Kano  D. Ibadan&#10;Answer: B&#10;&#10;2. What is 5 × 6?&#10;A. 25  B. 30  C. 35  D. 40&#10;Answer: B" style="min-height:180px;font-family:monospace;font-size:.82rem"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:4px">
+      <button class="btn btn-p" id="bulkParseBtn" style="flex:2;padding:11px;justify-content:center">🔍 Parse &amp; Preview</button>
+      <button class="btn-cancel" id="cancelBulkBtn" style="flex:1;padding:11px">Cancel</button>
+    </div>
+    <div id="bulkPreview" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:8px">
+        <span id="bulkParseStatus" style="font-size:.84rem;font-weight:600;color:var(--P)"></span>
+        <button class="btn btn-p btn-sm" id="bulkSaveBtn">💾 Save All to Exam</button>
+      </div>
+      <div class="bulk-preview" id="bulkPreviewList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP / QUANTITATIVE QUESTION MODAL -->
+<div class="modal-overlay" id="groupModal">
+  <div class="modal" style="width:580px">
+    <h3>🖼️ Group / Quantitative Questions</h3>
+    <p>Upload one shared image (passage, table, chart, graph), then add all the questions that refer to it. The image stays visible throughout all sub-questions during the exam.</p>
+
+    <!-- Shared image upload -->
+    <div class="form-group">
+      <label>Shared Passage / Diagram Image <span style="color:var(--err);font-weight:400">*required</span></label>
+      <div class="img-upload-area" id="grpImgArea">
+        <span style="font-size:32px">📊</span>
+        <p>Click to upload or drag &amp; drop<br/><span style="font-size:.74rem">The table, graph, chart, comprehension passage etc. — PNG/JPG, max 1.5 MB</span></p>
+        <input type="file" id="grpImgFile" accept="image/*" style="display:none"/>
+      </div>
+      <img id="grpImgPreview" class="img-preview" style="display:none"/>
+      <span class="img-remove" id="grpImgRemove" style="display:none">✕ Remove image</span>
+      <input type="hidden" id="grpImgData"/>
+    </div>
+
+    <div class="form-group">
+      <label>Group Label <span style="color:var(--muted);font-weight:400;text-transform:none">(optional — shows above image)</span></label>
+      <input type="text" id="grpLabel" placeholder="e.g. Study the table below and answer questions 6–10"/>
+    </div>
+
+    <!-- Sub-questions container -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px">
+      <span style="font-size:.82rem;font-weight:700;color:var(--text)">Sub-Questions</span>
+      <button class="btn btn-p btn-sm" id="addGrpQBtn" type="button">＋ Add Sub-Question</button>
+    </div>
+    <div id="grpQContainer" style="display:flex;flex-direction:column;gap:10px;max-height:320px;overflow-y:auto;padding-right:4px"></div>
+
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn-cancel" id="cancelGroupBtn">Cancel</button>
+      <button class="btn btn-p" id="saveGroupBtn">💾 Save All Questions</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div id="pwModal">
+  <div class="pw-box">
+    <h3>🔐 Confirm Identity</h3>
+    <p id="pwDesc">Enter your password to proceed.</p>
+    <input type="password" id="pwInput" placeholder="Enter your password"/>
+    <div class="pw-err" id="pwErr">Incorrect password. Please try again.</div>
+    <div class="pw-acts">
+      <button class="btn-cancel" id="pwCancelBtn">Cancel</button>
+      <button class="btn btn-p" id="pwConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,doc,addDoc,getDoc,getDocs,deleteDoc,updateDoc,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FC={apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",authDomain:"veil-1-bd7b5.firebaseapp.com",projectId:"veil-1-bd7b5",storageBucket:"veil-1-bd7b5.firebasestorage.app",messagingSenderId:"526021682048",appId:"1:526021682048:web:a52dae5b2650ca951ad765"};
+const app=initializeApp(FC);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+/* STATE */
+let userId="",userName="",teacherEmail="";
+let activeExamId=null; // currently selected exam in questions tab
+let pwCallback=null;   // callback after password confirmed
+
+/* HELPERS */
+function toast(m,t="success"){const el=document.getElementById("toast");el.textContent=(t==="success"?"✓ ":"✗ ")+m;el.className="toast show "+t;setTimeout(()=>el.classList.remove("show"),3500);}
+function fmtDate(ts){if(!ts)return"—";const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});}
+function spin(btn,label){btn.disabled=true;btn.innerHTML=`<span class="spinner"></span>${label}`;}
+function unspin(btn,label){btn.disabled=false;btn.textContent=label;}
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){
+  document.getElementById(id).classList.remove("open");
+  document.querySelectorAll(`#${id} input:not([type=hidden]),#${id} textarea,#${id} select`).forEach(el=>el.value="");
+}
+
+/* PASSWORD CONFIRM — fully event-listener based, zero inline onclick */
+function requirePw(label,cb){
+  pwCallback=cb;
+  document.getElementById("pwDesc").textContent="Enter your password to: "+label+".";
+  document.getElementById("pwInput").value="";
+  document.getElementById("pwErr").classList.remove("show");
+  document.getElementById("pwModal").classList.add("show");
+  setTimeout(()=>document.getElementById("pwInput").focus(),80);
+}
+document.getElementById("pwCancelBtn").addEventListener("click",()=>{
+  document.getElementById("pwModal").classList.remove("show");
+  pwCallback=null;
+});
+document.getElementById("pwConfirmBtn").addEventListener("click",async()=>{
+  const pw=document.getElementById("pwInput").value;
+  const btn=document.getElementById("pwConfirmBtn");
+  const errEl=document.getElementById("pwErr");
+  errEl.classList.remove("show");
+  if(!pw){errEl.textContent="Please enter your password.";errEl.classList.add("show");return;}
+  spin(btn,"Verifying...");
+  try{
+    await signInWithEmailAndPassword(auth,teacherEmail,pw);
+    document.getElementById("pwModal").classList.remove("show");
+    unspin(btn,"Confirm");
+    const cb=pwCallback;pwCallback=null;
+    if(cb)await cb();
+  }catch(e){
+    errEl.textContent="Incorrect password. Try again.";errEl.classList.add("show");
+    unspin(btn,"Confirm");
+  }
+});
+document.getElementById("pwInput").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("pwConfirmBtn").click();});
+
+/* LOGIN */
+document.getElementById("loginBtn").addEventListener("click",async()=>{
+  const email=document.getElementById("emailIn").value.trim();
+  const pw=document.getElementById("pwIn").value;
+  const btn=document.getElementById("loginBtn");
+  document.getElementById("lAlert").classList.remove("show");
+  if(!email||!pw){showLA("Please fill in all fields.");return;}
+  spin(btn,"Signing in...");
+  try{
+    try{await signOut(auth);}catch(e){}
+    const uc=await signInWithEmailAndPassword(auth,email,pw);
+    const ud=await getDoc(doc(db,"teachers",uc.user.uid));
+    if(!ud.exists()){
+      await signOut(auth);showLA("Teacher account not found.");unspin(btn,"Sign In");return;
+    }
+    const d=ud.data();
+    userId=uc.user.uid;userName=d.name||"Teacher";teacherEmail=email;
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("portalScreen").classList.add("open");
+    document.getElementById("uAv").textContent=userName.charAt(0).toUpperCase();
+    document.getElementById("uName").textContent=userName;
+    document.getElementById("dateDisp").textContent=new Date().toDateString();
+    showSection("home"); // always start at dashboard
+    history.replaceState({sec:"home"},"","");
+  }catch(err){
+    let m="Login failed.";
+    if(err.code==="auth/wrong-password"||err.code==="auth/invalid-credential")m="Incorrect email or password.";
+    if(err.code==="auth/too-many-requests")m="Too many attempts. Wait a moment.";
+    showLA(m);unspin(btn,"Sign In");
+  }
+});
+document.getElementById("emailIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("loginBtn").click();});
+document.getElementById("pwIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("loginBtn").click();});
+function showLA(m){document.getElementById("lMsg").textContent=m;document.getElementById("lAlert").classList.add("show");}
+
+/* SIDEBAR */
+document.getElementById("hamBtn").addEventListener("click",()=>{document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOv").classList.toggle("open");});
+document.getElementById("sbOv").addEventListener("click",()=>{document.getElementById("sidebar").classList.remove("open");document.getElementById("sbOv").classList.remove("open");});
+
+/* NAV — pure event listeners on sidebar items with data-sec attributes */
+const TITLES={
+  home:["Dashboard","Here's your teaching overview"],
+  exams:["My Exams","Click the toggle button to make an exam Active or Inactive"],
+  questions:["Add Questions","Select an exam and add questions to it"],
+  monitor:["Live Monitor","Track student progress during active exams"],
+  results:["Results","View exam results for your classes"],
+};
+document.querySelectorAll(".nav-item[data-sec]").forEach(item=>{
+  item.addEventListener("click",()=>showSection(item.dataset.sec));
+});
+function showSection(name){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  document.getElementById("section-"+name).classList.add("active");
+  const ni=document.getElementById("ni-"+name);
+  if(ni)ni.classList.add("active");
+  const[t,s]=TITLES[name]||["Dashboard",""];
+  document.getElementById("tbTitle").textContent=t;
+  document.getElementById("tbSub").textContent=s;
+  if(window.innerWidth<=768){document.getElementById("sidebar").classList.remove("open");document.getElementById("sbOv").classList.remove("open");}
+  history.pushState({sec:name},"","");
+  if(name==="home")loadHome();
+  if(name==="exams")loadExams();
+  if(name==="questions")populateExamSelQ();
+  if(name==="monitor")populateMonSel();
+  if(name==="results"){populateResultsFilter();loadResults();}
+}
+window.addEventListener("popstate",e=>{const s=e.state?.sec||"home";showSection(s);history.pushState({sec:s},"","");});
+
+/* HOME */
+async function loadHome(){
+  const[examSnap,subSnap,resSnap]=await Promise.all([
+    getDocs(query(collection(db,"cbtExams"),where("teacherId","==",userId))),
+    getDocs(query(collection(db,"cbtSubjects"),where("teacherId","==",userId))),
+    getDocs(query(collection(db,"cbtResults"),where("teacherId","==",userId))),
+  ]);
+  document.getElementById("stExams").textContent=examSnap.size;
+  document.getElementById("stSubs").textContent=subSnap.size;
+  document.getElementById("stResults").textContent=resSnap.size;
+  let active=0;examSnap.forEach(d=>{if(d.data().isActive===true)active++;});
+  document.getElementById("stActive").textContent=active;
+  const subEl=document.getElementById("subjectsList");
+  if(subSnap.empty){subEl.innerHTML='<div class="empty-state"><div class="empty-icon">📚</div><p>No subjects assigned yet. Contact your admin.</p></div>';}
+  else{subEl.innerHTML="";subSnap.forEach(d=>{const s=d.data();subEl.innerHTML+=`<div style="padding:14px 20px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.88rem;font-weight:600">${s.name||"—"}</div><div style="font-size:.78rem;color:var(--muted);margin-top:2px">Class: ${s.className||"—"}</div></div><span class="badge b-green">${s.className||"—"}</span></div>`;});}
+  const annSnap=await getDocs(query(collection(db,"announcements"),orderBy("createdAt","desc")));
+  const annEl=document.getElementById("annList");
+  if(annSnap.empty){annEl.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div><p>No announcements</p></div>';}
+  else{annEl.innerHTML="";annSnap.forEach(d=>{const a=d.data();annEl.innerHTML+=`<div style="padding:14px 20px;border-bottom:1px solid #f5f7fc"><div style="font-size:.88rem;font-weight:600;margin-bottom:3px">${a.title||""}</div><div style="font-size:.8rem;color:var(--soft)">${a.body||""}</div><div style="font-size:.72rem;color:var(--muted);margin-top:6px">${fmtDate(a.createdAt)}</div></div>`;});}
+}
+
+/* EXAMS — all buttons created via DOM, zero inline onclick */
+async function loadExams(){
+  const tbody=document.getElementById("examsBody");
+  tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">Loading...</td></tr>`;
+  const[examSnap,qSnap]=await Promise.all([
+    getDocs(query(collection(db,"cbtExams"),where("teacherId","==",userId))),
+    getDocs(query(collection(db,"cbtQuestions"),where("teacherId","==",userId))),
+  ]);
+  if(examSnap.empty){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><p>No exams yet. Create one!</p></div></td></tr>`;return;}
+  const qCount={};qSnap.forEach(d=>{const e=d.data().examId;qCount[e]=(qCount[e]||0)+1;});
+  const docs=examSnap.docs.sort((a,b)=>(b.data().createdAt?.toDate?.()?.getTime()||0)-(a.data().createdAt?.toDate?.()?.getTime()||0));
+  tbody.innerHTML="";
+  docs.forEach(d=>{
+    const e=d.data(),id=d.id,isActive=e.isActive===true;
+    const tr=document.createElement("tr");
+    // Static cells
+    tr.innerHTML=`<td><strong>${e.title||"—"}</strong></td><td>${e.subjectName||"—"}</td><td><span class="badge b-gold">${e.className||"—"}</span></td><td>${e.duration||"—"} min</td><td><span class="badge b-blue">${qCount[id]||0} Qs</span></td><td></td><td></td>`;
+    // Toggle button in cell 5
+    const tog=document.createElement("button");
+    tog.className=isActive?"btn-active":"btn-inactive";
+    tog.textContent=isActive?"🟢 Active":"⭕ Inactive";
+    tog.addEventListener("click",async()=>{
+      tog.disabled=true;
+      try{
+        await updateDoc(doc(db,"cbtExams",id),{isActive:!isActive});
+        toast(isActive?"Exam set to INACTIVE — hidden from students.":"Exam set to ACTIVE — students can now write it.");
+        loadExams();loadHome();
+      }catch(err){toast("Failed to update.","error");tog.disabled=false;}
+    });
+    tr.cells[5].appendChild(tog);
+    // Edit button
+    const editBtn=document.createElement("button");
+    editBtn.className="btn btn-edit btn-sm";editBtn.textContent="✏️ Edit";
+    editBtn.addEventListener("click",()=>requirePw("Edit Exam",()=>openEditExam(id,e)));
+    // Delete button
+    const delBtn=document.createElement("button");
+    delBtn.className="btn btn-danger btn-sm";delBtn.textContent="🗑️ Delete";
+    delBtn.addEventListener("click",()=>requirePw(`Delete "${e.title||"exam"}"`,async()=>{
+      try{await deleteDoc(doc(db,"cbtExams",id));toast("Exam deleted.");loadExams();loadHome();}
+      catch(err){toast("Failed to delete.","error");}
+    }));
+    const actDiv=document.createElement("div");actDiv.className="act-btns";
+    actDiv.appendChild(editBtn);actDiv.appendChild(delBtn);
+    tr.cells[6].appendChild(actDiv);
+    tbody.appendChild(tr);
+  });
+}
+
+/* CREATE EXAM */
+document.getElementById("openCreateExamBtn").addEventListener("click",async()=>{
+  await populateSubjectSel();openModal("examModal");
+});
+document.getElementById("cancelExamBtn").addEventListener("click",()=>closeModal("examModal"));
+document.getElementById("saveExamBtn").addEventListener("click",async()=>{
+  const title=document.getElementById("eTitle").value.trim();
+  const subEl=document.getElementById("eSubject"),subId=subEl.value;
+  const dur=parseInt(document.getElementById("eDuration").value);
+  if(!title||!subId||!dur){toast("Please fill in all fields.","error");return;}
+  const opt=subEl.options[subEl.selectedIndex];
+  const btn=document.getElementById("saveExamBtn");
+  spin(btn,"Creating...");
+  try{
+    await addDoc(collection(db,"cbtExams"),{
+      title,subjectId:subId,subjectName:opt.dataset.subName||"",
+      classId:opt.dataset.classId||"",className:opt.dataset.className||"",
+      teacherId:userId,teacherName:userName,duration:dur,
+      isActive:false,createdAt:serverTimestamp()
+    });
+    toast(`Exam "${title}" created! Toggle Active when ready.`);
+    closeModal("examModal");loadExams();loadHome();
+  }catch(err){toast("Failed to create exam.","error");console.error(err);}
+  finally{unspin(btn,"Create Exam");}
+});
+
+/* EDIT EXAM */
+function openEditExam(id,data){
+  document.getElementById("editExamId").value=id;
+  document.getElementById("editETitle").value=data.title||"";
+  document.getElementById("editEDur").value=data.duration||"";
+  openModal("editExamModal");
+}
+document.getElementById("cancelEditExamBtn").addEventListener("click",()=>closeModal("editExamModal"));
+document.getElementById("saveEditExamBtn").addEventListener("click",async()=>{
+  const id=document.getElementById("editExamId").value;
+  const title=document.getElementById("editETitle").value.trim();
+  const dur=parseInt(document.getElementById("editEDur").value);
+  if(!title||!dur){toast("Please fill all fields.","error");return;}
+  const btn=document.getElementById("saveEditExamBtn");spin(btn,"Saving...");
+  try{
+    await updateDoc(doc(db,"cbtExams",id),{title,duration:dur});
+    toast("Exam updated!");closeModal("editExamModal");loadExams();
+  }catch(err){toast("Failed to update.","error");}
+  finally{unspin(btn,"Save Changes");}
+});
+
+/* POPULATE SUBJECT SELECT */
+async function populateSubjectSel(){
+  const sel=document.getElementById("eSubject");
+  sel.innerHTML='<option value="">— Select Subject —</option>';
+  const snap=await getDocs(query(collection(db,"cbtSubjects"),where("teacherId","==",userId)));
+  snap.forEach(d=>{
+    const o=document.createElement("option");
+    o.value=d.id;o.textContent=d.data().name+" — "+d.data().className;
+    o.dataset.classId=d.data().classId||"";o.dataset.className=d.data().className||"";o.dataset.subName=d.data().name||"";
+    sel.appendChild(o);
+  });
+}
+
+/* QUESTIONS — all buttons created via DOM */
+async function populateExamSelQ(){
+  const sel=document.getElementById("qExamSel");
+  sel.innerHTML='<option value="">— Choose an exam —</option>';
+  const snap=await getDocs(query(collection(db,"cbtExams"),where("teacherId","==",userId)));
+  snap.docs.sort((a,b)=>a.data().title?.localeCompare(b.data().title)).forEach(d=>{
+    const o=document.createElement("option");
+    o.value=d.id;o.textContent=d.data().title+" ("+( d.data().className||"—")+")";
+    sel.appendChild(o);
+  });
+}
+document.getElementById("qExamSel").addEventListener("change",async function(){
+  const eid=this.value;
+  const panel=document.getElementById("qPanel");
+  if(!eid){panel.style.display="none";activeExamId=null;return;}
+  activeExamId=eid;panel.style.display="block";
+  const ed=await getDoc(doc(db,"cbtExams",eid));
+  document.getElementById("qExamTitle").textContent=ed.data()?.title||"Questions";
+  await renderQuestions(eid);
+});
+async function renderQuestions(eid){
+  const snap=await getDocs(query(collection(db,"cbtQuestions"),where("examId","==",eid)));
+  document.getElementById("qCount").textContent=snap.size+" question"+(snap.size!==1?"s":"")+" added";
+  const el=document.getElementById("qList");
+  if(snap.empty){el.innerHTML='<div class="empty-state"><div class="empty-icon">❓</div><p>No questions yet. Use "+ Add Question" or "Bulk Import".</p></div>';return;}
+  el.innerHTML="";let num=1;
+  snap.forEach(d=>{
+    const q=d.data(),qid=d.id;
+    let optsHtml="";
+    ["a","b","c","d"].forEach(k=>{
+      if(!q.options?.[k])return;
+      const cls=q.correctAnswer===k?"q-opt correct":"q-opt";
+      optsHtml+=`<div class="${cls}"><strong>${k.toUpperCase()}.</strong> ${q.options[k]}${q.correctAnswer===k?" ✓":""}</div>`;
+    });
+    const item=document.createElement("div");item.className="q-item";
+    const editBtn=document.createElement("button");
+    editBtn.className="btn btn-edit btn-sm";editBtn.textContent="✏️ Edit";
+    editBtn.addEventListener("click",()=>requirePw("Edit Question",()=>openEditQuestion(d)));
+    const delBtn=document.createElement("button");
+    delBtn.className="btn btn-danger btn-sm";delBtn.textContent="🗑️ Delete";
+    delBtn.addEventListener("click",()=>requirePw("Delete Question",async()=>{
+      try{await deleteDoc(doc(db,"cbtQuestions",qid));toast("Question deleted.");renderQuestions(eid);}
+      catch(err){toast("Failed to delete.","error");}
+    }));
+    const actDiv=document.createElement("div");actDiv.className="act-btns";
+    actDiv.appendChild(editBtn);actDiv.appendChild(delBtn);
+    const inner=document.createElement("div");
+    inner.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:10px";
+    const body=document.createElement("div");body.style.flex="1";
+    // Group image (shared passage) takes priority; fallback to per-question image
+    const imgHtml=q.groupImage
+      ? `${q.groupLabel?`<div class="q-group-banner">📊 ${q.groupLabel}</div>`:""}
+         <img src="${q.groupImage}" class="q-group-img" alt="passage"/>`
+      : (q.imageUrl?`<img src="${q.imageUrl}" class="q-image" alt="diagram"/>`:"");
+    body.innerHTML=`<div class="q-num">Question ${num}</div>${imgHtml}<div style="font-size:.88rem;margin-bottom:8px">${q.questionText||""}</div><div class="q-opts">${optsHtml}</div>`;
+    inner.appendChild(body);inner.appendChild(actDiv);item.appendChild(inner);
+    el.appendChild(item);num++;
+  });
+}
+
+/* ═══ IMAGE UPLOAD HELPERS ═══ */
+function setupImgUpload(areaId, fileId, previewId, removeId, hiddenId){
+  const area=document.getElementById(areaId);
+  const file=document.getElementById(fileId);
+  const preview=document.getElementById(previewId);
+  const remove=document.getElementById(removeId);
+  const hidden=document.getElementById(hiddenId);
+  area.addEventListener("click",()=>file.click());
+  area.addEventListener("dragover",e=>{e.preventDefault();area.classList.add("drag");});
+  area.addEventListener("dragleave",()=>area.classList.remove("drag"));
+  area.addEventListener("drop",e=>{e.preventDefault();area.classList.remove("drag");const f=e.dataTransfer.files[0];if(f)readImg(f,preview,remove,hidden,area);});
+  file.addEventListener("change",()=>{if(file.files[0])readImg(file.files[0],preview,remove,hidden,area);});
+  remove.addEventListener("click",()=>{hidden.value="";preview.style.display="none";remove.style.display="none";area.style.display="block";file.value="";});
+}
+function readImg(file,preview,remove,hidden,area){
+  const maxMB=1;
+  if(file.size>maxMB*1024*1024){toast("Image too large. Max 1 MB. Resize it first.","error");return;}
+  const reader=new FileReader();
+  reader.onload=e=>{hidden.value=e.target.result;preview.src=e.target.result;preview.style.display="block";remove.style.display="inline-block";area.style.display="none";};
+  reader.readAsDataURL(file);
+}
+function clearImgUpload(areaId,fileId,previewId,removeId,hiddenId){
+  document.getElementById(hiddenId).value="";
+  document.getElementById(previewId).style.display="none";
+  document.getElementById(removeId).style.display="none";
+  document.getElementById(areaId).style.display="block";
+  document.getElementById(fileId).value="";
+}
+// Init image uploaders
+setupImgUpload("qImgArea","qImgFile","qImgPreview","qImgRemove","qImgData");
+setupImgUpload("editQImgArea","editQImgFile","editQImgPreview","editQImgRemove","editQImgData");
+
+/* ═══ ADD QUESTION — Save & Next (stays open) + Save & Close ═══ */
+let _qModalCount=1;
+function clearQModal(){
+  document.getElementById("qText").value="";
+  document.getElementById("qA").value="";document.getElementById("qB").value="";
+  document.getElementById("qC").value="";document.getElementById("qD").value="";
+  document.getElementById("qAns").value="";
+  clearImgUpload("qImgArea","qImgFile","qImgPreview","qImgRemove","qImgData");
+}
+async function saveQuestion(closeAfter){
+  if(!activeExamId){toast("No exam selected.","error");return;}
+  const qt=document.getElementById("qText").value.trim();
+  const a=document.getElementById("qA").value.trim(),b=document.getElementById("qB").value.trim();
+  const c=document.getElementById("qC").value.trim(),d=document.getElementById("qD").value.trim();
+  const ca=document.getElementById("qAns").value;
+  const imageUrl=document.getElementById("qImgData").value||"";
+  if(!qt||!a||!b||!c||!d||!ca){toast("Please fill in all fields.","error");return;}
+  const btn=closeAfter?document.getElementById("saveQCloseBtn"):document.getElementById("saveQNextBtn");
+  spin(btn,closeAfter?"Saving...":"Saving...");
+  try{
+    await addDoc(collection(db,"cbtQuestions"),{
+      examId:activeExamId,teacherId:userId,questionText:qt,
+      options:{a,b,c,d},correctAnswer:ca,
+      ...(imageUrl?{imageUrl}:{}),
+      createdAt:serverTimestamp()
+    });
+    _qModalCount++;
+    document.getElementById("qModalNum").textContent=_qModalCount;
+    toast("Question "+(_qModalCount-1)+" saved!");
+    if(closeAfter){closeModal("questionModal");_qModalCount=1;}
+    else{clearQModal();document.getElementById("qText").focus();}
+    renderQuestions(activeExamId);
+  }catch(err){toast("Failed to add.","error");console.error(err);}
+  finally{unspin(btn,closeAfter?"Save & Close":"✅ Save & Add Next Question");}
+}
+
+document.getElementById("openAddQBtn").addEventListener("click",()=>{
+  _qModalCount=1;document.getElementById("qModalNum").textContent="1";
+  clearQModal();openModal("questionModal");
+});
+document.getElementById("cancelQBtn").addEventListener("click",()=>{closeModal("questionModal");_qModalCount=1;});
+document.getElementById("saveQNextBtn").addEventListener("click",()=>saveQuestion(false));
+document.getElementById("saveQCloseBtn").addEventListener("click",()=>saveQuestion(true));
+
+/* ═══ EDIT QUESTION ═══ */
+function openEditQuestion(docSnap){
+  const q=docSnap.data();
+  document.getElementById("editQId").value=docSnap.id;
+  document.getElementById("editQText").value=q.questionText||"";
+  document.getElementById("editQA").value=q.options?.a||"";document.getElementById("editQB").value=q.options?.b||"";
+  document.getElementById("editQC").value=q.options?.c||"";document.getElementById("editQD").value=q.options?.d||"";
+  document.getElementById("editQAns").value=q.correctAnswer||"a";
+  // Load existing image
+  const imgData=q.imageUrl||"";
+  document.getElementById("editQImgData").value=imgData;
+  if(imgData){
+    document.getElementById("editQImgPreview").src=imgData;
+    document.getElementById("editQImgPreview").style.display="block";
+    document.getElementById("editQImgRemove").style.display="inline-block";
+    document.getElementById("editQImgArea").style.display="none";
+  } else {
+    clearImgUpload("editQImgArea","editQImgFile","editQImgPreview","editQImgRemove","editQImgData");
+  }
+  openModal("editQModal");
+}
+document.getElementById("cancelEditQBtn").addEventListener("click",()=>closeModal("editQModal"));
+document.getElementById("saveEditQBtn").addEventListener("click",async()=>{
+  const id=document.getElementById("editQId").value;
+  const qt=document.getElementById("editQText").value.trim();
+  const a=document.getElementById("editQA").value.trim(),b=document.getElementById("editQB").value.trim();
+  const c=document.getElementById("editQC").value.trim(),d=document.getElementById("editQD").value.trim();
+  const ca=document.getElementById("editQAns").value;
+  const imageUrl=document.getElementById("editQImgData").value||"";
+  if(!qt||!a||!b||!c||!d||!ca){toast("Please fill all fields.","error");return;}
+  const btn=document.getElementById("saveEditQBtn");spin(btn,"Saving...");
+  try{
+    await updateDoc(doc(db,"cbtQuestions",id),{questionText:qt,options:{a,b,c,d},correctAnswer:ca,imageUrl:imageUrl||""});
+    toast("Question updated!");closeModal("editQModal");if(activeExamId)renderQuestions(activeExamId);
+  }catch(err){toast("Failed to update.","error");}
+  finally{unspin(btn,"Save Changes");}
+});
+
+/* ═══ BULK IMPORT ═══ */
+let _bulkParsed=[];
+
+function parseBulkText(raw){
+  const questions=[];
+  // Normalise line endings, split on blank lines between questions too
+  const lines=raw.split(/\r?\n/).map(l=>l.trim());
+  let cur=null;
+
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    if(!line){continue;} // skip blank lines
+
+    // ── Question start: MUST begin with a number at the very start
+    // Pattern: 1.  1)  1   — followed by a letter (not just any digit-dot)
+    // Crucially: "A. option" or "30 students" must NOT match
+    const qMatch=line.match(/^(\d+)[\.\)]\s+(.+)/);
+
+    // ── Answer line: "Answer: B" or "Ans: B" or "ANS:B"
+    const ansMatch=line.match(/^(?:answer|ans)\s*[:\-]\s*([A-Da-d])\b/i);
+
+    // ── Options line: starts with A. B. C. D. (with dot or bracket, then space)
+    // Must be capital letter immediately followed by . or ) then space
+    const optLineMatch=line.match(/^([A-D])[\.]\s+\S/);
+    // Multi-option on one line: e.g. "A. Yes  B. No  C. Maybe  D. Never"
+    // Detect by presence of at least two capital-letter option markers
+    const multiOptMatch=line.match(/\b[A-D][\.]\s+.+\b[A-D][\.]\s+/);
+
+    if(qMatch){
+      // Save previous question
+      if(cur)questions.push(cur);
+      cur={text:qMatch[2].trim(),options:{},answer:"",errors:[]};
+    }
+    else if(cur && ansMatch){
+      cur.answer=ansMatch[1].toLowerCase();
+    }
+    else if(cur && (optLineMatch || multiOptMatch)){
+      // Parse options — split only on standalone A. B. C. D. markers
+      // Use a regex that splits before a capital letter followed by . and space
+      const parts=line.split(/(?<!\w)(?=[A-D]\.\s)/);
+      let gotAny=false;
+      parts.forEach(p=>{
+        const m=p.match(/^([A-D])\.\s+(.+)/i);
+        if(m){cur.options[m[1].toLowerCase()]=m[2].trim();gotAny=true;}
+      });
+      // If split didn't work, try matching individually
+      if(!gotAny){
+        const re=/([A-D])\.\s+([^A-D\.]+?)(?=\s+[A-D]\.\s|$)/gi;
+        let match;
+        while((match=re.exec(line))!==null){
+          cur.options[match[1].toLowerCase()]=match[2].trim();
+        }
+      }
+    }
+    else if(cur && line && !ansMatch){
+      // Could be continuation of question text (multi-line question)
+      // Only if it doesn't look like an option or answer
+      if(!line.match(/^[A-D][\.\)]/i) && !line.match(/^(?:answer|ans)\s*[:\-]/i)){
+        cur.text+=" "+line;
+      }
+    }
+  }
+  if(cur)questions.push(cur);
+
+  // Validate
+  questions.forEach(q=>{
+    q.text=q.text.trim();
+    if(!q.text)q.errors.push("Missing question text");
+    ["a","b","c","d"].forEach(k=>{
+      if(!q.options[k])q.errors.push("Missing option "+k.toUpperCase());
+      else q.options[k]=q.options[k].trim();
+    });
+    if(!q.answer)q.errors.push("Missing answer — add: Answer: A/B/C/D");
+    else if(!q.options[q.answer])q.errors.push("Answer "+q.answer.toUpperCase()+" not found in options");
+  });
+  return questions;
+}
+
+document.getElementById("bulkHelpToggle").addEventListener("click",()=>{
+  const el=document.getElementById("bulkHelp");
+  const btn=document.getElementById("bulkHelpToggle");
+  const open=el.style.display!=="none";
+  el.style.display=open?"none":"block";
+  btn.textContent=open?"? Format Guide":"✕ Hide Guide";
+});
+
+document.getElementById("openBulkBtn").addEventListener("click",()=>{
+  document.getElementById("bulkText").value="";
+  document.getElementById("bulkPreview").style.display="none";
+  document.getElementById("bulkHelp").style.display="none";
+  document.getElementById("bulkHelpToggle").textContent="? Format Guide";
+  _bulkParsed=[];
+  openModal("bulkModal");
+});
+document.getElementById("cancelBulkBtn").addEventListener("click",()=>closeModal("bulkModal"));
+
+document.getElementById("bulkParseBtn").addEventListener("click",()=>{
+  const raw=document.getElementById("bulkText").value;
+  if(!raw.trim()){toast("Please paste some questions first.","error");return;}
+  _bulkParsed=parseBulkText(raw);
+  if(!_bulkParsed.length){toast("Could not detect any questions. Make sure each question starts with a number and dot, e.g.  1. Question text","error");return;}
+  const valid=_bulkParsed.filter(q=>!q.errors.length).length;
+  const total=_bulkParsed.length;
+  const statusEl=document.getElementById("bulkParseStatus");
+  statusEl.textContent=valid===total
+    ?`✅ ${total} question${total>1?"s":""} ready to save`
+    :`⚠️ ${valid} of ${total} valid — questions with errors shown in red`;
+  statusEl.style.color=valid===total?"var(--ok)":"var(--warn)";
+  document.getElementById("bulkSaveBtn").disabled=valid===0;
+  // Render preview
+  const list=document.getElementById("bulkPreviewList");
+  list.innerHTML="";
+  _bulkParsed.forEach((q,i)=>{
+    const div=document.createElement("div");
+    div.className="bulk-q"+(q.errors.length?" bq-err":"");
+    let optsHtml="";
+    ["a","b","c","d"].forEach(k=>{
+      if(!q.options[k])return;
+      optsHtml+=`<div class="bq-opt${q.answer===k?" correct":""}">${k.toUpperCase()}. ${q.options[k]}${q.answer===k?" ✓":""}</div>`;
+    });
+    div.innerHTML=`<div class="bq-num">Q${i+1}</div><div class="bq-text">${q.text}</div><div class="bq-opts">${optsHtml||"<span style='color:var(--err);font-size:.75rem'>Options not parsed</span>"}</div>${q.errors.length?`<div class="bq-err-msg">⚠ ${q.errors.join(" · ")}</div>`:""}`;
+    list.appendChild(div);
+  });
+  document.getElementById("bulkPreview").style.display="block";
+});
+
+document.getElementById("bulkSaveBtn").addEventListener("click",async()=>{
+  if(!activeExamId){toast("No exam selected.","error");return;}
+  const valid=_bulkParsed.filter(q=>!q.errors.length);
+  if(!valid.length){toast("No valid questions to save.","error");return;}
+  const btn=document.getElementById("bulkSaveBtn");
+  spin(btn,"Saving...");
+  try{
+    // Save all simultaneously — no lag regardless of question count
+    await Promise.all(valid.map(q=>addDoc(collection(db,"cbtQuestions"),{
+      examId:activeExamId,teacherId:userId,
+      questionText:q.text,options:q.options,correctAnswer:q.answer,
+      imageUrl:"",createdAt:serverTimestamp()
+    })));
+    toast(`${valid.length} question${valid.length>1?"s":""} saved!`);
+    closeModal("bulkModal");
+    renderQuestions(activeExamId);
+  }catch(err){toast("Failed to save some questions.","error");console.error(err);}
+  finally{unspin(btn,"💾 Save All to Exam");}
+});
+
+/* ═══ GROUP / QUANTITATIVE QUESTIONS ═══ */
+setupImgUpload("grpImgArea","grpImgFile","grpImgPreview","grpImgRemove","grpImgData");
+
+let _grpQCount=0;
+function addGrpQRow(){
+  _grpQCount++;
+  const cont=document.getElementById("grpQContainer");
+  const id="grpq_"+Date.now()+"_"+_grpQCount;
+  const div=document.createElement("div");
+  div.className="grp-q-row"; div.id=id;
+  div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="grp-q-num">Sub-Question ${_grpQCount}</div>
+    <button style="background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.25);color:var(--err);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:.8rem" onclick="this.closest('.grp-q-row').remove()">✕ Remove</button>
+  </div>
+  <div class="form-group" style="margin-bottom:10px">
+    <label style="font-size:.7rem">Question Text</label>
+    <textarea class="grp-qt" placeholder="Type the question here..." style="width:100%;padding:9px 12px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;outline:none;min-height:56px;resize:vertical;color:var(--text)"></textarea>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div><label style="font-size:.7rem;font-weight:600;color:var(--P);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Option A</label><input type="text" class="grp-a" placeholder="Option A" style="width:100%;padding:8px 10px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;outline:none;color:var(--text)"/></div>
+    <div><label style="font-size:.7rem;font-weight:600;color:var(--P);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Option B</label><input type="text" class="grp-b" placeholder="Option B" style="width:100%;padding:8px 10px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;outline:none;color:var(--text)"/></div>
+    <div><label style="font-size:.7rem;font-weight:600;color:var(--P);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Option C</label><input type="text" class="grp-c" placeholder="Option C" style="width:100%;padding:8px 10px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;outline:none;color:var(--text)"/></div>
+    <div><label style="font-size:.7rem;font-weight:600;color:var(--P);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Option D</label><input type="text" class="grp-d" placeholder="Option D" style="width:100%;padding:8px 10px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;outline:none;color:var(--text)"/></div>
+  </div>
+  <div><label style="font-size:.7rem;font-weight:600;color:var(--P);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Correct Answer</label>
+    <select class="grp-ans" style="width:100%;padding:9px 12px;background:var(--inp);border:1.5px solid var(--bdr);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;outline:none;color:var(--text)">
+      <option value="">— Select —</option>
+      <option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option>
+    </select>
+  </div>`;
+  cont.appendChild(div);
+  div.querySelector(".grp-qt").focus();
+}
+
+document.getElementById("openGroupBtn").addEventListener("click",()=>{
+  if(!activeExamId){toast("Please select an exam first.","error");return;}
+  _grpQCount=0;
+  document.getElementById("grpImgData").value="";
+  document.getElementById("grpImgPreview").style.display="none";
+  document.getElementById("grpImgRemove").style.display="none";
+  document.getElementById("grpImgArea").style.display="block";
+  document.getElementById("grpImgFile").value="";
+  document.getElementById("grpLabel").value="";
+  document.getElementById("grpQContainer").innerHTML="";
+  // Start with 2 blank sub-questions
+  addGrpQRow(); addGrpQRow();
+  openModal("groupModal");
+});
+document.getElementById("addGrpQBtn").addEventListener("click",addGrpQRow);
+document.getElementById("cancelGroupBtn").addEventListener("click",()=>closeModal("groupModal"));
+
+document.getElementById("saveGroupBtn").addEventListener("click",async()=>{
+  if(!activeExamId){toast("No exam selected.","error");return;}
+  const groupImage=document.getElementById("grpImgData").value;
+  if(!groupImage){toast("Please upload the shared image/passage first.","error");return;}
+  const groupLabel=document.getElementById("grpLabel").value.trim();
+  const rows=document.querySelectorAll("#grpQContainer .grp-q-row");
+  if(!rows.length){toast("Please add at least one sub-question.","error");return;}
+
+  // Validate all rows
+  const valid=[];
+  let hasError=false;
+  rows.forEach((row,i)=>{
+    const qt=row.querySelector(".grp-qt").value.trim();
+    const a=row.querySelector(".grp-a").value.trim();
+    const b=row.querySelector(".grp-b").value.trim();
+    const c=row.querySelector(".grp-c").value.trim();
+    const d=row.querySelector(".grp-d").value.trim();
+    const ca=row.querySelector(".grp-ans").value;
+    if(!qt||!a||!b||!c||!d||!ca){
+      toast(`Sub-question ${i+1}: please fill in all fields and select the correct answer.`,"error");
+      hasError=true; return;
+    }
+    valid.push({qt,a,b,c,d,ca});
+  });
+  if(hasError)return;
+
+  const btn=document.getElementById("saveGroupBtn");
+  spin(btn,"Saving...");
+  try{
+    for(const q of valid){
+      await addDoc(collection(db,"cbtQuestions"),{
+        examId:activeExamId,teacherId:userId,
+        questionText:q.qt,
+        options:{a:q.a,b:q.b,c:q.c,d:q.d},
+        correctAnswer:q.ca,
+        groupImage,        // shared passage image stored on every question in the group
+        groupLabel:groupLabel||"",
+        imageUrl:"",       // no per-question image for group questions
+        createdAt:serverTimestamp()
+      });
+    }
+    toast(`${valid.length} group question${valid.length>1?"s":""} saved!`);
+    closeModal("groupModal");
+    renderQuestions(activeExamId);
+  }catch(err){toast("Failed to save.","error");console.error(err);}
+  finally{unspin(btn,"💾 Save All Questions");}
+});
+
+/* MONITOR */
+async function populateMonSel(){
+  const sel=document.getElementById("monSel");
+  sel.innerHTML='<option value="">— Choose an exam —</option>';
+  const snap=await getDocs(query(collection(db,"cbtExams"),where("teacherId","==",userId)));
+  snap.docs.sort((a,b)=>a.data().title?.localeCompare(b.data().title)).forEach(d=>{
+    const o=document.createElement("option");o.value=d.id;o.textContent=d.data().title;sel.appendChild(o);
+  });
+}
+async function loadMonitor(){
+  const eid=document.getElementById("monSel").value;
+  const panel=document.getElementById("monPanel");
+  if(!eid){panel.innerHTML='<div class="empty-state"><div class="empty-icon">🔴</div><p>Select an exam to monitor</p></div>';return;}
+  panel.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Loading...</div>';
+  const ed=await getDoc(doc(db,"cbtExams",eid));
+  const classId=ed.data()?.classId;
+  const[stuSnap,resSnap]=await Promise.all([
+    getDocs(query(collection(db,"students"),where("class","==",classId))),
+    getDocs(query(collection(db,"cbtResults"),where("examId","==",eid))),
+  ]);
+  const done=new Set();resSnap.forEach(d=>done.add(d.data().studentId));
+  const total=stuSnap.size,submitted=done.size;
+  panel.innerHTML=`<div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap"><div style="background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:16px 24px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--P)">${total}</div><div style="font-size:.75rem;color:var(--muted)">Total Students</div></div><div style="background:#fff;border:1px solid #bbf7d0;border-radius:12px;padding:16px 24px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--ok)">${submitted}</div><div style="font-size:.75rem;color:var(--muted)">Submitted</div></div><div style="background:#fff;border:1px solid #fde68a;border-radius:12px;padding:16px 24px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:var(--warn)">${total-submitted}</div><div style="font-size:.75rem;color:var(--muted)">Pending</div></div></div><div class="mon-grid" id="monCards"></div>`;
+  const cards=document.getElementById("monCards");
+  if(stuSnap.empty){cards.innerHTML='<p style="color:var(--muted);font-size:.85rem">No students in this class</p>';return;}
+  stuSnap.forEach(d=>{const s=d.data(),isDone=done.has(d.id);cards.innerHTML+=`<div class="mon-card ${isDone?"submitted":"pending"}"><div class="mc-name">${s.name||`${s.firstName||""} ${s.lastName||""}`.trim()||s.regNumber||"—"}</div><div class="mc-st" style="color:${isDone?"var(--ok)":"var(--warn)"}">${isDone?"✅ Submitted":"⏳ Pending"}</div></div>`;});
+}
+document.getElementById("monSel").addEventListener("change",loadMonitor);
+document.getElementById("refreshMonBtn").addEventListener("click",loadMonitor);
+
+/* RESULTS */
+async function populateResultsFilter(){
+  const sel=document.getElementById("rExamFilter");
+  sel.innerHTML='<option value="">All Exams</option>';
+  const snap=await getDocs(query(collection(db,"cbtExams"),where("teacherId","==",userId)));
+  snap.docs.sort((a,b)=>a.data().title?.localeCompare(b.data().title)).forEach(d=>{
+    const o=document.createElement("option");o.value=d.id;o.textContent=d.data().title;sel.appendChild(o);
+  });
+}
+async function loadResults(){
+  const tbody=document.getElementById("resultsBody");
+  const examId=document.getElementById("rExamFilter").value;
+  const search=(document.getElementById("rSearch").value||"").toLowerCase();
+  tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">Loading...</td></tr>`;
+  const snap=await getDocs(query(collection(db,"cbtResults"),where("teacherId","==",userId)));
+  let docs=snap.docs;
+  if(examId)docs=docs.filter(d=>d.data().examId===examId);
+  if(search)docs=docs.filter(d=>d.data().studentName?.toLowerCase().includes(search));
+  docs.sort((a,b)=>(b.data().submittedAt?.toDate?.()?.getTime()||0)-(a.data().submittedAt?.toDate?.()?.getTime()||0));
+  if(!docs.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">${search?"🔍":"📊"}</div><p>${search?"No results match search":"No results yet"}</p></div></td></tr>`;return;}
+  tbody.innerHTML="";
+  docs.forEach(d=>{
+    const r=d.data(),pct=r.totalMarks>0?Math.round((r.score/r.totalMarks)*100):0;
+    const col=pct>=70?"var(--ok)":pct>=50?"var(--warn)":"var(--err)";
+    const mins=r.timeTaken?Math.ceil(r.timeTaken/60):"—";
+    const tr=document.createElement("tr");
+    const delBtn=document.createElement("button");
+    delBtn.className="btn btn-danger btn-sm";delBtn.textContent="🗑️";
+    delBtn.addEventListener("click",()=>requirePw(`Delete result for ${r.studentName||"student"}`,async()=>{
+      try{await deleteDoc(doc(db,"cbtResults",d.id));toast("Result deleted.");loadResults();loadHome();}
+      catch(err){toast("Failed to delete.","error");}
+    }));
+    tr.innerHTML=`<td><strong>${r.studentName||"—"}</strong><br/><span style="font-size:.75rem;color:var(--muted)">${r.className||""}</span></td><td style="font-size:.82rem">${r.examTitle||"—"}</td><td><strong>${r.score}/${r.totalMarks}</strong></td><td><span style="color:${col};font-weight:600">${pct}%</span></td><td>${typeof mins==="number"?mins+" min":"—"}</td><td>${fmtDate(r.submittedAt)}</td><td></td>`;
+    tr.cells[6].appendChild(delBtn);
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById("rSearch").addEventListener("input",loadResults);
+document.getElementById("rExamFilter").addEventListener("change",loadResults);
+document.getElementById("printBtn").addEventListener("click",()=>{
+  document.getElementById("prtHdr").style.display="block";
+  document.getElementById("prtDate").textContent="Printed: "+new Date().toLocaleString("en-GB");
+  document.getElementById("prtTeacher").textContent="Teacher: "+userName;
+  window.print();
+  setTimeout(()=>{document.getElementById("prtHdr").style.display="none";},500);
+});
+
+/* LOGOUT */
+document.getElementById("logoutBtn").addEventListener("click",()=>{
+  document.getElementById("dlgSignOut").classList.add("show");
+});
+document.getElementById("dlgSignOutConfirm").addEventListener("click",async()=>{
+  document.getElementById("dlgSignOut").classList.remove("show");
+  await signOut(auth);
+  userId="";userName="";teacherEmail="";activeExamId=null;pwCallback=null;
+  // Reset all sections to home before hiding portal
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById("section-home").classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  document.getElementById("ni-home").classList.add("active");
+  document.getElementById("tbTitle").textContent="Dashboard";
+  document.getElementById("tbSub").textContent="Here's your teaching overview";
+  document.getElementById("portalScreen").classList.remove("open");
+  document.getElementById("loginScreen").style.display="";
+  document.getElementById("emailIn").value="";document.getElementById("pwIn").value="";
+  unspin(document.getElementById("loginBtn"),"Sign In");
+});
+document.getElementById("dlgSignOutCancel").addEventListener("click",()=>{
+  document.getElementById("dlgSignOut").classList.remove("show");
+});
+
+/* CLOSE MODALS ON OVERLAY CLICK */
+document.querySelectorAll(".modal-overlay").forEach(ov=>{
+  ov.addEventListener("click",e=>{if(e.target===ov)ov.classList.remove("open");});
+});
+</script>
+</body>
+</html>

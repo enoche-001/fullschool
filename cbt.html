@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brighton Heights School — CBT Exam Hall</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="cbt.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="lw">
+    <div class="ll">
+      <div>
+        <div class="li">📝</div>
+        <h1>Brighton Heights School<br/>Exam Hall</h1>
+        <p class="sub">CBT Examination System</p>
+      </div>
+      <div>
+        <div class="feats">
+          <div class="fi"><div class="fii"></div><div class="fit">JAMB-style questions for every exam</div></div>
+          <div class="fi"><div class="fii"></div><div class="fit">Auto-timed with instant marking on submission</div></div>
+          <div class="fi"><div class="fii"></div><div class="fit">Anti-cheat: tab-switch detection and fullscreen lock</div></div>
+        </div>
+        <p class="lq">"Focus. Read carefully. Do your best."</p>
+      </div>
+    </div>
+    <div class="lr">
+      <div class="rbadge">📝 CBT Exam Login</div>
+      <h2>Brighton Heights School</h2>
+      <p class="desc">Enter your credentials to access your exams</p>
+      <div class="l-alert" id="lAlert"><span>⚠</span><span id="lMsg"></span></div>
+      <div class="fg"><label>Registration Number</label><input type="text" id="regIn" placeholder="BHS/2025/SS2/001" autocomplete="off"/></div>
+      <div class="fg"><label>Password</label><input type="password" id="pwIn" placeholder="******"/></div>
+      <button class="btn-lg" id="loginBtn">Sign In</button>
+     </div>
+  </div>
+</div>
+
+<!-- EXAM HALL -->
+<div id="examHall">
+  <div class="topbar">
+    <div class="tb-brand"><span class="logo">🔥</span><h1>Brighton Heights School</h1><span>Exam Hall</span></div>
+    <div class="tb-right">
+      <span class="tb-user" id="tbUser"></span>
+      <button class="btn-out" id="signOutBtn">Sign Out</button>
+    </div>
+  </div>
+  <div class="hall-wrap">
+    <div class="hall-hdr">
+      <h2>🔴 Active Exams</h2>
+      <p>Only exams currently active for your class are shown here. Exams tagged "#" can be written more than once and isn't added to leaderboard detail. <br> Click <strong>Start Exam</strong> to begin.</p>
+    </div>
+    <div class="status-bar">
+      <div class="sdot"></div>
+      <span>Live — active exams for <strong id="clsDisp">your class</strong></span>
+      <span style="margin-left:auto;font-size:.78rem" id="lastRef"></span>
+      <button onclick="loadExams()" style="padding:5px 12px;background:var(--P);color:#fff;border:none;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">Refresh</button>
+    </div>
+    <div id="examsGrid" class="exams-grid">
+      <div class="empty-state"><div class="empty-icon">⏳</div><p>Loading exams...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- CBT EXAM INTERFACE -->
+<div id="examInterface">
+  <div class="exam-topbar">
+    <div class="etw"><h2 id="eTitle">Exam</h2><p id="eSub">Subject — Class</p></div>
+    <div class="exam-timer" id="eTimer"><span>⏱</span><span class="timer-display" id="tDisp">00:00</span></div>
+    <div class="exam-progress"><strong id="pCur">1</strong> / <span id="pTot">0</span></div>
+  </div>
+  <div id="passagePanel" style="display:none;background:#fff;border-bottom:2px solid var(--bdr);padding:14px 24px;flex-shrink:0">
+    <div id="passageLabel" style="font-size:.78rem;font-weight:700;color:var(--P);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px"></div>
+    <img id="passageImg" style="max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--bdr);display:block" alt="passage"/>
+  </div>
+  <div class="exam-body">
+    <div class="qpanel">
+      <div class="qnum" id="qNum">QUESTION 1</div>
+      <img id="qDiagram" style="display:none;max-width:100%;max-height:220px;border-radius:10px;border:1px solid var(--bdr);margin-bottom:14px" alt="diagram"/>
+      <div class="qtext" id="qText">Loading...</div>
+      <div class="opts" id="optsList"></div>
+    </div>
+    <div class="q-grid"><div class="qgt">Questions</div><div class="qgw" id="qDots"></div></div>
+  </div>
+  <div class="exam-nav">
+    <div style="display:flex;gap:8px">
+      <button class="btn-en" id="prevBtn" onclick="goQ(-1)">← Prev</button>
+      <button class="btn-en" id="nextBtn" onclick="goQ(1)">Next →</button>
+    </div>
+    <button class="btn-sub" onclick="confirmSubmit()">Submit Exam</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen">
+  <div class="rw">
+    <div class="rhdr">
+      <div class="sring" id="sRing"><div class="pct" id="rPct">0%</div><div class="sc" id="rSc">0/0</div></div>
+      <h2 id="rTitle">Exam Complete!</h2>
+      <p id="rMsg">Here's how you did</p>
+    </div>
+    <div class="rstats">
+      <div class="rs"><div class="rs-n" id="rsOk" style="color:var(--ok)">0</div><div class="rs-l">Correct</div></div>
+      <div class="rs"><div class="rs-n" id="rsNo" style="color:var(--err)">0</div><div class="rs-l">Wrong</div></div>
+      <div class="rs"><div class="rs-n" id="rsTime">—</div><div class="rs-l">Time Taken</div></div>
+    </div>
+    <!-- AI Tips -->
+    <div class="ai-tips-box" id="aiTipsBox">
+      <div class="ai-tips-header">🤖 AI Study Tips — Personalised for You</div>
+      <div class="ai-tips-content" id="aiTipsContent">
+        <div class="ai-loading"><div class="spinner-ai"></div> Analysing your answers...</div>
+      </div>
+    </div>
+    <div class="rbd"><div class="rbdh">📋 Question Breakdown</div><div id="bdList"></div></div>
+    <div style="text-align:center;margin-top:8px;padding-bottom:40px">
+      <button class="btn btn-p" onclick="backToHall()">← Back to Exam Hall</button>
+    </div>
+  </div>
+</div>
+
+<!-- WARNING OVERLAY -->
+<div class="wo" id="warnOv">
+  <div class="wb">
+    <div class="wi">⚠️</div>
+    <h3 id="wTitle">Warning!</h3>
+    <p id="wMsg">You left the exam window. This is your first and only warning. A second violation will auto-submit your exam.</p>
+    <button class="btn-bk" onclick="dismissWarn()">Return to Exam</button>
+  </div>
+</div>
+
+<!-- DIALOG: Instructions -->
+<div class="dlg-ov" id="dlgInstructions">
+  <div class="dlg">
+    <div class="dlg-icon">📋</div>
+    <h3 id="dlgInstTitle">Exam Instructions</h3>
+    <p id="dlgInstSubtitle">Read carefully before you begin</p>
+    <ul class="dlg-rules" id="dlgInstRules">
+      <li>Once you start, the timer begins immediately</li>
+      <li>Do not switch tabs or minimise — violations auto-submit</li>
+      <li>Navigate between questions freely</li>
+      <li>Answered questions are highlighted in the grid</li>
+      <li>Submit before time runs out — exam auto-submits when time expires</li>
+      <li>You cannot change answers after submission</li>
+    </ul>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-primary" id="dlgInstProceed">I Understand — Proceed →</button>
+      <button class="dlg-btn dlg-btn-secondary" id="dlgInstCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: Start Confirm -->
+<div class="dlg-ov" id="dlgStartConfirm">
+  <div class="dlg">
+    <div class="dlg-icon">⚡</div>
+    <h3>Ready to Begin?</h3>
+    <p id="dlgStartMeta">The timer starts the moment you click Start.</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-primary" id="dlgStartGo">✅ Yes, Start My Exam Now</button>
+      <button class="dlg-btn dlg-btn-secondary" id="dlgStartBack">← Back to Instructions</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: Submit Stats -->
+<div class="dlg-ov" id="dlgSubmitStats">
+  <div class="dlg">
+    <div class="dlg-icon">📊</div>
+    <h3>Ready to Submit?</h3>
+    <p>Here's a summary of your attempt:</p>
+    <div class="dlg-stat">
+      <div class="dlg-stat-item"><div class="dsn" id="dlgStatAnswered" style="color:var(--ok)">0</div><div class="dsl">Answered</div></div>
+      <div class="dlg-stat-item"><div class="dsn" id="dlgStatUnanswered" style="color:var(--err)">0</div><div class="dsl">Unanswered</div></div>
+      <div class="dlg-stat-item"><div class="dsn" id="dlgStatTotal" style="color:var(--P)">0</div><div class="dsl">Total</div></div>
+    </div>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-primary" id="dlgSubmitProceed">Proceed to Submit →</button>
+      <button class="dlg-btn dlg-btn-secondary" id="dlgSubmitCancel">Continue Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: Submit Final -->
+<div class="dlg-ov" id="dlgSubmitFinal">
+  <div class="dlg">
+    <div class="dlg-icon">⚠️</div>
+    <h3>Final Confirmation</h3>
+    <p>You are about to submit. <strong>This cannot be undone.</strong></p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-primary" id="dlgFinalSubmit">✅ Submit Exam Now</button>
+      <button class="dlg-btn dlg-btn-secondary" id="dlgFinalBack">← Go Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: Sign Out -->
+<div class="dlg-ov" id="dlgSignOut">
+  <div class="dlg">
+    <div class="dlg-icon">🚪</div>
+    <h3>Sign Out?</h3>
+    <p id="dlgSignOutMsg">Are you sure you want to sign out?</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-danger" id="dlgSignOutConfirm">Yes, Sign Out</button>
+      <button class="dlg-btn dlg-btn-secondary" id="dlgSignOutCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,collection,doc,addDoc,getDoc,getDocs,updateDoc,query,where,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{verifyPassword}from"./pwhash.js";
+
+const FC={apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",authDomain:"veil-1-bd7b5.firebaseapp.com",projectId:"veil-1-bd7b5",storageBucket:"veil-1-bd7b5.firebasestorage.app",messagingSenderId:"526021682048",appId:"1:526021682048:web:a52dae5b2650ca951ad765"};
+const app=initializeApp(FC);
+const db=getFirestore(app);
+
+let userId="",userName="",classId="",className="",regNumber="";
+
+function toast(m,t="success"){const el=document.getElementById("toast");el.textContent=(t==="success"?"✓ ":"✗ ")+m;el.className=`toast show ${t}`;setTimeout(()=>el.classList.remove("show"),3500);}
+function showAlert(m){document.getElementById("lMsg").textContent=m;document.getElementById("lAlert").classList.add("show");}
+function closeDlg(id){document.getElementById(id).classList.remove("show");}
+
+document.getElementById("loginBtn").addEventListener("click",async()=>{
+  const reg=document.getElementById("regIn").value.trim().toUpperCase();
+  const pw=document.getElementById("pwIn").value;
+  const btn=document.getElementById("loginBtn");
+  document.getElementById("lAlert").classList.remove("show");
+  if(!reg||!pw){showAlert("Please fill in all fields.");return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Signing in...';
+  try{
+    let snap=await getDocs(query(collection(db,"students"),where("regNumber","==",reg)));
+    if(snap.empty){const rawReg=document.getElementById("regIn").value.trim();if(rawReg!==reg)snap=await getDocs(query(collection(db,"students"),where("regNumber","==",rawReg)));}
+    if(snap.empty){showAlert("Registration number not found.");btn.disabled=false;btn.innerHTML="Sign In";return;}
+    const ds=snap.docs[0],d=ds.data();
+    if(!(await verifyPassword(pw,d))){showAlert("Incorrect reg number or password.");btn.disabled=false;btn.innerHTML="Sign In";return;}
+    if((d.status||"active")!=="active"){showAlert("Your account is not active. Please contact the school office.");btn.disabled=false;btn.innerHTML="Sign In";return;}
+    userId=ds.id;userName=`${d.firstName||""} ${d.lastName||""}`.trim()||d.regNumber||"Student";classId=d.class||"";className=d.class||"";regNumber=d.regNumber||reg;
+    openHall();
+  }catch(err){
+    let m="Login failed.";
+        showAlert(m);btn.disabled=false;btn.innerHTML="Sign In";
+  }
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("loginScreen").style.display!=="none")document.getElementById("loginBtn").click();});
+
+function openHall(){
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("examHall").classList.add("open");
+  document.getElementById("tbUser").textContent=userName;
+  document.getElementById("clsDisp").textContent=className||"your class";
+  loadExams();
+  setInterval(()=>{if(!document.getElementById("examInterface").classList.contains("open"))loadExams();},60000);
+}
+
+window.loadExams=async function(){
+  const grid=document.getElementById("examsGrid");
+  grid.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  document.getElementById("lastRef").textContent="Updated: "+new Date().toLocaleTimeString("en-GB");
+  const myR=await getDocs(query(collection(db,"cbtResults"),where("studentId","==",userId)));
+  const done=new Set();myR.forEach(d=>done.add(d.data().examId));
+  const snap=await getDocs(query(collection(db,"cbtExams"),where("classId","==",classId)));
+  const cards=[];
+  snap.forEach(d=>{
+    const e=d.data();
+    if(e.isActive!==true)return;
+    const isDone=done.has(d.id);
+    const isAI=e.source==="ai";
+    cards.push(`<div class="exam-card">
+      <div class="ec-top"><h3>${e.title}</h3><span class="badge b-green">🔴 Active</span></div>
+      <div class="ec-meta">
+        <span>📚 ${e.subjectName||"—"}</span>
+        <span>⏱ ${e.duration} minutes &nbsp;|&nbsp; 🏫 ${e.className||"—"}</span>
+        
+      </div>
+      <div class="ec-foot">
+        <span class="badge ${isDone?"b-blue":"b-green"}">${isDone?"✅ Submitted":"⏳ Pending"}</span>
+        <button class="btn btn-p btn-sm" ${isDone?"disabled":""} onclick="startExam('${d.id}')">
+          ${isDone?"Already Submitted":"Start Exam →"}
+        </button>
+      </div>
+    </div>`);
+  });
+  grid.innerHTML=cards.length?cards.join(""):'<div class="empty-state"><div class="empty-icon">🔴</div><p>No active exams right now</p><small>Check back later or contact your admin.</small></div>';
+};
+
+let examQ=[],answers={},curQ=0,timerInt=null,tLeft=0,examStart=null,examData=null,examId_=null,tabWarn=0,submitted=false,_pendingExamId=null,_pendingSubject="";
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function shuffleOpts(q){const k=shuffle(["a","b","c","d"]);const o={};let c="";k.forEach((ok,i)=>{const nk=["a","b","c","d"][i];o[nk]=q.options[ok];if(ok===q.correctAnswer)c=nk;});return{...q,options:o,correctAnswer:c};}
+
+window.startExam=async function(eid){
+  const ex=await getDocs(query(collection(db,"cbtResults"),where("examId","==",eid),where("studentId","==",userId)));
+  if(!ex.empty){toast("You already submitted this exam.","error");return;}
+  const ed=await getDoc(doc(db,"cbtExams",eid));
+  if(!ed.exists()){toast("Exam not found.","error");return;}
+  const e=ed.data();
+  if(e.isActive!==true){toast("This exam is no longer available.","error");loadExams();return;}
+  const qs=await getDocs(query(collection(db,"cbtQuestions"),where("examId","==",eid)));
+  if(qs.empty){toast("No questions in this exam yet.","error");return;}
+  _pendingExamId=eid;_pendingSubject=e.subjectName||"";
+  document.getElementById("dlgInstTitle").textContent=e.title;
+  document.getElementById("dlgInstSubtitle").textContent=`${e.subjectName} — ${e.duration} minutes — ${qs.size} questions`;
+  document.getElementById("dlgInstructions").classList.add("show");
+};
+
+async function _launchExam(eid){
+  const ed=await getDoc(doc(db,"cbtExams",eid));const e=ed.data();
+  const qs=await getDocs(query(collection(db,"cbtQuestions"),where("examId","==",eid)));
+  const raw=[];qs.forEach(d=>raw.push({id:d.id,...d.data()}));
+  examQ=shuffle(raw).map(shuffleOpts);answers={};curQ=0;tabWarn=0;submitted=false;examId_=eid;examData=e;examStart=Date.now();
+  document.getElementById("eTitle").textContent=e.title;
+  document.getElementById("eSub").textContent=`${e.subjectName} — ${e.className}`;
+  document.getElementById("pTot").textContent=examQ.length;
+  tLeft=e.duration*60;startTimer();renderQ(0);
+  document.getElementById("examInterface").classList.add("open");
+  document.addEventListener("contextmenu",blk);document.addEventListener("copy",blk);document.addEventListener("cut",blk);
+  document.addEventListener("visibilitychange",onVis);
+  try{document.documentElement.requestFullscreen?.();}catch(e){}
+}
+
+function blk(e){e.preventDefault();}
+function onVis(){
+  if(submitted||!document.hidden)return;
+  tabWarn++;
+  if(tabWarn>=2)doSubmit(true);
+  else showWarn("⚠️ Tab Switch Detected","You switched tabs. This is your first and only warning. A second violation will auto-submit your exam.");
+}
+
+function startTimer(){clearInterval(timerInt);updTimer();timerInt=setInterval(()=>{tLeft--;updTimer();if(tLeft<=0){clearInterval(timerInt);doSubmit(false,true);}},1000);}
+function updTimer(){const m=Math.floor(tLeft/60).toString().padStart(2,"0"),s=(tLeft%60).toString().padStart(2,"0");document.getElementById("tDisp").textContent=`${m}:${s}`;const el=document.getElementById("eTimer");if(tLeft<=300)el.classList.add("danger");else el.classList.remove("danger");}
+
+function renderQ(i){
+  const q=examQ[i];curQ=i;
+  document.getElementById("qNum").textContent=`QUESTION ${i+1} OF ${examQ.length}`;
+  const passPanel=document.getElementById("passagePanel");
+  if(q.groupImage){document.getElementById("passageLabel").textContent=q.groupLabel||"Study the diagram below";document.getElementById("passageImg").src=q.groupImage;passPanel.style.display="block";}
+  else{passPanel.style.display="none";}
+  const diagEl=document.getElementById("qDiagram");
+  if(q.imageUrl){diagEl.src=q.imageUrl;diagEl.style.display="block";}else{diagEl.src="";diagEl.style.display="none";}
+  document.getElementById("qText").textContent=q.questionText;
+  document.getElementById("pCur").textContent=i+1;
+  const ol=document.getElementById("optsList");ol.innerHTML="";
+  ["a","b","c","d"].forEach(k=>{
+    const sel=answers[q.id]===k;
+    const div=document.createElement("div");div.className=`opt${sel?" selected":""}`;
+    div.innerHTML=`<div class="opt-l">${k.toUpperCase()}</div><div class="opt-t">${q.options[k]||""}</div>`;
+    div.onclick=()=>{answers[q.id]=k;renderQ(curQ);};ol.appendChild(div);
+  });
+  document.getElementById("prevBtn").disabled=i===0;
+  document.getElementById("nextBtn").disabled=i===examQ.length-1;
+  renderDots();
+}
+function renderDots(){
+  const g=document.getElementById("qDots");g.innerHTML="";
+  examQ.forEach((q,i)=>{const d=document.createElement("div");d.className=`qdot${i===curQ?" current":answers[q.id]?" answered":""}`;d.textContent=i+1;d.onclick=()=>renderQ(i);g.appendChild(d);});
+}
+window.goQ=function(dir){const n=curQ+dir;if(n>=0&&n<examQ.length)renderQ(n);};
+window.confirmSubmit=function(){openSubmitStep1();};
+
+async function doSubmit(cheat=false,timeup=false){
+  if(submitted)return;submitted=true;clearInterval(timerInt);
+  document.removeEventListener("contextmenu",blk);document.removeEventListener("copy",blk);document.removeEventListener("cut",blk);document.removeEventListener("visibilitychange",onVis);
+  try{document.exitFullscreen?.();}catch(e){}
+  document.getElementById("warnOv").classList.remove("show");
+  let score=0;const log=[];
+  examQ.forEach(q=>{const ch=answers[q.id]||null;const ok=ch===q.correctAnswer;if(ok)score++;log.push({questionId:q.id,questionText:q.questionText,options:q.options,chosen:ch,correct:q.correctAnswer,isRight:ok,imageUrl:q.imageUrl||"",explanation:q.explanation||""});});
+  const total=examQ.length,tt=Math.floor((Date.now()-examStart)/1000),pct=Math.round((score/total)*100);
+  try{
+    await addDoc(collection(db,"cbtResults"),{
+      examId:examId_,examTitle:examData.title,subjectName:examData.subjectName,
+      classId,className,teacherId:examData.teacherId||"",studentId:userId,studentName:userName,regNumber,
+      score,totalMarks:total,percentage:pct,timeTaken:tt,
+      answers:log,autoSubmitted:cheat||timeup,submittedAt:serverTimestamp()
+    });
+    // Update student streak/badge
+    try{
+      const ud=await getDoc(doc(db,"students",userId));
+      const d=ud.data()||{};
+      const totalExams=(d.totalExams||0)+1;
+      const badges=d.badges||[];
+      if(totalExams===1&&!badges.includes("first_exam"))badges.push("first_exam");
+      if(totalExams>=10&&!badges.includes("veteran"))badges.push("veteran");
+      if(pct>=70&&!badges.includes("score70"))badges.push("score70");
+      if(pct>=90&&!badges.includes("score90"))badges.push("score90");
+      await updateDoc(doc(db,"students",userId),{totalExams,badges});
+    }catch(e){}
+  }catch(e){console.error("Save error:",e);}
+  showResult(score,total,tt,log,cheat,timeup,pct);
+}
+
+async function showResult(score,total,tt,log,cheat,timeup,pct){
+  const wrong=total-score,mins=Math.floor(tt/60),secs=tt%60;
+  const c=pct>=70?"#15803d":pct>=50?"#b45309":"#dc2626";
+  const ring=document.getElementById("sRing");ring.style.borderColor=c;ring.style.backgroundColor=c+"18";
+  document.getElementById("rPct").style.color=c;document.getElementById("rPct").textContent=`${pct}%`;
+  document.getElementById("rSc").textContent=`${score}/${total}`;
+  const msg=cheat?"Auto-submitted: tab switch violation":timeup?"Time expired — auto submitted":pct>=70?"Excellent work! Keep it up 🎉":pct>=50?"Good effort! Keep studying 📚":"Keep working hard, you'll improve! 💪";
+  document.getElementById("rTitle").textContent=cheat||timeup?"Exam Submitted":"Exam Complete!";
+  document.getElementById("rMsg").textContent=msg;
+  document.getElementById("rsOk").textContent=score;document.getElementById("rsNo").textContent=wrong;document.getElementById("rsTime").textContent=`${mins}m ${secs}s`;
+  // Breakdown
+  const bl=document.getElementById("bdList");bl.innerHTML="";
+  log.forEach((a,i)=>{bl.innerHTML+=`<div class="bdi"><div class="bdn ${a.isRight?"bok":"bno"}">${i+1}</div><div><div class="bdq">${a.questionText}</div><div class="bda">Your answer: <span class="${a.isRight?"ca":"wa"}">${a.chosen?a.options[a.chosen]:"Not answered"}</span>${!a.isRight?` &nbsp;|&nbsp; Correct: <span class="ca">${a.options[a.correct]}</span>`:""}</div>${a.explanation?`<div style="font-size:.74rem;color:#b8902a;margin-top:4px;font-style:italic">💡 ${a.explanation}</div>`:""}</div></div>`;});
+  document.getElementById("examInterface").classList.remove("open");
+  document.getElementById("resultScreen").classList.add("open");
+  // AI Tips
+  const tipsEl=document.getElementById("aiTipsContent");
+  try{
+    const wrongQs=log.filter(a=>!a.isRight).map(a=>a.questionText).slice(0,6);
+    if(!wrongQs.length){tipsEl.innerHTML='<strong>✅ Perfect or near-perfect score!</strong> Excellent mastery of this topic. Keep practising other subjects at this pace.';return;}
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:350,
+        messages:[{role:"user",content:`A Nigerian JAMB student just scored ${pct}% on a ${_pendingSubject||"JAMB"} exam. They got these questions wrong:\n${wrongQs.join("\n")}\n\nGive 3 short, specific, actionable study tips to help them improve. Be encouraging and direct. Format as plain text with each tip on a new line starting with •. Max 100 words total.`}]
+      })
+    });
+    const data=await resp.json();
+    const tips=data.content?.[0]?.text||"";
+    tipsEl.innerHTML=tips.split("\n").filter(Boolean).map(t=>`<div style="margin-bottom:7px">${t}</div>`).join("");
+  }catch(e){tipsEl.innerHTML='• Review each wrong answer above and read the explanation carefully.<br>• Create a summary sheet of topics you missed and revise them before your next exam.<br>• Take another practice exam on this subject within 48 hours to reinforce what you learned.';}
+}
+
+window.backToHall=function(){document.getElementById("resultScreen").classList.remove("open");loadExams();};
+function showWarn(t,m){document.getElementById("wTitle").textContent=t;document.getElementById("wMsg").textContent=m;document.getElementById("warnOv").classList.add("show");}
+window.dismissWarn=function(){document.getElementById("warnOv").classList.remove("show");try{document.documentElement.requestFullscreen?.();}catch(e){}};
+
+// Instructions dialog
+document.getElementById("dlgInstProceed").addEventListener("click",()=>{closeDlg("dlgInstructions");document.getElementById("dlgStartMeta").textContent="Timer starts the moment you click Start. Make sure you're ready!";document.getElementById("dlgStartConfirm").classList.add("show");});
+document.getElementById("dlgInstCancel").addEventListener("click",()=>{closeDlg("dlgInstructions");_pendingExamId=null;});
+document.getElementById("dlgStartGo").addEventListener("click",()=>{closeDlg("dlgStartConfirm");if(_pendingExamId)_launchExam(_pendingExamId);_pendingExamId=null;});
+document.getElementById("dlgStartBack").addEventListener("click",()=>{closeDlg("dlgStartConfirm");document.getElementById("dlgInstructions").classList.add("show");});
+
+// Submit dialogs
+function openSubmitStep1(){const answered=Object.keys(answers).length;const total=examQ.length;document.getElementById("dlgStatAnswered").textContent=answered;document.getElementById("dlgStatUnanswered").textContent=total-answered;document.getElementById("dlgStatTotal").textContent=total;document.getElementById("dlgSubmitStats").classList.add("show");}
+document.getElementById("dlgSubmitProceed").addEventListener("click",()=>{closeDlg("dlgSubmitStats");document.getElementById("dlgSubmitFinal").classList.add("show");});
+document.getElementById("dlgSubmitCancel").addEventListener("click",()=>closeDlg("dlgSubmitStats"));
+document.getElementById("dlgFinalSubmit").addEventListener("click",()=>{closeDlg("dlgSubmitFinal");doSubmit();});
+document.getElementById("dlgFinalBack").addEventListener("click",()=>{closeDlg("dlgSubmitFinal");document.getElementById("dlgSubmitStats").classList.add("show");});
+
+// Sign out
+document.getElementById("signOutBtn").addEventListener("click",()=>{
+  const active=document.getElementById("examInterface").classList.contains("open");
+  document.getElementById("dlgSignOutMsg").textContent=active?"⚠️ You have an active exam! Signing out will abandon it. Are you sure?":"Are you sure you want to sign out?";
+  document.getElementById("dlgSignOut").classList.add("show");
+});
+document.getElementById("dlgSignOutConfirm").addEventListener("click",async()=>{
+  closeDlg("dlgSignOut");clearInterval(timerInt);
+  document.removeEventListener("contextmenu",blk);document.removeEventListener("copy",blk);document.removeEventListener("cut",blk);document.removeEventListener("visibilitychange",onVis);
+  try{document.exitFullscreen?.();}catch(e){}
+  userId="";userName="";classId="";className="";regNumber="";submitted=false;
+  ["uid","name","classId","className","reg"].forEach(k=>sessionStorage.removeItem("mf_cbt_"+k));
+  document.getElementById("examHall").classList.remove("open");
+  document.getElementById("resultScreen").classList.remove("open");
+  document.getElementById("examInterface").classList.remove("open");
+  document.getElementById("loginScreen").style.display="";
+  document.getElementById("regIn").value="";document.getElementById("pwIn").value="";
+  document.getElementById("loginBtn").disabled=false;document.getElementById("loginBtn").innerHTML="Sign In";
+});
+document.getElementById("dlgSignOutCancel").addEventListener("click",()=>closeDlg("dlgSignOut"));
+
+// ── AUTO-LOGIN from Student Portal session ──
+// Runs last so Firebase (db) and all functions are fully initialised
+(function(){
+  const uid=sessionStorage.getItem("mf_cbt_uid");
+  const name=sessionStorage.getItem("mf_cbt_name");
+  const cid=sessionStorage.getItem("mf_cbt_classId");
+  const cname=sessionStorage.getItem("mf_cbt_className");
+  const reg=sessionStorage.getItem("mf_cbt_reg");
+  if(uid&&name&&cid){
+    userId=uid;userName=name;classId=cid;className=cname||"";regNumber=reg||"";
+    openHall();
+  }
+})();
+</script>
+</body>
+</html>

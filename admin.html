@@ -1,0 +1,2719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>Admin Portal — School Management</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Core palette */
+  --ink:#0d1f3c;
+  --ink2:#162e52;
+  --ink3:#374151;
+  --accent:#b8902a;--accent-bg:#fdf8ec;--accent-border:#f0d98a;
+  --indigo:#0d1f3c;
+  --indigo-d:#162e52;
+  --indigo-s:#eff6ff;
+  --indigo-m:#c8d0e0;
+
+  /* Surfaces */
+  --bg:#f5f7fc;
+  --white:#ffffff;
+  --panel:#ffffff;
+  --border:#e2e8f2;
+  --border2:#c8d0e0;
+
+  /* Text */
+  --text:#162e52;
+  --muted:#64748b;
+  --soft:#94a3b8;
+
+  /* Sidebar */
+  --sb:#0d1f3c;
+  --sb2:#162e52;
+  --sb-border:rgba(255,255,255,.07);
+  --sb-active:rgba(255,255,255,.15);
+  --sb-hover:rgba(255,255,255,.06);
+
+  /* Status */
+  --ok:#15803d;--ok-bg:#f0fdf4;--ok-b:#bbf7d0;
+  --err:#dc2626;--err-bg:#fef2f2;--err-b:#fecaca;
+  --warn:#b45309;--warn-bg:#fffbeb;--warn-b:#fde68a;
+
+  /* Input */
+  --inp:#f5f7fc;
+
+  /* Radii */
+  --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ═══════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════ */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:var(--bg);
+}
+.lw{
+  display:flex;width:820px;max-width:96vw;min-height:460px;
+  border-radius:var(--r-xl);overflow:hidden;
+  box-shadow:0 2px 4px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.1);
+  animation:fadeUp .35s cubic-bezier(.22,.68,0,1.1) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* Left panel — brand only, no prose clutter */
+.ll{
+  flex:1;background:var(--sb);padding:48px 40px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+/* Subtle grid texture */
+.ll::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+/* Indigo glow blob */
+.ll::after{
+  content:'';position:absolute;bottom:-80px;right:-80px;
+  width:280px;height:280px;border-radius:50%;
+  background:rgba(184,144,42,.10);
+  pointer-events:none;
+}
+.ll-brand{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.ll-mark{
+  width:46px;height:46px;border-radius:var(--r-md);
+  background:rgba(13,31,60,.2);border:1px solid rgba(13,31,60,.35);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ll-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
+.ll h1{font-size:1.5rem;color:#fff;font-weight:700;line-height:1.15;position:relative;z-index:1;margin-top:20px}
+.ll .sub{font-size:.72rem;color:rgba(255,255,255,.4);letter-spacing:.12em;text-transform:uppercase;position:relative;z-index:1;margin-top:4px}
+/* These classes still exist in HTML but are hidden */
+.ll-feats,.ll-note{display:none!important}
+
+/* Right panel — form */
+.lr{flex:1.2;background:var(--white);padding:52px 48px;display:flex;flex-direction:column;justify-content:center}
+.lr-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--indigo-s);border:1px solid var(--indigo-m);
+  color:var(--indigo-d);font-size:.65rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 12px;border-radius:30px;margin-bottom:16px;width:fit-content;
+}
+.lr-badge span{width:5px;height:5px;border-radius:50%;background:var(--indigo)}
+.lr h2{font-size:1.45rem;color:var(--ink);font-weight:700;margin-bottom:6px}
+.lr .desc{font-size:.84rem;color:var(--muted);margin-bottom:28px;line-height:1.6}
+
+.fg{margin-bottom:16px}
+.fg label{
+  display:block;font-size:.68rem;font-weight:700;color:var(--ink3);
+  margin-bottom:7px;letter-spacing:.07em;text-transform:uppercase;
+}
+.fg input{
+  width:100%;padding:11px 15px;
+  background:var(--inp);border:1.5px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);
+  font-size:.9rem;font-family:'DM Sans',sans-serif;
+  transition:border-color .15s,box-shadow .15s,background .15s;outline:none;
+}
+.fg input::placeholder{color:#b8c4d8}
+.fg input:focus{border-color:var(--indigo);background:var(--white);box-shadow:0 0 0 3px rgba(13,31,60,.12)}
+
+.btn-login{
+  width:100%;padding:12.5px;
+  background:var(--indigo);color:#fff;
+  font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;
+  border:none;border-radius:var(--r-sm);cursor:pointer;margin-top:4px;
+  transition:background .15s,box-shadow .15s,transform .1s;
+  letter-spacing:.01em;
+}
+.btn-login:hover{background:var(--indigo-d);box-shadow:0 4px 16px rgba(13,31,60,.35)}
+.btn-login:active{transform:translateY(1px)}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.l-alert{
+  padding:10px 14px;border-radius:var(--r-sm);font-size:.8rem;
+  margin-bottom:14px;display:none;align-items:center;gap:9px;
+  background:var(--err-bg);border:1px solid var(--err-b);color:var(--err);
+  font-weight:500;
+}
+.l-alert.show{display:flex}
+.sec-note{
+  display:flex;align-items:center;gap:8px;margin-top:16px;
+  padding:10px 13px;background:var(--bg);border-radius:var(--r-sm);
+  border:1px solid var(--border);font-size:.74rem;color:var(--muted);
+}
+.sec-note svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+
+@media(max-width:600px){
+  #loginScreen{padding:0;align-items:stretch}
+  .lw{flex-direction:column;width:100%;max-width:100%;min-height:100svh;border-radius:0;box-shadow:none}
+  .ll{padding:36px 28px 28px;flex:none;justify-content:flex-start}
+  .ll h1{font-size:1.25rem;margin-top:16px}
+  .lr{padding:32px 28px 40px;flex:1}
+  .lr h2{font-size:1.2rem}
+}
+
+/* ═══════════════════════════════════════
+   PORTAL SHELL
+═══════════════════════════════════════ */
+#portalScreen{display:none;height:100vh;overflow:hidden;flex-direction:row}
+#portalScreen.open{display:flex}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:242px;flex-shrink:0;
+  background:var(--sb);
+  display:flex;flex-direction:column;height:100vh;overflow-y:auto;z-index:10;
+  border-right:1px solid var(--sb-border);
+}
+/* Pinstripe texture on sidebar */
+.sidebar::before{
+  content:'';position:fixed;top:0;left:0;width:242px;height:100vh;
+  background-image:repeating-linear-gradient(
+    90deg,transparent,transparent 27px,rgba(255,255,255,.015) 27px,rgba(255,255,255,.015) 28px
+  );pointer-events:none;z-index:0;
+}
+
+.sb-brand{
+  padding:22px 18px 18px;border-bottom:1px solid var(--sb-border);
+  display:flex;align-items:center;gap:11px;position:relative;z-index:1;
+  flex-shrink:0;
+}
+.sb-mark{
+  width:32px;height:32px;border-radius:var(--r-sm);
+  background:rgba(13,31,60,.2);border:1px solid rgba(13,31,60,.3);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sb-mark svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
+.sb-brand-text h2{font-size:.88rem;color:#fff;font-weight:700;line-height:1.2;letter-spacing:-.01em}
+.sb-brand-text span{font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.14em}
+
+.sb-nav{padding:14px 10px;flex:1;position:relative;z-index:1}
+.nav-label{
+  font-size:.58rem;color:rgba(255,255,255,.28);
+  text-transform:uppercase;letter-spacing:.16em;
+  padding:0 10px;margin:16px 0 5px;
+  font-weight:700;
+}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:var(--r-xs);
+  cursor:pointer;transition:background .12s,color .12s;
+  font-size:.82rem;color:rgba(255,255,255,.55);
+  margin-bottom:1px;text-decoration:none;user-select:none;
+  font-weight:500;position:relative;
+}
+.nav-item:hover{background:var(--sb-hover);color:rgba(255,255,255,.9)}
+.nav-item.active{
+  background:var(--sb-active);color:#fff;font-weight:600;
+}
+/* Indigo left accent bar for active */
+.nav-item.active::before{
+  content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);
+  width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0;
+}
+.nav-item svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;opacity:.8}
+.nav-item.active svg{opacity:1}
+
+.sb-footer{
+  padding:12px 10px 14px;border-top:1px solid var(--sb-border);
+  position:relative;z-index:1;flex-shrink:0;
+}
+.ucard{
+  display:flex;align-items:center;gap:10px;padding:10px;
+  border-radius:var(--r-sm);background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.07);margin-bottom:8px;
+}
+.uav{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--indigo);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;
+}
+.un{font-size:.81rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.ur{font-size:.63rem;color:rgba(255,255,255,.38);margin-top:1px}
+.btn-out{
+  width:100%;padding:8px;
+  background:transparent;border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--r-xs);color:rgba(255,255,255,.45);
+  font-size:.76rem;font-family:'DM Sans',sans-serif;cursor:pointer;
+  transition:all .15s;font-weight:500;
+}
+.btn-out:hover{border-color:rgba(220,38,38,.45);color:#f87171;background:rgba(220,38,38,.07)}
+
+/* ── Main area ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── Topbar ── */
+.topbar{
+  padding:0 26px;height:58px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--white);flex-shrink:0;
+}
+.topbar-l h1{font-size:1rem;color:var(--ink);font-weight:700;letter-spacing:-.01em}
+.topbar-l p{font-size:.74rem;color:var(--muted);margin-top:1px}
+
+.content{flex:1;overflow-y:auto;padding:24px 26px}
+.section{display:none;animation:fadeIn .18s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:20px 22px;
+  transition:border-color .18s,box-shadow .18s;
+  position:relative;overflow:hidden;
+}
+.stat-card::after{display:none}
+.stat-card:hover{border-color:var(--indigo-m);box-shadow:0 4px 20px rgba(13,31,60,.09)}
+
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.stat-ic{
+  width:38px;height:38px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+}
+.stat-ic.ic-blue{background:#eff6ff;border:1px solid var(--indigo-m)}
+.stat-ic.ic-green{background:#f0fdf4;border:1px solid #bbf7d0}
+.stat-ic.ic-gold{background:#fffbeb;border:1px solid #fde68a}
+.stat-ic.ic-purple{background:#fdf8ec;border:1px solid #f0d98a}
+.stat-ic svg{width:17px;height:17px;fill:none;stroke-width:1.8;stroke-linecap:round}
+.stat-ic.ic-blue svg{stroke:var(--indigo)}
+.stat-ic.ic-green svg{stroke:var(--ok)}
+.stat-ic.ic-gold svg{stroke:var(--warn)}
+.stat-ic.ic-purple svg{stroke:#b8902a}
+
+.stat-trend{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.65rem;font-weight:700;padding:3px 9px;
+  border-radius:20px;letter-spacing:.03em;
+}
+.trend-up{background:#f0fdf4;color:var(--ok)}
+.trend-down{background:var(--err-bg);color:var(--err)}
+.trend-neu{background:var(--bg);color:var(--muted)}
+.stat-trend svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+
+.stat-num{font-size:1.9rem;font-weight:700;color:var(--ink);letter-spacing:-.04em;line-height:1}
+.stat-label{font-size:.71rem;color:var(--muted);margin-top:5px;font-weight:500}
+.stat-sub{
+  font-size:.68rem;color:var(--muted);margin-top:12px;padding-top:11px;
+  border-top:1px solid var(--border);display:flex;align-items:center;gap:5px;
+}
+.stat-sub svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+
+/* ── Overview panels ── */
+.overview-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.ov-panel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:20px 22px;
+}
+.ov-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.ov-panel-hdr h3{font-size:.88rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.ov-panel-hdr span{font-size:.71rem;color:var(--muted);background:var(--bg);padding:3px 9px;border-radius:20px;border:1px solid var(--border)}
+
+.ov-bar-list{display:flex;flex-direction:column;gap:13px}
+.ov-bar-item{}
+.ov-bar-label{display:flex;justify-content:space-between;font-size:.73rem;margin-bottom:6px}
+.ov-bar-label span:first-child{color:var(--muted);font-weight:500}
+.ov-bar-label span:last-child{color:var(--ink);font-weight:700}
+.ov-bar-track{height:6px;background:var(--bg);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.ov-bar-fill{height:100%;border-radius:10px;transition:width .7s cubic-bezier(.23,1,.32,1)}
+.fill-blue{background:var(--indigo)}
+.fill-green{background:var(--ok)}
+.fill-gold{background:var(--warn)}
+
+.ov-quick-list{display:flex;flex-direction:column;gap:7px}
+.ov-quick-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;border-radius:var(--r-sm);
+  background:var(--bg);border:1px solid var(--border);
+  transition:border-color .12s,background .12s;
+}
+.ov-quick-item:hover{border-color:var(--indigo-m);background:var(--indigo-s)}
+.ov-quick-item-l{
+  display:flex;align-items:center;gap:10px;
+  font-size:.82rem;color:var(--text);font-weight:500;
+}
+.ov-quick-item-l svg{width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:1.8;flex-shrink:0}
+@media(max-width:760px){.overview-row{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════
+   SECTION HEADERS
+═══════════════════════════════════════ */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.sec-hdr-l h2{font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.sec-hdr-l p{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* ─ Filter bar ─ */
+.s-bar{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.s-bar input,.s-bar select{
+  flex:1;min-width:148px;padding:8px 13px;
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);
+  font-size:.82rem;font-family:'DM Sans',sans-serif;
+  outline:none;transition:border-color .14s;
+}
+.s-bar input:focus,.s-bar select:focus{border-color:var(--indigo)}
+
+/* ═══════════════════════════════════════
+   TABLES
+═══════════════════════════════════════ */
+.twrap{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r-md);overflow:hidden;
+}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--bg)}
+th{
+  padding:10px 16px;text-align:left;
+  font-size:.64rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+td{
+  padding:12px 16px;font-size:.83rem;
+  border-bottom:1px solid var(--border);color:var(--text);
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:#f7f9fd}
+
+/* ─ Badges ─ */
+.badge{
+  display:inline-flex;align-items:center;padding:3px 10px;
+  border-radius:20px;font-size:.65rem;font-weight:700;
+  white-space:nowrap;letter-spacing:.03em;
+}
+.b-green{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-b)}
+.b-gold{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-b)}
+.b-red{background:var(--err-bg);color:var(--err);border:1px solid var(--err-b)}
+.b-blue{background:var(--indigo-s);color:var(--indigo-d);border:1px solid var(--indigo-m)}
+
+/* ─ Action buttons ─ */
+.act-btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{
+  padding:6px 12px;border-radius:var(--r-xs);border:none;
+  font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;
+  cursor:pointer;transition:all .14s;
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+.btn-p,.btn-primary{background:var(--indigo);color:#fff}
+.btn-p:hover,.btn-primary:hover{background:var(--indigo-d);box-shadow:0 3px 12px rgba(13,31,60,.3)}
+.btn-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-b)}.btn-ok:hover{background:#d1fae5}
+.btn-danger{background:var(--err-bg);color:var(--err);border:1px solid var(--err-b)}.btn-danger:hover{background:#fee2e2}
+.btn-edit{background:var(--bg);color:var(--ink3);border:1px solid var(--border)}.btn-edit:hover{border-color:var(--indigo-m);background:var(--indigo-s);color:var(--indigo)}
+.btn-sm{padding:6px 11px;font-size:.73rem}
+
+/* ─ Empty / placeholder ─ */
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty svg{width:32px;height:32px;stroke:var(--muted);opacity:.4;fill:none;stroke-width:1.5;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto}
+.empty p{font-size:.84rem;margin-top:6px}
+
+.placeholder-box{
+  background:var(--panel);border:1.5px dashed var(--border);
+  border-radius:var(--r-lg);padding:64px 20px;text-align:center;color:var(--muted);
+}
+.placeholder-box svg{width:36px;height:36px;stroke:var(--muted);opacity:.35;fill:none;stroke-width:1.5;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto}
+.placeholder-box h3{font-size:.92rem;color:var(--ink);font-weight:700;margin-bottom:4px}
+.placeholder-box p{font-size:.81rem}
+
+/* ═══════════════════════════════════════
+   CARDS / FORMS (fee settings, etc.)
+═══════════════════════════════════════ */
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:22px 24px;margin-bottom:16px;
+}
+.card h3{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:16px;letter-spacing:-.01em}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-group{margin-bottom:0}
+.form-group label{
+  display:block;font-size:.67rem;font-weight:700;color:var(--ink3);
+  margin-bottom:7px;letter-spacing:.07em;text-transform:uppercase;
+}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:10px 13px;
+  background:var(--inp);border:1.5px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);
+  font-size:.85rem;font-family:'DM Sans',sans-serif;
+  outline:none;transition:border-color .14s,background .14s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+  border-color:var(--indigo);background:var(--white);box-shadow:0 0 0 3px rgba(13,31,60,.09);
+}
+
+.class-fee-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:11px;margin-bottom:18px}
+.cf-item label{display:block;font-size:.67rem;font-weight:700;color:var(--ink3);margin-bottom:6px}
+.cf-item .cf-wrap{position:relative}
+.cf-item .cf-wrap span{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.82rem;color:var(--muted)}
+.cf-item input{padding-left:26px!important}
+
+.levy-row{display:grid;grid-template-columns:1fr 136px auto;gap:9px;margin-bottom:9px;align-items:center}
+.levy-row input{
+  padding:9px 12px;background:var(--inp);border:1.5px solid var(--border);
+  border-radius:var(--r-sm);font-size:.83rem;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color .14s;
+}
+.levy-row input:focus{border-color:var(--indigo);background:var(--white)}
+
+.btn-icon{
+  width:34px;height:34px;border-radius:var(--r-sm);
+  border:1.5px solid var(--err-b);background:var(--err-bg);color:var(--err);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .14s;
+}
+.btn-icon:hover{background:#fee2e2;border-color:var(--err)}
+.btn-icon svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+
+.btn-add-row{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 14px;
+  background:var(--bg);border:1.5px dashed var(--border);
+  border-radius:var(--r-sm);color:var(--muted);
+  font-size:.81rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .14s;
+}
+.btn-add-row:hover{border-color:var(--indigo);color:var(--indigo);background:var(--indigo-s)}
+.btn-add-row svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.5}
+
+.fs-actions{display:flex;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.fs-summary{
+  font-size:.78rem;color:var(--muted);background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;margin-top:14px;display:none;
+}
+.fs-summary.show{display:block}
+
+/* ─ Toggle ─ */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{
+  position:absolute;cursor:pointer;inset:0;
+  background:var(--border2);border-radius:22px;transition:.18s;
+}
+.toggle .slider::before{
+  content:'';position:absolute;width:16px;height:16px;
+  left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked+.slider{background:var(--indigo)}
+.toggle input:checked+.slider::before{transform:translateX(18px)}
+
+/* ═══════════════════════════════════════
+   ANNOUNCEMENTS
+═══════════════════════════════════════ */
+.ann-form{display:grid;grid-template-columns:1fr 160px;gap:14px;margin-bottom:14px}
+.pin-icon{width:13px;height:13px;fill:var(--warn);stroke:var(--warn)}
+
+/* ═══════════════════════════════════════
+   MODALS
+═══════════════════════════════════════ */
+.mo{
+  position:fixed;inset:0;
+  background:rgba(13,17,23,.55);backdrop-filter:blur(6px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.mo.open{display:flex}
+.mbox{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r-xl);padding:32px;
+  width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;
+  animation:slideUp .22s cubic-bezier(.22,.68,0,1.1);
+  box-shadow:0 20px 60px rgba(0,0,0,.18);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.mbox h3{font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:4px;letter-spacing:-.01em}
+.mbox>.mdesc{font-size:.8rem;color:var(--muted);margin-bottom:22px;line-height:1.6}
+
+.mactions{display:flex;gap:10px;margin-top:22px}
+.mactions .btn{flex:1;justify-content:center;padding:11px}
+
+.btn-cancel{
+  background:transparent;border:1.5px solid var(--border);color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:600;
+  border-radius:var(--r-sm);padding:11px;cursor:pointer;transition:all .14s;flex:1;
+}
+.btn-cancel:hover{border-color:var(--ink3);color:var(--ink)}
+
+/* ─ Confirm dialog ─ */
+.dlg-ov{
+  position:fixed;inset:0;
+  background:rgba(13,17,23,.6);backdrop-filter:blur(6px);
+  z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.dlg-ov.show{display:flex}
+.dlg{
+  background:var(--white);border-radius:var(--r-xl);padding:32px 28px;
+  width:400px;max-width:94vw;
+  box-shadow:0 24px 64px rgba(0,0,0,.22);
+  animation:slideUp .2s cubic-bezier(.22,.68,0,1.1);
+}
+.dlg-ic{
+  width:46px;height:46px;border-radius:var(--r-md);
+  background:var(--err-bg);border:1.5px solid var(--err-b);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+}
+.dlg-ic svg{width:20px;height:20px;fill:none;stroke:var(--err);stroke-width:1.8;stroke-linecap:round}
+.dlg h3{font-size:1rem;font-weight:700;color:var(--ink);text-align:center;margin-bottom:6px}
+.dlg p{font-size:.82rem;color:var(--muted);line-height:1.65;text-align:center;margin-bottom:22px}
+.dlg-btns{display:flex;flex-direction:column;gap:8px}
+.dlg-btn{width:100%;padding:12px;border-radius:var(--r-sm);border:none;font-family:'DM Sans',sans-serif;font-size:.86rem;font-weight:600;cursor:pointer;transition:all .14s}
+.dlg-btn-danger{background:var(--err);color:#fff}.dlg-btn-danger:hover{background:#b91c1c}
+.dlg-btn-secondary{background:var(--white);border:1.5px solid var(--border);color:var(--muted)}.dlg-btn-secondary:hover{border-color:var(--ink3);color:var(--ink)}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:22px;right:22px;z-index:800;
+  padding:11px 16px;border-radius:var(--r-md);font-size:.82rem;font-weight:600;
+  display:none;align-items:center;gap:9px;
+  box-shadow:0 8px 32px rgba(0,0,0,.14);
+  animation:slideUp .2s ease;
+  max-width:320px;
+}
+.toast.show{display:flex}
+.toast svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+.toast.success{background:var(--ok-bg);border:1px solid var(--ok-b);color:var(--ok)}
+.toast.error{background:var(--err-bg);border:1px solid var(--err-b);color:var(--err)}
+
+/* ═══════════════════════════════════════
+   MISC
+═══════════════════════════════════════ */
+.spinner{
+  display:inline-block;width:13px;height:13px;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:spin .65s linear infinite;
+  vertical-align:middle;margin-right:5px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Hamburger */
+.hamburger{
+  display:none;flex-direction:column;gap:4.5px;cursor:pointer;
+  padding:7px;border-radius:var(--r-sm);
+  background:var(--bg);border:1px solid var(--border);
+}
+.hamburger span{display:block;width:16px;height:2px;background:var(--ink3);border-radius:2px}
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9}
+.sb-ov.open{display:block}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(107,122,153,.2);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:rgba(107,122,153,.35)}
+
+/* ─ App / student modals ─ */
+.mbox-lg{width:660px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:16px}
+.info-item label{display:block;font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.info-item span{font-size:.84rem;color:var(--text)}
+.info-item a{font-size:.84rem;color:var(--indigo);text-decoration:none}
+.info-item a:hover{text-decoration:underline}
+.info-divider{grid-column:1/-1;border:none;border-top:1px solid var(--border);margin:6px 0}
+.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;margin-top:8px}
+.subj-cb{
+  display:flex;align-items:center;gap:8px;padding:8px 11px;
+  border:1.5px solid var(--border);border-radius:var(--r-sm);
+  cursor:pointer;font-size:.81rem;color:var(--text);
+  transition:all .14s;user-select:none;
+}
+.subj-cb input{accent-color:var(--indigo);width:14px;height:14px;flex-shrink:0}
+.subj-cb:has(input:checked){border-color:var(--indigo);background:var(--indigo-s);color:var(--indigo)}
+
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:38px!important}
+.pw-toggle{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:0;
+}
+.pw-toggle svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+.section-sub{
+  font-size:.68rem;font-weight:700;color:var(--indigo);
+  text-transform:uppercase;letter-spacing:.1em;margin:16px 0 9px;
+}
+.approve-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+
+/* ─ Results table inputs ─ */
+.res-score-inp{
+  width:62px;padding:5px 7px;border:1.5px solid var(--border);
+  border-radius:var(--r-xs);font-size:.79rem;font-family:'DM Sans',sans-serif;
+  text-align:center;background:var(--inp);color:var(--text);outline:none;
+}
+.res-score-inp:focus{border-color:var(--indigo);background:var(--white)}
+.res-remark-inp{
+  width:108px;padding:5px 8px;border:1.5px solid var(--border);
+  border-radius:var(--r-xs);font-size:.79rem;font-family:'DM Sans',sans-serif;
+  background:var(--inp);color:var(--text);outline:none;
+}
+.res-remark-inp:focus{border-color:var(--indigo);background:var(--white)}
+.res-pos-inp{
+  width:54px;padding:5px 7px;border:1.5px solid var(--border);
+  border-radius:var(--r-xs);font-size:.79rem;font-family:'DM Sans',sans-serif;
+  text-align:center;background:var(--inp);color:var(--text);outline:none;
+}
+.res-pos-inp:focus{border-color:var(--indigo);background:var(--white)}
+.res-na{color:var(--muted);font-size:.79rem;text-align:center}
+.res-footer{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:12px;margin-top:14px;padding:14px 18px;
+  background:var(--white);border:1px solid var(--border);border-radius:var(--r-md);
+}
+.res-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);background:#fff}
+.res-wrap table{min-width:900px}
+.res-sel-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;align-items:flex-end}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — MOBILE
+═══════════════════════════════════════ */
+@media(max-width:768px){
+  body{overflow:auto}
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;z-index:10;transition:left .28s ease}
+  .sidebar.open{left:0}
+  .sidebar::before{display:none}
+  .main{width:100%;min-height:100vh;overflow:auto}
+  .topbar{padding:0 14px;height:54px}
+  .hamburger{display:flex}
+  .content{padding:16px}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .form-row{grid-template-columns:1fr}
+  .ann-form{grid-template-columns:1fr}
+  .class-fee-grid{grid-template-columns:repeat(2,1fr)}
+  .levy-row{grid-template-columns:1fr;gap:6px}
+  table{min-width:480px}
+  .twrap{overflow-x:auto}
+  #portalScreen.open{flex-direction:column}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .mbox,.mbox-lg{padding:24px 20px}
+  .info-grid{grid-template-columns:1fr}
+  .approve-row{grid-template-columns:1fr}
+}
+
+
+/* ===== CBT (merged) ===== */
+:root{--navy:var(--ink);--navy3:var(--ink2);--accent:#b8902a;--accent-bg:#fdf8ec;--accent-border:#f0d98a;--ai:#b8902a;--ai-bg:#fdf8ec;--ai-bdr:#f0d98a;--err-bdr:var(--err-b);--ok-bdr:var(--ok-b);--radius-sm:8px;--shadow-sm:0 1px 4px rgba(13,17,23,.06);--transition:.15s}
+.btn-ai{background:var(--navy);color:#fff;border:none}
+.btn-ai:hover{background:var(--navy3);transform:translateY(-1px);box-shadow:0 4px 16px rgba(184,144,42,.35)}
+.b-ai{background:var(--ai-bg);color:var(--ai)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-panel{
+  background:var(--navy);
+  border-radius:var(--r-md);padding:30px;margin-bottom:22px;
+  box-shadow:0 8px 32px rgba(184,144,42,.25);position:relative;overflow:hidden;
+}
+.ai-panel::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;
+  background:rgba(184,144,42,.12);
+  border-radius:50%;
+}
+.ai-panel h3{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:6px}
+.ai-panel p{font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:22px;line-height:1.65}
+.ai-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.ai-form-row.three{grid-template-columns:1fr 1fr 1fr}
+.ai-input{
+  width:100%;padding:11px 14px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  border-radius:var(--r-sm);color:#fff;font-size:.85rem;
+  outline:none;transition:var(--transition);
+}
+.ai-input::placeholder{color:rgba(255,255,255,.35)}
+.ai-input:focus{border-color:rgba(184,144,42,.8);background:rgba(255,255,255,.15)}
+.ai-input option{background:#162e52;color:#fff}
+.ai-label{display:block;font-size:.68rem;font-weight:600;color:rgba(255,255,255,.55);margin-bottom:7px;text-transform:uppercase;letter-spacing:.08em}
+.btn-gen{
+  padding:12px 22px;
+  background:var(--accent);
+  color:#fff;border:none;border-radius:var(--r-sm);
+  font-size:.88rem;font-weight:700;cursor:pointer;
+  transition:var(--transition);display:flex;align-items:center;gap:8px;
+}
+.btn-gen:hover{background:#a07d22;transform:translateY(-2px);box-shadow:0 6px 20px rgba(184,144,42,.45)}
+.btn-gen:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.ai-generating{
+  text-align:center;padding:36px;
+  background:rgba(255,255,255,.06);
+  border-radius:12px;border:1px dashed rgba(255,255,255,.18);
+  margin-top:18px;
+}
+.ai-generating p{color:rgba(255,255,255,.65);font-size:.85rem;margin-top:14px}
+.spinner-ai{
+  display:inline-block;width:32px;height:32px;
+  border:3px solid rgba(255,255,255,.15);border-top-color:#b8902a;
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+.q-preview{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r-md);overflow:hidden;margin-top:22px;
+  box-shadow:var(--shadow-sm);
+}
+.q-preview-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  background:#f8fafc;
+}
+.q-preview-header h4{font-size:.9rem;font-weight:700;color:var(--navy)}
+.q-item{padding:18px 20px;border-bottom:1px solid #eef1f8}
+.q-item:last-child{border-bottom:none}
+.q-item-top{display:flex;gap:11px;align-items:flex-start;margin-bottom:12px}
+.q-num-badge{
+  width:28px;height:28px;min-width:28px;
+  border-radius:7px;background:#eff6ff;color:var(--navy);
+  font-size:.72rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.q-text-edit{
+  flex:1;width:100%;padding:9px 11px;
+  border:1.5px solid var(--border);border-radius:var(--r-sm);
+  font-size:.85rem;color:var(--text);background:var(--inp);
+  outline:none;resize:vertical;min-height:54px;transition:var(--transition);
+}
+.q-text-edit:focus{border-color:var(--navy);background:#fff}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.q-opt-row{display:flex;align-items:center;gap:8px}
+.q-opt-label{
+  width:24px;height:24px;min-width:24px;
+  border-radius:6px;background:#eff6ff;color:var(--navy);
+  font-size:.68rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.q-opt-input{
+  flex:1;padding:7px 10px;
+  border:1.5px solid var(--border);border-radius:6px;
+  font-size:.82rem;color:var(--text);background:var(--inp);outline:none;transition:var(--transition);
+}
+.q-opt-input:focus{border-color:var(--navy);background:#fff}
+.q-correct-row{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.q-correct-row label{font-size:.72rem;color:var(--muted);font-weight:600}
+.q-correct-sel{
+  padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;
+  font-size:.8rem;color:var(--text);background:var(--inp);outline:none;transition:var(--transition);
+}
+.q-correct-sel:focus{border-color:var(--ok)}
+.q-exp{
+  width:100%;padding:8px 11px;
+  border:1.5px solid var(--ok-bdr);border-radius:7px;
+  font-size:.79rem;color:var(--soft);background:#f0fdf4;
+  outline:none;resize:vertical;margin-top:8px;transition:var(--transition);
+}
+.q-del-btn{
+  padding:5px 11px;background:var(--err-bg);color:var(--err);
+  border:1px solid var(--err-bdr);border-radius:6px;font-size:.72rem;
+  font-weight:600;cursor:pointer;margin-left:auto;flex-shrink:0;transition:var(--transition);
+}
+.q-del-btn:hover{background:#fee2e2}
+.publish-panel{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:22px;margin-top:18px;
+  box-shadow:var(--shadow-sm);
+}
+.publish-panel h4{font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:16px}
+.lb-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r-md);overflow:hidden;margin-bottom:18px;
+  box-shadow:var(--shadow-sm);
+}
+.lb-header{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  background:var(--navy);
+  color:#fff;display:flex;justify-content:space-between;align-items:center;
+}
+.lb-header h4{font-size:.95rem;font-weight:700}
+.lb-entry{
+  padding:14px 22px;border-bottom:1px solid #eef1f8;
+  display:flex;align-items:center;gap:14px;transition:var(--transition);
+}
+.lb-entry:last-child{border-bottom:none}
+.lb-entry:hover{background:#fafbfd}
+.lb-rank{
+  width:30px;height:30px;min-width:30px;
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:700;
+}
+.rank-1{background:#fef9e7;color:#b45309;font-size:1.1rem}
+.rank-2{background:#f1f5f9;color:#64748b;font-size:1rem}
+.rank-3{background:#fef2f2;color:#b45309;font-size:1rem}
+.rank-other{background:#eff6ff;color:var(--navy)}
+.lb-name{font-size:.88rem;font-weight:600;color:var(--navy);flex:1}
+.lb-class{font-size:.73rem;color:var(--muted)}
+.lb-score{font-size:.95rem;font-weight:700;color:var(--navy)}
+.me-details-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:22px;margin-bottom:18px;
+  box-shadow:var(--shadow-sm);
+}
+.me-details-card h4{
+  font-size:.95rem;font-weight:700;
+  color:var(--navy);margin-bottom:16px;
+}
+.csv-import-card{
+  background:var(--ai-bg);border:1px solid var(--ai-bdr);
+  border-radius:var(--r-md);padding:22px;margin-bottom:18px;
+}
+.csv-import-card h4{
+  font-size:.95rem;font-weight:700;color:var(--ai);margin-bottom:6px;
+  
+}
+.csv-import-card p{font-size:.81rem;color:var(--accent);margin-bottom:14px;line-height:1.6}
+.csv-format-box{
+  background:#fff;border:1px solid var(--ai-bdr);
+  border-radius:var(--r-sm);padding:12px 15px;margin-bottom:14px;
+  font-size:.78rem;color:#8a6a14;line-height:1.85;
+}
+.csv-format-box code{background:var(--ai-bg);padding:2px 7px;border-radius:4px;font-size:.77rem}
+
+.b-ai{background:var(--ai-bg);color:var(--ai);border:1px solid var(--ai-bdr)}
+.b-purple{background:var(--indigo-s);color:var(--indigo)}
+.cb-creds{display:none;background:var(--ok-bg);border:1px solid var(--ok-b);border-radius:var(--r-md);padding:14px 16px;margin-top:14px;font-size:.82rem;color:var(--ok);line-height:1.8}
+.cb-creds code{background:#fff;border:1px solid var(--ok-b);border-radius:6px;padding:2px 8px;font-weight:700}
+.cb-note{background:var(--indigo-s);border:1px solid var(--indigo-m);border-radius:var(--r-md);padding:12px 16px;font-size:.78rem;color:var(--ink3);margin-bottom:16px;line-height:1.6}
+.cb-sel{padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:.82rem;outline:none;background:#fff;color:var(--text)}
+.cb-pwerr{display:none;color:var(--err);font-size:.78rem;margin-top:8px}
+.lb-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="lw">
+    <div class="ll">
+      <div>
+        <div class="ll-brand">
+          <div class="ll-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+          <div><h1>Admin Portal</h1><p class="sub">School Management System</p></div>
+        </div>
+        <div class="ll-feats">
+          <div class="lf"><div class="lf-dot"></div><p>Manage applications, students, and academic results</p></div>
+          <div class="lf"><div class="lf-dot"></div><p>Configure termly fees, levies, and due dates</p></div>
+          <div class="lf"><div class="lf-dot"></div><p>Track payments and publish school announcements</p></div>
+        </div>
+      </div>
+      <div class="ll-note">Access is restricted to authorized school administrators.</div>
+    </div>
+    <div class="lr">
+      <div class="lr-badge"><span></span>Admin Access</div>
+      <h2>Welcome back</h2>
+      <p class="desc">Sign in to manage your school dashboard.</p>
+      <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
+      <div class="fg"><label>Admin Email</label><input type="email" id="emailIn" placeholder="admin@school.edu.ng" autocomplete="off"/></div>
+      <div class="fg"><label>Password</label><input type="password" id="pwIn" placeholder="Enter password"/></div>
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
+      <div class="sec-note"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>For school administrators only</div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div id="portalScreen">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+      <div class="sb-brand-text"><h2>School Admin</h2><span>Dashboard</span></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" data-sec="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview</div>
+      <div class="nav-label">Admissions</div>
+      <div class="nav-item" data-sec="applications"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Applications</div>
+      <div class="nav-label">Academics</div>
+      <div class="nav-item" data-sec="students"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students</div>
+      <div class="nav-item" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
+      <div class="nav-label">Finance</div>
+      <div class="nav-item" data-sec="feeSettings"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fee Settings</div>
+      <div class="nav-item" data-sec="payments"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</div>
+      <div class="nav-label">Communication</div>
+      <div class="nav-item" data-sec="announcements"><svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Announcements</div>
+      <div class="nav-label">CBT &amp; Exams</div>
+      <div class="nav-item" data-sec="cbtTeachers"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">👨‍🏫</span>Teachers</div>
+      <div class="nav-item" data-sec="cbtSubjects"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">📚</span>Subjects &amp; Teachers</div>
+      <div class="nav-item" data-sec="cbtAI"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">🤖</span>AI Exam Generator</div>
+      <div class="nav-item" data-sec="cbtManual"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">✏️</span>Manual Exam</div>
+      <div class="nav-item" data-sec="cbtExams"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">📝</span>Manage Exams</div>
+      <div class="nav-item" data-sec="cbtResults"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">📊</span>CBT Results</div>
+      <div class="nav-item" data-sec="cbtBoard"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">🏆</span>Leaderboard</div>
+      <a class="nav-item" href="teacher.html" target="_blank" style="text-decoration:none"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">↗</span>Teacher Portal</a>
+      <a class="nav-item" href="cbt.html" target="_blank" style="text-decoration:none"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">↗</span>CBT Exam Hall</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="ucard">
+        <div class="uav" id="sbAv">A</div>
+        <div><div class="un" id="sbName">Admin</div><div class="ur">Administrator</div></div>
+      </div>
+      <button class="btn-out" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="sb-ov" id="sbOv" onclick="closeSidebar()"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+        <div class="topbar-l"><h1 id="topTitle">Overview</h1><p id="topSub">School dashboard summary</p></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <div class="section active" id="sec-overview">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-ic ic-blue"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="stat-trend trend-neu" id="s-students-trend"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Live</span></div>
+            </div>
+            <div class="stat-num" id="s-students">—</div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-sub"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Active enrolments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-ic ic-gold"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+              <div class="stat-trend trend-neu" id="s-apps-trend"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg><span>Pending</span></div>
+            </div>
+            <div class="stat-num" id="s-applications">—</div>
+            <div class="stat-label">Applications Awaiting Review</div>
+            <div class="stat-sub"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Requires admin action</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-ic ic-green"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="stat-trend trend-up" id="s-pay-trend"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg><span>Collected</span></div>
+            </div>
+            <div class="stat-num" id="s-payments">—</div>
+            <div class="stat-label">Total Payments Collected</div>
+            <div class="stat-sub"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>This academic session</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-ic ic-purple"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div class="stat-trend trend-neu"><span>Published</span></div>
+            </div>
+            <div class="stat-num" id="s-results">—</div>
+            <div class="stat-label">Result Sheets Published</div>
+            <div class="stat-sub"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Visible to students</div>
+          </div>
+        </div>
+
+        <div class="overview-row">
+          <div class="ov-panel">
+            <div class="ov-panel-hdr"><h3>Enrolment by Class</h3><span>All active students</span></div>
+            <div class="ov-bar-list" id="classBarList">
+              <div style="text-align:center;padding:24px;color:var(--muted);font-size:.82rem">Loading data…</div>
+            </div>
+          </div>
+          <div class="ov-panel">
+            <div class="ov-panel-hdr"><h3>Quick Actions</h3><span>Common tasks</span></div>
+            <div class="ov-quick-list">
+              <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=applications]').click()">
+                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Review pending applications</div>
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=results]').click()">
+                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Enter & publish results</div>
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=payments]').click()">
+                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>View payment records</div>
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=announcements]').click()">
+                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Post an announcement</div>
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS -->
+      <div class="section" id="sec-applications">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Applications</h2><p>Review and process admission applications</p></div>
+        </div>
+        <div class="s-bar">
+          <select id="appFilterStatus" onchange="renderApplications()">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select id="appFilterClass" onchange="renderApplications()">
+            <option value="">All Classes</option>
+            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            <option>SS1</option><option>SS2</option><option>SS3</option>
+          </select>
+        </div>
+        <div class="twrap">
+          <table>
+            <thead><tr><th>Applicant</th><th>Class</th><th>Parent Phone</th><th>Date Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="appTbody"><tr><td colspan="6" class="empty"><p>Loading...</p></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="section" id="sec-students">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Students</h2><p>Manage student records and enrollment</p></div>
+          <button class="btn btn-primary btn-sm" onclick="openCreateStudentModal()">
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create Student
+          </button>
+        </div>
+        <div class="s-bar">
+          <input type="text" id="stuSearch" placeholder="Search by name or reg number…" oninput="renderStudents()"/>
+          <select id="stuFilterClass" onchange="renderStudents()">
+            <option value="">All Classes</option>
+            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            <option>SS1</option><option>SS2</option><option>SS3</option>
+          </select>
+        </div>
+        <div class="twrap">
+          <table>
+            <thead><tr><th>Reg Number</th><th>Name</th><th>Class</th><th>Subjects</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="stuTbody"><tr><td colspan="6" class="empty"><p>Loading...</p></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="section" id="sec-results">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Results</h2><p>Manage and publish academic results</p></div></div>
+
+        <!-- Selection bar -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;align-items:flex-end">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Session</label>
+              <select id="resSession">
+                <option value="2024/2025">2024/2025</option>
+                <option value="2025/2026" selected>2025/2026</option>
+                <option value="2026/2027">2026/2027</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Term</label>
+              <select id="resTerm">
+                <option value="First">First Term</option>
+                <option value="Second">Second Term</option>
+                <option value="Third">Third Term</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Class</label>
+              <select id="resClass">
+                <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+                <option>SS1</option><option>SS2</option><option>SS3</option>
+              </select>
+            </div>
+            <div style="margin-bottom:0">
+              <button class="btn btn-p" id="resLoadBtn" onclick="loadResultsStudents()" style="width:100%;justify-content:center;padding:10px 14px">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Load Students
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results table area -->
+        <div id="resTableArea" style="display:none">
+          <div style="overflow-x:auto" class="twrap">
+            <table id="resTable">
+              <thead id="resThead"></thead>
+              <tbody id="resTbody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:14px;padding:14px 18px;background:#fff;border:1.5px solid var(--border);border-radius:12px">
+            <label class="toggle-wrap" style="cursor:pointer;user-select:none">
+              <label class="toggle"><input type="checkbox" id="resPublishToggle"/><span class="slider"></span></label>
+              <span style="font-size:.83rem;color:var(--soft)">Publish results — students can view once published</span>
+            </label>
+            <button class="btn btn-p" id="resSaveBtn" onclick="saveResults()" style="padding:10px 22px;justify-content:center">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Results
+            </button>
+          </div>
+        </div>
+
+        <div id="resEmptyBox" class="placeholder-box" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <h3>No active students found</h3>
+          <p>There are no active students in the selected class.</p>
+        </div>
+      </div>
+
+      <!-- FEE SETTINGS -->
+      <div class="section" id="sec-feeSettings">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Fee Settings</h2><p>Set termly fees, levies, and due dates per class</p></div>
+        </div>
+
+        <div class="card">
+          <h3>Session &amp; Term</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Academic Session</label>
+              <select id="fsSession">
+                <option value="2024/2025">2024/2025</option>
+                <option value="2025/2026" selected>2025/2026</option>
+                <option value="2026/2027">2026/2027</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Term</label>
+              <select id="fsTerm">
+                <option value="First">First Term</option>
+                <option value="Second">Second Term</option>
+                <option value="Third">Third Term</option>
+              </select>
+            </div>
+          </div>
+          <div class="fs-summary" id="fsExistingNote"></div>
+        </div>
+
+        <div class="card">
+          <h3>Fee Per Class</h3>
+          <div class="class-fee-grid" id="classFeeGrid">
+            <!-- populated by JS -->
+          </div>
+
+          <h3>Levy Items</h3>
+          <div id="levyRows"></div>
+          <button class="btn-add-row" onclick="addLevyRow()" type="button">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Levy
+          </button>
+
+          <h3 style="margin-top:18px">Due Date</h3>
+          <div class="form-group" style="max-width:260px">
+            <label>Payment Due Date</label>
+            <input type="date" id="fsDueDate"/>
+          </div>
+
+          <div class="fs-actions">
+            <button class="btn btn-p" id="fsSaveBtn" onclick="saveFeeSettings()" style="flex:1;justify-content:center;padding:11px">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Fee Settings
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div class="section" id="sec-payments">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Payments</h2><p>Track fee payments collected via Paystack</p></div></div>
+
+        <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <div class="stat-card" style="flex:1;min-width:180px;padding:14px 18px">
+            <div class="stat-label" style="margin-bottom:4px">Total Collected (filtered)</div>
+            <div class="stat-num" id="payTotalAmt">&#8358;0</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:180px;padding:14px 18px">
+            <div class="stat-label" style="margin-bottom:4px">Payment Count</div>
+            <div class="stat-num" id="payCount">0</div>
+          </div>
+        </div>
+
+        <div class="s-bar" style="margin-bottom:14px">
+          <input type="text" id="paySearch" placeholder="Search by name or reg number&#8230;" oninput="renderPayments()"/>
+          <select id="payFilterTerm" onchange="renderPayments()">
+            <option value="">All Terms</option>
+            <option value="First">First Term</option>
+            <option value="Second">Second Term</option>
+            <option value="Third">Third Term</option>
+          </select>
+          <select id="payFilterClass" onchange="renderPayments()">
+            <option value="">All Classes</option>
+            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            <option>SS1</option><option>SS2</option><option>SS3</option>
+          </select>
+          <select id="payFilterType" onchange="renderPayments()">
+            <option value="">All Types</option>
+            <option value="School Fee">School Fee</option>
+            <option value="Levy">Levy</option>
+          </select>
+        </div>
+
+        <div class="twrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Student Name</th><th>Reg Number</th><th>Class</th>
+                <th>Payment Type</th><th>Term</th><th>Session</th><th>Amount</th>
+                <th>Status</th><th>Reference</th>
+              </tr>
+            </thead>
+            <tbody id="payTbody"><tr><td colspan="10" class="empty"><p>Loading&#8230;</p></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS -->
+
+      <!-- ===== CBT: TEACHERS ===== -->
+      <div class="section" id="sec-cbtTeachers">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Teachers</h2><p>Create teacher accounts — teachers sign in at teacher.html</p></div><button class="btn btn-primary btn-sm" id="cbOpenTeacher">+ Create Teacher</button></div>
+        <div class="twrap"><table>
+          <thead><tr><th>Name</th><th>Email (login)</th><th>Subjects</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody id="cbTeachersBody"><tr><td colspan="5" class="empty"><p>Loading...</p></td></tr></tbody>
+        </table></div>
+      </div>
+
+      <!-- ===== CBT: SUBJECTS ===== -->
+      <div class="section" id="sec-cbtSubjects">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Subjects &amp; Teachers</h2><p>Assign a subject in a class to a teacher — they can then set exams for it</p></div><button class="btn btn-primary btn-sm" id="cbOpenSubject">+ Create Subject</button></div>
+        <div class="twrap"><table>
+          <thead><tr><th>Subject</th><th>Class</th><th>Teacher</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody id="cbSubjectsBody"><tr><td colspan="5" class="empty"><p>Loading...</p></td></tr></tbody>
+        </table></div>
+      </div>
+
+      <!-- ===== CBT: AI EXAM GENERATOR ===== -->
+      <div class="section" id="sec-cbtAI">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>AI Exam Generator</h2><p>Generate JAMB-style questions with AI — review, edit, then publish to the CBT hall</p></div></div>
+        <div class="ai-panel">
+          <h3>🤖 Generate Questions with AI</h3>
+          <p>Describe what you want. The AI will generate full JAMB-style MCQs with answer keys and explanations — ready to review and publish.</p>
+          <div class="ai-form-row">
+            <div><span class="ai-label">Subject</span>
+              <select id="aiSubject" class="ai-input"><option value="">Select Subject</option>
+                <option>Use of English</option><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Economics</option><option>Government</option><option>Literature in English</option><option>Geography</option><option>Commerce</option><option>Financial Accounting</option><option>Agricultural Science</option><option>CRS / IRS</option>
+              </select></div>
+            <div><span class="ai-label">Topic / Focus Area</span><input id="aiTopic" class="ai-input" placeholder="e.g. Organic Chemistry, Waves, Adverbs..."></div>
+          </div>
+          <div class="ai-form-row three">
+            <div><span class="ai-label">Number of Questions</span>
+              <select id="aiCount" class="ai-input"><option value="10">10 Questions</option><option value="20">20 Questions</option><option value="30">30 Questions</option><option value="40" selected>40 Questions</option></select></div>
+            <div><span class="ai-label">Difficulty</span>
+              <select id="aiDifficulty" class="ai-input"><option value="mixed">Mixed (Recommended)</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard (JAMB-tough)</option></select></div>
+            <div><span class="ai-label">Year Style</span>
+              <select id="aiStyle" class="ai-input"><option value="JAMB 2024 style">JAMB 2024 Style</option><option value="JAMB 2023 style">JAMB 2023 Style</option><option value="JAMB classic style">JAMB Classic</option></select></div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+            <button class="btn-gen" id="generateBtn" onclick="generateQuestions()">✨ Generate Questions</button>
+            <span style="font-size:.76rem;color:rgba(255,255,255,.5)">Takes ~10–20 seconds</span>
+          </div>
+          <div id="aiGenerating" style="display:none" class="ai-generating"><div class="spinner-ai"></div><p id="aiGenMsg">AI is crafting your questions...</p></div>
+        </div>
+        <div id="qPreviewWrap" style="display:none">
+          <div class="q-preview">
+            <div class="q-preview-header"><h4 id="qPreviewTitle">Generated Questions — Review &amp; Edit Before Publishing</h4>
+              <div style="display:flex;gap:8px"><button class="btn btn-ai btn-sm" onclick="generateQuestions()">🔄 Regenerate</button></div></div>
+            <div id="qPreviewList"></div>
+          </div>
+          <div class="publish-panel">
+            <h4>📤 Publish to Exam Hall</h4>
+            <div class="form-row"><div class="form-group"><label>Exam Title</label><input id="pubTitle" placeholder="e.g. Biology Mock Test – Week 3"></div>
+              <div class="form-group"><label>Assign to Class</label><select id="pubClass"><option value="">Select Class</option></select></div></div>
+            <div class="form-row"><div class="form-group"><label>Duration (minutes)</label><input type="number" id="pubDuration" value="60" min="5" max="180"></div>
+              <div class="form-group"><label>Activate Immediately?</label><select id="pubActive"><option value="true">Yes — students can start now</option><option value="false">No — save as draft</option></select></div></div>
+            <button class="btn btn-p" id="publishBtn" onclick="publishExam()">🚀 Publish Exam to CBT Hall</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CBT: MANUAL EXAM ===== -->
+      <div class="section" id="sec-cbtManual">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Manual Exam Builder</h2><p>Create a fully custom exam with your own questions</p></div></div>
+        <div class="me-details-card">
+          <h4>📋 Exam Details</h4>
+          <div class="form-row"><div class="form-group"><label>Exam Title</label><input id="meTitle" placeholder="e.g. Chemistry Test – Week 4"></div>
+            <div class="form-group"><label>Assign to Class</label><select id="meClass"><option value="">— Select Class —</option></select></div></div>
+          <div class="form-row"><div class="form-group"><label>Duration (minutes)</label><input type="number" id="meDuration" value="60" min="5" max="180"></div>
+            <div class="form-group"><label>Status</label><select id="meStatus"><option value="true">Active — students can start now</option><option value="false">Draft</option></select></div></div>
+        </div>
+        <div class="csv-import-card">
+          <h4>📥 Bulk Import Questions from CSV</h4>
+          <p>Import many questions at once. Each row = one question.</p>
+          <div class="csv-format-box"><strong>📄 CSV Format:</strong><br><code>question, optionA, optionB, optionC, optionD, correctAnswer</code><br><em>correctAnswer</em> must be: <strong>a, b, c, d</strong><br><strong>Example:</strong> <code>What is H2O?, Oxygen, Water, Salt, Acid, b</code></div>
+          <div style="margin-bottom:12px"><label style="display:block;font-size:.72rem;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Upload .csv file</label><input type="file" id="meCSVFile" accept=".csv" onchange="handleMeCSVFile()" style="font-size:.82rem"></div>
+          <div class="form-group" style="margin-bottom:10px"><label>Or paste CSV text directly</label><textarea id="meCSVPaste" rows="5" placeholder="question, optionA, optionB, optionC, optionD, correctAnswer" style="font-family:monospace;font-size:.8rem;resize:vertical"></textarea></div>
+          <button class="btn btn-p" onclick="parseMeCSV()">📥 Import Questions from CSV</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <h4 style="font-size:.9rem;font-weight:700">📝 Questions <span id="meQCount" style="font-size:.78rem;font-weight:400;color:var(--muted)">(0 added)</span></h4>
+            <button class="btn btn-p btn-sm" onclick="addMeQuestion()">+ Add Question</button>
+          </div>
+          <div id="meQuestionsList" style="padding:4px 0"></div>
+          <div id="meQEmpty" style="padding:28px;text-align:center;color:var(--muted);font-size:.85rem">No questions yet. Add one above or import from CSV.</div>
+        </div>
+        <button class="btn btn-p" style="padding:14px 30px;font-size:.92rem" id="mePublishBtn" onclick="publishManualExam()">🚀 Publish Manual Exam</button>
+      </div>
+
+      <!-- ===== CBT: MANAGE EXAMS ===== -->
+      <div class="section" id="sec-cbtExams">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Manage Exams</h2><p>All exams in the CBT hall — including exams set by teachers</p></div></div>
+        <div class="s-bar"><input id="exSearch" placeholder="Search exams..."><select id="exClassFilter"><option value="">All Classes</option></select></div>
+        <div class="twrap"><table>
+          <thead><tr><th>Exam</th><th>Subject</th><th>Class</th><th>Questions</th><th>Duration</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead>
+          <tbody id="exBody"><tr><td colspan="8" class="empty"><p>No exams yet</p></td></tr></tbody>
+        </table></div>
+      </div>
+
+      <!-- ===== CBT: RESULTS ===== -->
+      <div class="section" id="sec-cbtResults">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>CBT Results</h2><p>All CBT exam submissions across the school (term report sheets are under Results)</p></div><button class="btn btn-primary btn-sm" id="cbResPrint">🖨 Print</button></div>
+        <div class="s-bar"><input id="cbResSearch" placeholder="Search by student name or reg number..."><select id="cbResClass"><option value="">All Classes</option><option>JSS1</option><option>JSS2</option><option>JSS3</option><option>SS1</option><option>SS2</option><option>SS3</option></select></div>
+        <div class="twrap"><table>
+          <thead><tr><th>Student</th><th>Exam</th><th>Subject</th><th>Score</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="cbResBody"><tr><td colspan="6" class="empty"><p>Loading...</p></td></tr></tbody>
+        </table></div>
+      </div>
+
+      <!-- ===== CBT: LEADERBOARD ===== -->
+      <div class="section" id="sec-cbtBoard">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Leaderboard</h2><p>Student rankings by CBT performance</p></div><div style="display:flex;gap:8px"><select id="lbPeriod" class="cb-sel"><option value="week">This Week</option><option value="month">This Month</option><option value="all">All Time</option></select><select id="lbClass" class="cb-sel"><option value="">All Classes</option></select></div></div>
+        <div id="lbContent"><div class="empty"><p>Loading leaderboard...</p></div></div>
+      </div>
+
+      <div class="section" id="sec-announcements">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Announcements</h2><p>Publish school-wide notices</p></div>
+        </div>
+
+        <div class="card">
+          <h3 id="annFormTitle">New Announcement</h3>
+          <div class="ann-form">
+            <div class="form-group"><label>Title</label><input type="text" id="annTitle" placeholder="e.g. Mid-Term Break Notice"/></div>
+            <div class="form-group"><label>Date</label><input type="date" id="annDate"/></div>
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label>Body</label>
+            <textarea id="annBody" rows="4" placeholder="Write the announcement..."></textarea>
+          </div>
+          <div class="toggle-wrap" style="margin-bottom:16px">
+            <label class="toggle"><input type="checkbox" id="annPinned"/><span class="slider"></span></label>
+            <span style="font-size:.83rem;color:var(--soft)">Pin this announcement to the top</span>
+          </div>
+          <input type="hidden" id="annEditId" value=""/>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-p" id="annSaveBtn" onclick="saveAnnouncement()" style="padding:10px 18px">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Post Announcement
+            </button>
+            <button class="btn-cancel" id="annCancelBtn" onclick="resetAnnouncementForm()" style="display:none;flex:none;padding:10px 18px">Cancel Edit</button>
+          </div>
+        </div>
+
+        <div class="twrap">
+          <table>
+            <thead><tr><th>Title</th><th>Date</th><th>Pinned</th><th>Actions</th></tr></thead>
+            <tbody id="annTbody"><tr><td colspan="4" class="empty"><p>Loading...</p></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- APPLICATION VIEW MODAL -->
+<div class="mo" id="moAppView">
+  <div class="mbox mbox-lg">
+    <h3 id="moAppViewTitle">Application Details</h3>
+    <p class="mdesc" id="moAppViewSub"></p>
+    <div id="moAppViewBody"></div>
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeMo('moAppView')">Close</button>
+      <button class="btn btn-danger btn-sm" id="moAppRejectBtn" onclick="triggerReject()" style="flex:1;justify-content:center;padding:11px">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Reject
+      </button>
+      <button class="btn btn-ok" id="moAppApproveBtn" onclick="openApproveModal()" style="flex:1;justify-content:center;padding:11px">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- APPROVE MODAL -->
+<div class="mo" id="moApprove">
+  <div class="mbox mbox-lg">
+    <h3>Approve Application</h3>
+    <p class="mdesc">Confirm class, assign electives, and set login credentials.</p>
+
+    <div class="approve-row">
+      <div class="form-group">
+        <label>Confirm Class</label>
+        <select id="apvClass">
+          <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+          <option>SS1</option><option>SS2</option><option>SS3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Login Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="apvPassword" placeholder="Set student password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('apvPassword',this)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-sub">Elective Subjects</div>
+    <div class="subj-grid" id="apvSubjects"></div>
+
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeMo('moApprove')">Cancel</button>
+      <button class="btn btn-ok" id="apvConfirmBtn" onclick="confirmApprove()" style="flex:1;justify-content:center;padding:11px">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm &amp; Enrol
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE STUDENT MODAL -->
+<div class="mo" id="moCreateStudent">
+  <div class="mbox mbox-lg">
+    <h3>Create Student</h3>
+    <p class="mdesc">Manually add a student directly to the portal</p>
+
+    <div class="info-grid">
+      <div class="form-group"><label>First Name <span style="color:var(--err)">*</span></label><input type="text" id="csFirstName" placeholder="First name"/></div>
+      <div class="form-group"><label>Last Name <span style="color:var(--err)">*</span></label><input type="text" id="csLastName" placeholder="Last name"/></div>
+      <div class="form-group"><label>Date of Birth</label><input type="date" id="csDob"/></div>
+      <div class="form-group"><label>Gender</label>
+        <select id="csGender"><option value="">Select</option><option>Male</option><option>Female</option></select>
+      </div>
+      <div class="form-group"><label>Class <span style="color:var(--err)">*</span></label>
+        <select id="csClass"><option value="">Select class</option><option>JSS1</option><option>JSS2</option><option>JSS3</option><option>SS1</option><option>SS2</option><option>SS3</option></select>
+      </div>
+      <div class="form-group"><label>Session</label>
+        <select id="csSession"><option>2024/2025</option><option selected>2025/2026</option><option>2026/2027</option></select>
+      </div>
+      <div class="form-group"><label>Blood Group</label>
+        <select id="csBloodGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
+      </div>
+      <div class="form-group"><label>Genotype</label>
+        <select id="csGenotype"><option value="">Select</option><option>AA</option><option>AS</option><option>SS</option><option>AC</option></select>
+      </div>
+      <div class="form-group"><label>Father's Name</label><input type="text" id="csFatherName" placeholder="Father's full name"/></div>
+      <div class="form-group"><label>Mother's Name</label><input type="text" id="csMotherName" placeholder="Mother's full name"/></div>
+      <div class="form-group"><label>Phone Number <span style="color:var(--err)">*</span></label><input type="tel" id="csPhone" placeholder="Parent/guardian phone"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="csEmail" placeholder="Parent email"/></div>
+    </div>
+
+    <div class="form-group" style="margin-top:4px"><label>Home Address</label><textarea id="csAddress" rows="2" style="width:100%;resize:vertical;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:.83rem"></textarea></div>
+
+    <div class="form-group" style="margin-top:12px">
+      <label>Elective Subjects</label>
+      <div id="csSubjects" class="subj-grid"></div>
+    </div>
+
+    <div class="form-group" style="margin-top:12px">
+      <label>Login Password <span style="color:var(--err)">*</span></label>
+      <div style="position:relative">
+        <input type="password" id="csPassword" placeholder="Set login password" style="width:100%;padding-right:40px"/>
+        <button onclick="togglePw('csPassword',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem">Show</button>
+      </div>
+    </div>
+
+    <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.78rem;color:var(--muted)">
+      <strong style="color:var(--text)">📋 Note:</strong> A reg number will be auto-generated on save. Copy it from the success notification and give it to the student along with their password.
+    </div>
+
+    <div class="mo-actions">
+      <button class="btn btn-ghost" onclick="closeMo('moCreateStudent')">Cancel</button>
+      <button class="btn btn-primary" id="csCreateBtn" onclick="createStudentManually()">
+        <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Create Student
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT EDIT MODAL -->
+<div class="mo" id="moStudent">
+  <div class="mbox mbox-lg">
+    <h3 id="moStuTitle">Student Record</h3>
+    <p class="mdesc" id="moStuSub"></p>
+
+    <div class="info-grid">
+      <div class="form-group"><label>First Name</label><input type="text" id="stuFirstName"/></div>
+      <div class="form-group"><label>Last Name</label><input type="text" id="stuLastName"/></div>
+      <div class="form-group"><label>Date of Birth</label><input type="date" id="stuDob"/></div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="stuGender"><option value="">—</option><option>Male</option><option>Female</option></select>
+      </div>
+      <div class="form-group">
+        <label>Class</label>
+        <select id="stuClass">
+          <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+          <option>SS1</option><option>SS2</option><option>SS3</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Blood Group</label><input type="text" id="stuBloodGroup" placeholder="e.g. O+"/></div>
+      <div class="form-group"><label>Genotype</label><input type="text" id="stuGenotype" placeholder="e.g. AA"/></div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="stuPassword" placeholder="Leave blank to keep current"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('stuPassword',this)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-sub">Elective Subjects</div>
+    <div class="subj-grid" id="stuSubjects"></div>
+
+    <div class="mactions">
+      <button class="btn btn-danger btn-sm" id="moStuDeactivateBtn" onclick="triggerDeactivate()" style="flex:none;padding:11px 16px">Deactivate</button>
+      <button class="btn-cancel" onclick="closeMo('moStudent')">Cancel</button>
+      <button class="btn btn-p" id="moStuSaveBtn" onclick="saveStudentEdits()" style="flex:1;justify-content:center;padding:11px">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="dlg-ov" id="dlgOv">
+  <div class="dlg">
+    <div class="dlg-ic"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <h3 id="dlgTitle">Are you sure?</h3>
+    <p id="dlgMsg">This action cannot be undone.</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-danger" id="dlgConfirmBtn">Confirm</button>
+      <button class="dlg-btn dlg-btn-secondary" onclick="closeDlg()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== CBT MODALS ===== -->
+<div class="mo" id="moCbPw"><div class="mbox" style="width:400px">
+  <h3>Confirm it’s you</h3><p class="mdesc" id="cbPwDesc"></p>
+  <div class="form-group"><label>Your admin password</label><input type="password" id="cbPwInput" placeholder="Enter your password"/></div>
+  <div class="cb-pwerr" id="cbPwErr"></div>
+  <div class="mactions"><button class="btn-cancel" id="cbPwCancel">Cancel</button><button class="btn btn-p" id="cbPwOk">Confirm</button></div>
+</div></div>
+
+<div class="mo" id="moCbTeacher"><div class="mbox">
+  <h3>Create Teacher</h3><p class="mdesc">Creates a login the teacher uses at teacher.html</p>
+  <div class="form-group"><label>Full name</label><input id="cbTName" placeholder="e.g. Mrs. Adebayo"/></div>
+  <div class="form-group"><label>Email (used to log in)</label><input type="email" id="cbTEmail" placeholder="teacher@school.com"/></div>
+  <div class="form-group"><label>Password (min 6 characters)</label><input type="text" id="cbTPass" placeholder="Set a password"/></div>
+  <div class="cb-creds" id="cbTCreds"><strong>✅ Teacher created — share these login details:</strong><br>Email: <code id="cbTCredsEmail"></code><br>Password: <code id="cbTCredsPass"></code></div>
+  <div class="mactions"><button class="btn-cancel" id="cbTCancel">Close</button><button class="btn btn-p" id="cbTSubmit">Create Teacher</button></div>
+</div></div>
+
+<div class="mo" id="moCbTeacherEdit"><div class="mbox">
+  <h3>Edit Teacher</h3><p class="mdesc">Passwords are never stored by the app. Use the reset email to change a teacher's password.</p>
+  <input type="hidden" id="cbETId"/>
+  <div class="form-group"><label>Full name</label><input id="cbETName"/></div>
+  <input type="hidden" id="cbETEmail"/>
+  <div class="form-group"><button type="button" class="btn btn-edit" id="cbETReset" style="width:100%;justify-content:center">Send password reset email</button></div>
+  <div class="mactions"><button class="btn-cancel" id="cbETCancel">Cancel</button><button class="btn btn-p" id="cbETSave">Save Changes</button></div>
+</div></div>
+
+<div class="mo" id="moCbSubject"><div class="mbox">
+  <h3>Create Subject</h3><p class="mdesc">Assign a subject in a class to a teacher</p>
+  <div class="form-group"><label>Subject name</label><input id="cbSubName" placeholder="e.g. Mathematics"/></div>
+  <div class="form-group"><label>Class</label><select id="cbSubClass"><option value="">— Select Class —</option></select></div>
+  <div class="form-group"><label>Teacher</label><select id="cbSubTeacher"><option value="">— Select Teacher —</option></select></div>
+  <div class="mactions"><button class="btn-cancel" id="cbSubCancel">Cancel</button><button class="btn btn-p" id="cbSubSubmit">Create Subject</button></div>
+</div></div>
+
+<div class="mo" id="moCbSubjectEdit"><div class="mbox">
+  <h3>Edit Subject</h3><p class="mdesc">Change the subject, class or assigned teacher</p>
+  <input type="hidden" id="cbESubId"/>
+  <div class="form-group"><label>Subject name</label><input id="cbESubName"/></div>
+  <div class="form-group"><label>Class</label><select id="cbESubClass"><option value="">— Select Class —</option></select></div>
+  <div class="form-group"><label>Teacher</label><select id="cbESubTeacher"><option value="">— Select Teacher —</option></select></div>
+  <div class="mactions"><button class="btn-cancel" id="cbESubCancel">Cancel</button><button class="btn btn-p" id="cbESubSave">Save Changes</button></div>
+</div></div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg"></span></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, deleteField, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { hashPassword } from "./pwhash.js";
+
+const cfg = {
+  apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",
+  authDomain:"veil-1-bd7b5.firebaseapp.com",
+  projectId:"veil-1-bd7b5",
+  storageBucket:"veil-1-bd7b5.firebasestorage.app",
+  messagingSenderId:"526021682048",
+  appId:"1:526021682048:web:a52dae5b2650ca951ad765"
+};
+const app = initializeApp(cfg);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const CLASSES = ['JSS1','JSS2','JSS3','SS1','SS2','SS3'];
+let allAnnouncements = [];
+
+/* ============ AUTH ============ */
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    // Teacher accounts live in the same Firebase Auth project — keep them out of the admin portal
+    try{
+      const t = await getDoc(doc(db,'teachers',user.uid));
+      if(t.exists()){
+        await signOut(auth);
+        showLAlert('This is a teacher account. Please use the Teacher Portal (teacher.html).');
+        const lb=document.getElementById('loginBtn'); if(lb){ lb.disabled=false; lb.textContent='Sign In'; }
+        return;
+      }
+    }catch(e){ /* if the check cannot run, fall through to the normal admin flow */ }
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('portalScreen').classList.add('open');
+    document.getElementById('sbAv').textContent = user.email.charAt(0).toUpperCase();
+    document.getElementById('sbName').textContent = user.email.split('@')[0];
+    loadAll();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('portalScreen').classList.remove('open');
+  }
+});
+
+window.doLogin = async function(){
+  const email = document.getElementById('emailIn').value.trim();
+  const pw = document.getElementById('pwIn').value;
+  const btn = document.getElementById('loginBtn');
+  document.getElementById('lAlert').classList.remove('show');
+  if(!email || !pw){ showLAlert('Please fill in all fields.'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
+  try{
+    await signInWithEmailAndPassword(auth, email, pw);
+  } catch(e){
+    showLAlert(e.code==='auth/invalid-credential' ? 'Invalid email or password.' : 'Login failed. Try again.');
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+};
+function showLAlert(msg){ document.getElementById('lMsg').textContent = msg; document.getElementById('lAlert').classList.add('show'); }
+
+window.doLogout = function(){
+  if(confirm('Sign out of the admin portal?')) signOut(auth);
+};
+
+document.getElementById('pwIn')?.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+/* ============ NAV ============ */
+document.querySelectorAll('.nav-item[data-sec]').forEach(el=>{
+  el.addEventListener('click', ()=>{ switchTab(el.dataset.sec); closeSidebar(); });
+});
+window.switchTab = (sec)=>{
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+sec)?.classList.add('active');
+  const titles={overview:'Overview',applications:'Applications',students:'Students',results:'Results',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements',cbtTeachers:'Teachers',cbtSubjects:'Subjects & Teachers',cbtAI:'AI Exam Generator',cbtManual:'Manual Exam Builder',cbtExams:'Manage Exams',cbtResults:'CBT Results',cbtBoard:'Leaderboard'};
+  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',results:'Manage and publish academic results',feeSettings:'Set termly fees, levies, and due dates per class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices',cbtTeachers:'Create and manage teacher accounts',cbtSubjects:'Assign subjects and classes to teachers',cbtAI:'Generate exams with AI',cbtManual:'Build exams with your own questions',cbtExams:'All exams in the CBT hall',cbtResults:'CBT exam submissions',cbtBoard:'Student rankings'};
+  document.getElementById('topTitle').textContent = titles[sec] || sec;
+  document.getElementById('topSub').textContent = subs[sec] || '';
+};
+window.openSidebar = ()=>{ document.getElementById('sidebar').classList.add('open'); document.getElementById('sbOv').classList.add('open'); };
+window.closeSidebar = ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); };
+
+/* ============ LOAD ALL ============ */
+async function loadAll(){
+  buildClassFeeGrid();
+  setDefaultAnnDate();
+  await Promise.all([loadOverviewStats(), loadFeeSettingsForCurrentSelection(), loadAnnouncements(), loadApplications(), loadStudents(), loadPayments()]);
+  migrateStudentPasswords();
+}
+
+/* One-time, automatic: older student records kept the password as plain text.
+   Convert each to a salted hash and delete the plain-text field. */
+async function migrateStudentPasswords(){
+  try{
+    const snap = await getDocs(collection(db,'students'));
+    const old = snap.docs.filter(d=>{ const v=d.data(); return typeof v.password==='string' && v.password && !v.passwordHash; });
+    if(!old.length) return;
+    for(const d of old){
+      const h = await hashPassword(d.data().password);
+      await updateDoc(doc(db,'students',d.id), { ...h, password: deleteField() });
+    }
+    showToast(`Secured ${old.length} student password${old.length===1?'':'s'}`,'success');
+  }catch(e){ console.warn('Password migration skipped:', e.message); }
+}
+
+/* ============ OVERVIEW ============ */
+async function loadOverviewStats(){
+  try{
+    const [stuSnap, appSnap] = await Promise.all([
+      getDocs(collection(db,'students')),
+      getDocs(collection(db,'applications'))
+    ]);
+    const totalStu = stuSnap.size;
+    document.getElementById('s-students').textContent = totalStu.toLocaleString();
+    const pending = appSnap.docs.filter(d=>(d.data().status||'pending')==='pending').length;
+    document.getElementById('s-applications').textContent = pending;
+    if(pending>0){
+      const el=document.getElementById('s-apps-trend');
+      el.className='stat-trend trend-down';
+      el.innerHTML='<svg viewBox="0 0 24 24"><polyline points="18 9 12 15 6 9"/></svg><span>'+pending+' pending</span>';
+    }
+    document.getElementById('s-payments').textContent = '₦0';
+    // Class breakdown bar chart
+    const classCounts={};
+    const CLASSES=['JSS1','JSS2','JSS3','SS1','SS2','SS3'];
+    CLASSES.forEach(c=>classCounts[c]=0);
+    stuSnap.docs.forEach(d=>{const c=d.data().className||d.data().class;if(c&&classCounts[c]!==undefined)classCounts[c]++;});
+    const maxCount=Math.max(...Object.values(classCounts),1);
+    const fills=['fill-blue','fill-blue','fill-blue','fill-green','fill-green','fill-green'];
+    const barList=document.getElementById('classBarList');
+    if(barList){
+      barList.innerHTML=CLASSES.map((c,i)=>`
+        <div class="ov-bar-item">
+          <div class="ov-bar-label"><span>${c}</span><span>${classCounts[c]}</span></div>
+          <div class="ov-bar-track"><div class="ov-bar-fill ${fills[i]}" style="width:${Math.round(classCounts[c]/maxCount*100)}%"></div></div>
+        </div>`).join('');
+    }
+    // Results count
+    try{
+      const resSnap=await getDocs(collection(db,'results'));
+      document.getElementById('s-results').textContent=resSnap.size.toLocaleString();
+    } catch(e){ document.getElementById('s-results').textContent='—'; }
+  } catch(e){ console.warn('Stats load skipped:',e.message); }
+}
+
+/* ============ APPLICATIONS ============ */
+const ELECTIVES = ['Further Maths','French','Agricultural Science','Economics','Literature','Government','Yoruba','Igbo','Fine Art','Music','Physical Education'];
+let allApplications = [];
+let currentAppId = null; // tracks which app is open in view/approve modal
+
+async function loadApplications(){
+  const tbody = document.getElementById('appTbody');
+  try{
+    const snap = await getDocs(query(collection(db,'applications'), orderBy('submittedAt','desc')));
+    allApplications = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderApplications();
+  } catch(e){
+    // orderBy may fail if no index yet — fall back
+    try{
+      const snap2 = await getDocs(collection(db,'applications'));
+      allApplications = snap2.docs.map(d=>({id:d.id,...d.data()}));
+      allApplications.sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
+      renderApplications();
+    } catch(e2){
+      tbody.innerHTML=`<tr><td colspan="6" class="empty"><p>Failed to load: ${escapeHtml(e2.message)}</p></td></tr>`;
+    }
+  }
+}
+
+function renderApplications(){
+  const tbody = document.getElementById('appTbody');
+  const fStatus = document.getElementById('appFilterStatus').value;
+  const fClass  = document.getElementById('appFilterClass').value;
+  let list = allApplications;
+  if(fStatus) list = list.filter(a=>(a.status||'pending')===fStatus);
+  if(fClass)  list = list.filter(a=>a.classApplied===fClass);
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="6" class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No applications found.</p></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(a=>{
+    const status = a.status||'pending';
+    const badge = status==='approved'?'b-green':status==='rejected'?'b-red':'b-gold';
+    const ts = a.submittedAt?.toDate ? a.submittedAt.toDate() : null;
+    const dateStr = ts ? ts.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    const name = `${escapeHtml(a.firstName||'')} ${escapeHtml(a.lastName||'')}`.trim()||'—';
+    return `<tr>
+      <td><strong>${name}</strong></td>
+      <td>${escapeHtml(a.classApplied||'—')}</td>
+      <td>${escapeHtml(a.parentPhone||'—')}</td>
+      <td>${dateStr}</td>
+      <td><span class="badge ${badge}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></td>
+      <td>
+        <div class="act-btns">
+          <button class="btn btn-edit btn-sm" onclick="viewApplication('${a.id}')">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.viewApplication = function(id){
+  const a = allApplications.find(x=>x.id===id);
+  if(!a) return;
+  currentAppId = id;
+  const status = a.status||'pending';
+  document.getElementById('moAppViewTitle').textContent = `${a.firstName||''} ${a.lastName||''}`.trim()||'Application';
+  document.getElementById('moAppViewSub').textContent = `${a.classApplied||'—'} · ${status.charAt(0).toUpperCase()+status.slice(1)}`;
+
+  const ts = a.submittedAt?.toDate ? a.submittedAt.toDate() : null;
+  const dateStr = ts ? ts.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—';
+
+  const docLinks = (a.documents||[]).map((url,i)=>
+    `<a href="${escapeAttr(url)}" target="_blank" rel="noopener">Document ${i+1}</a>`
+  ).join('<br/>') || '—';
+
+  document.getElementById('moAppViewBody').innerHTML = `
+    <div class="section-sub" style="margin-top:0">Personal Information</div>
+    <div class="info-grid">
+      <div class="info-item"><label>First Name</label><span>${escapeHtml(a.firstName||'—')}</span></div>
+      <div class="info-item"><label>Last Name</label><span>${escapeHtml(a.lastName||'—')}</span></div>
+      <div class="info-item"><label>Date of Birth</label><span>${escapeHtml(a.dob||'—')}</span></div>
+      <div class="info-item"><label>Gender</label><span>${escapeHtml(a.gender||'—')}</span></div>
+      <div class="info-item"><label>Class Applying For</label><span>${escapeHtml(a.classApplied||'—')}</span></div>
+      <div class="info-item"><label>Date Submitted</label><span>${dateStr}</span></div>
+      <div class="info-item"><label>Blood Group</label><span>${escapeHtml(a.bloodGroup||'—')}</span></div>
+      <div class="info-item"><label>Genotype</label><span>${escapeHtml(a.genotype||'—')}</span></div>
+      <hr class="info-divider"/>
+      <div class="section-sub" style="grid-column:1/-1;margin-top:0">Parent / Guardian</div>
+      <div class="info-item"><label>Parent Name</label><span>${escapeHtml(a.parentName||'—')}</span></div>
+      <div class="info-item"><label>Parent Phone</label><span>${escapeHtml(a.parentPhone||'—')}</span></div>
+      <div class="info-item"><label>Parent Email</label><span>${escapeHtml(a.parentEmail||'—')}</span></div>
+      <div class="info-item"><label>Relationship</label><span>${escapeHtml(a.relationship||'—')}</span></div>
+      <div class="info-item"><label>Home Address</label><span>${escapeHtml(a.address||'—')}</span></div>
+      <hr class="info-divider"/>
+      <div class="info-item" style="grid-column:1/-1"><label>Uploaded Documents</label><span>${docLinks}</span></div>
+    </div>
+  `;
+
+  // Show/hide approve+reject based on status
+  const isPending = status==='pending';
+  document.getElementById('moAppApproveBtn').style.display = isPending?'':'none';
+  document.getElementById('moAppRejectBtn').style.display  = isPending?'':'none';
+
+  openMo('moAppView');
+};
+
+window.triggerReject = function(){
+  showDlg('Reject this application?', 'The applicant will be marked as rejected. This can be reviewed later.', async ()=>{
+    try{
+      await updateDoc(doc(db,'applications',currentAppId), {status:'rejected'});
+      showToast('Application rejected','success');
+      closeMo('moAppView');
+      await loadApplications();
+      loadOverviewStats();
+    } catch(e){ showToast('Failed: '+e.message,'error'); }
+    closeDlg();
+  });
+};
+
+window.openApproveModal = function(){
+  const a = allApplications.find(x=>x.id===currentAppId);
+  if(!a) return;
+  // Pre-fill class
+  const cls = document.getElementById('apvClass');
+  cls.value = a.classApplied||'JSS1';
+  document.getElementById('apvPassword').value='';
+  // Build subject checkboxes
+  buildSubjectCheckboxes('apvSubjects', []);
+  closeMo('moAppView');
+  openMo('moApprove');
+};
+
+window.confirmApprove = async function(){
+  const btn = document.getElementById('apvConfirmBtn');
+  const cls = document.getElementById('apvClass').value;
+  const pw  = document.getElementById('apvPassword').value.trim();
+  if(!pw){ showToast('Please set a login password.','error'); return; }
+
+  const subjects = getCheckedSubjects('apvSubjects');
+  const a = allApplications.find(x=>x.id===currentAppId);
+  if(!a) return;
+
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Enrolling…';
+  try{
+    // Count approved students in this class to generate reg number
+    const stuSnap = await getDocs(collection(db,'students'));
+    const classCount = stuSnap.docs.filter(d=>d.data().class===cls).length;
+    const count = String(classCount+1).padStart(3,'0');
+    const year = new Date().getFullYear();
+    const regNumber = `BHS/${year}/${cls}/${count}`;
+
+    const studentData = {
+      firstName: a.firstName||'',
+      lastName:  a.lastName||'',
+      dob:       a.dob||'',
+      gender:    a.gender||'',
+      class:     cls,
+      bloodGroup:a.bloodGroup||'',
+      genotype:  a.genotype||'',
+      parentName: a.parentName||'',
+      parentPhone:a.parentPhone||'',
+      parentEmail:a.parentEmail||'',
+      address:   a.address||'',
+      regNumber,
+      ...(await hashPassword(pw)),
+      subjects,
+      status:    'active',
+      applicationId: currentAppId,
+      enrolledAt: serverTimestamp()
+    };
+
+    // Use regNumber as doc ID (URL-safe)
+    const regId = regNumber.replace(/\//g,'-');
+    await setDoc(doc(db,'students',regId), studentData);
+    await updateDoc(doc(db,'applications',currentAppId), {status:'approved', regNumber});
+
+    showToast(`Enrolled! Reg: ${regNumber}`,'success');
+    closeMo('moApprove');
+    await Promise.all([loadApplications(), loadStudents(), loadOverviewStats()]);
+  } catch(e){
+    showToast('Enrolment failed: '+e.message,'error');
+  } finally{
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm &amp; Enrol';
+  }
+};
+
+/* ============ STUDENTS ============ */
+let allStudents = [];
+let currentStuId = null;
+
+async function loadStudents(){
+  const tbody = document.getElementById('stuTbody');
+  try{
+    const snap = await getDocs(collection(db,'students'));
+    allStudents = snap.docs.map(d=>({_docId:d.id,...d.data()}));
+    allStudents.sort((a,b)=>(a.regNumber||'').localeCompare(b.regNumber||''));
+    renderStudents();
+  } catch(e){
+    tbody.innerHTML=`<tr><td colspan="6" class="empty"><p>Failed to load: ${escapeHtml(e.message)}</p></td></tr>`;
+  }
+}
+
+function renderStudents(){
+  const tbody = document.getElementById('stuTbody');
+  const search = (document.getElementById('stuSearch').value||'').toLowerCase();
+  const fClass  = document.getElementById('stuFilterClass').value;
+  let list = allStudents;
+  if(fClass)  list = list.filter(s=>s.class===fClass);
+  if(search)  list = list.filter(s=>
+    (`${s.firstName||''} ${s.lastName||''}`).toLowerCase().includes(search) ||
+    (s.regNumber||'').toLowerCase().includes(search)
+  );
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="6" class="empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>No students found.</p></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s=>{
+    const status = s.status||'active';
+    const badge = status==='active'?'b-green':'b-red';
+    const name = `${escapeHtml(s.firstName||'')} ${escapeHtml(s.lastName||'')}`.trim()||'—';
+    const subCount = (s.subjects||[]).length;
+    return `<tr>
+      <td><span style="font-family:monospace;font-size:.8rem;color:var(--navy2)">${escapeHtml(s.regNumber||'—')}</span></td>
+      <td><strong>${name}</strong></td>
+      <td>${escapeHtml(s.class||'—')}</td>
+      <td>${subCount} elective${subCount!==1?'s':''}</td>
+      <td><span class="badge ${badge}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></td>
+      <td>
+        <div class="act-btns">
+          <button class="btn btn-edit btn-sm" onclick="openStudentModal('${s._docId}')">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            Edit
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.openStudentModal = function(docId){
+  const s = allStudents.find(x=>x._docId===docId);
+  if(!s) return;
+  currentStuId = docId;
+  document.getElementById('moStuTitle').textContent = `${s.firstName||''} ${s.lastName||''}`.trim()||'Student';
+  document.getElementById('moStuSub').textContent = `${s.regNumber||''} · ${s.class||''}`;
+  document.getElementById('stuFirstName').value  = s.firstName||'';
+  document.getElementById('stuLastName').value   = s.lastName||'';
+  document.getElementById('stuDob').value        = s.dob||'';
+  document.getElementById('stuGender').value     = s.gender||'';
+  document.getElementById('stuClass').value      = s.class||'JSS1';
+  document.getElementById('stuBloodGroup').value = s.bloodGroup||'';
+  document.getElementById('stuGenotype').value   = s.genotype||'';
+  document.getElementById('stuPassword').value   = '';
+  buildSubjectCheckboxes('stuSubjects', s.subjects||[]);
+  // Deactivate button label
+  const isActive = (s.status||'active')==='active';
+  document.getElementById('moStuDeactivateBtn').textContent = isActive?'Deactivate':'Reactivate';
+  document.getElementById('moStuDeactivateBtn').className = isActive?'btn btn-danger btn-sm':'btn btn-ok btn-sm';
+  openMo('moStudent');
+};
+
+window.saveStudentEdits = async function(){
+  const btn = document.getElementById('moStuSaveBtn');
+  const pw  = document.getElementById('stuPassword').value.trim();
+  const payload = {
+    firstName:  document.getElementById('stuFirstName').value.trim(),
+    lastName:   document.getElementById('stuLastName').value.trim(),
+    dob:        document.getElementById('stuDob').value,
+    gender:     document.getElementById('stuGender').value,
+    class:      document.getElementById('stuClass').value,
+    bloodGroup: document.getElementById('stuBloodGroup').value.trim(),
+    genotype:   document.getElementById('stuGenotype').value.trim(),
+    subjects:   getCheckedSubjects('stuSubjects'),
+    updatedAt:  serverTimestamp()
+  };
+  if(pw){ Object.assign(payload, await hashPassword(pw)); payload.password = deleteField(); }
+
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Saving…';
+  try{
+    await updateDoc(doc(db,'students',currentStuId), payload);
+    showToast('Student record updated','success');
+    closeMo('moStudent');
+    await loadStudents();
+    loadOverviewStats();
+  } catch(e){
+    showToast('Save failed: '+e.message,'error');
+  } finally{
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Changes';
+  }
+};
+
+window.triggerDeactivate = function(){
+  const s = allStudents.find(x=>x._docId===currentStuId);
+  if(!s) return;
+  const isActive = (s.status||'active')==='active';
+  const newStatus = isActive?'inactive':'active';
+  const verb = isActive?'Deactivate':'Reactivate';
+  showDlg(`${verb} student?`, isActive
+    ? 'This student will lose access to the portal. You can reactivate them later.'
+    : 'This student will regain access to the portal.',
+    async ()=>{
+      try{
+        await updateDoc(doc(db,'students',currentStuId), {status:newStatus, updatedAt:serverTimestamp()});
+        showToast(`Student ${newStatus}`,'success');
+        closeMo('moStudent');
+        await loadStudents();
+        loadOverviewStats();
+      } catch(e){ showToast('Failed: '+e.message,'error'); }
+      closeDlg();
+    }
+  );
+};
+
+/* ============ MANUAL STUDENT CREATION ============ */
+window.openCreateStudentModal = function(){
+  // Clear all fields
+  ['csFirstName','csLastName','csDob','csPhone','csEmail','csAddress','csPassword'].forEach(id=>{
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('csGender').value = '';
+  document.getElementById('csClass').value = '';
+  document.getElementById('csBloodGroup').value = '';
+  document.getElementById('csGenotype').value = '';
+  document.getElementById('csSession').value = '2025/2026';
+  buildSubjectCheckboxes('csSubjects', []);
+  openMo('moCreateStudent');
+};
+
+window.createStudentManually = async function(){
+  const firstName = document.getElementById('csFirstName').value.trim();
+  const lastName  = document.getElementById('csLastName').value.trim();
+  const cls       = document.getElementById('csClass').value;
+  const phone     = document.getElementById('csPhone').value.trim();
+  const password  = document.getElementById('csPassword').value.trim();
+
+  if(!firstName || !lastName) return showToast('First and last name are required', 'error');
+  if(!cls)                    return showToast('Please select a class', 'error');
+  if(!phone)                  return showToast('Phone number is required', 'error');
+  if(!password)               return showToast('Password is required', 'error');
+
+  const btn = document.getElementById('csCreateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating…';
+
+  try{
+    // Count existing students in this class to generate reg number
+    const snap = await getDocs(collection(db, 'students'));
+    const classCount = snap.docs.filter(d => d.data().class === cls).length;
+    const year = new Date().getFullYear();
+    const regNumber = `BHS/${year}/${cls}/${String(classCount + 1).padStart(3, '0')}`;
+
+    const session = document.getElementById('csSession').value;
+    const payload = {
+      firstName,
+      lastName,
+      fullName: `${firstName} ${lastName}`,
+      dob:        document.getElementById('csDob').value,
+      gender:     document.getElementById('csGender').value,
+      class:      cls,
+      session,
+      bloodGroup: document.getElementById('csBloodGroup').value,
+      genotype:   document.getElementById('csGenotype').value,
+      fatherName: document.getElementById('csFatherName').value.trim(),
+      motherName: document.getElementById('csMotherName').value.trim(),
+      phone:      phone,
+      email:      document.getElementById('csEmail').value.trim(),
+      address:    document.getElementById('csAddress').value.trim(),
+      subjects:   getCheckedSubjects('csSubjects'),
+      ...(await hashPassword(password)),
+      regNumber,
+      status:     'active',
+
+      createdAt:  serverTimestamp()
+    };
+
+    await addDoc(collection(db, 'students'), payload);
+    showToast(`✅ Student created! Reg No: ${regNumber} — copy this now`, 'success');
+    closeMo('moCreateStudent');
+    await loadStudents();
+    loadOverviewStats();
+  } catch(e){
+    showToast('Failed: ' + e.message, 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Create Student';
+  }
+};
+
+
+function buildSubjectCheckboxes(containerId, checked){
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = ELECTIVES.map(s=>`
+    <label class="subj-cb">
+      <input type="checkbox" value="${escapeAttr(s)}" ${checked.includes(s)?'checked':''}/>
+      ${escapeHtml(s)}
+    </label>
+  `).join('');
+}
+function getCheckedSubjects(containerId){
+  return [...document.querySelectorAll(`#${containerId} input[type=checkbox]:checked`)].map(cb=>cb.value);
+}
+
+/* ============ MODAL HELPERS ============ */
+function openMo(id){ document.getElementById(id).classList.add('open'); }
+function closeMo(id){ document.getElementById(id).classList.remove('open'); }
+window.closeMo = closeMo;
+
+window.togglePw = function(inputId, btn){
+  const inp = document.getElementById(inputId);
+  const show = inp.type==='password';
+  inp.type = show?'text':'password';
+  btn.querySelector('svg').innerHTML = show
+    ? '<line x1="1" y1="1" x2="23" y2="23"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M6.53 6.53A10 10 0 0 0 1 12s4 8 11 8a9.14 9.14 0 0 0 5.12-1.53"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+};
+
+// Close modals on backdrop click
+document.querySelectorAll('.mo').forEach(mo=>{
+  mo.addEventListener('click', e=>{ if(e.target===mo) mo.classList.remove('open'); });
+});
+function buildClassFeeGrid(){
+  const grid = document.getElementById('classFeeGrid');
+  grid.innerHTML = CLASSES.map(c=>`
+    <div class="cf-item">
+      <label>${c}</label>
+      <div class="cf-wrap">
+        <span>₦</span>
+        <input type="number" min="0" step="100" id="fee-${c}" placeholder="0" data-cf="${c}"/>
+      </div>
+    </div>
+  `).join('');
+}
+
+function feeSettingsDocId(){
+  const session = document.getElementById('fsSession').value;
+  const term = document.getElementById('fsTerm').value;
+  return `${session.replace('/', '-')}_${term}`;
+}
+
+document.getElementById('fsSession').addEventListener('change', loadFeeSettingsForCurrentSelection);
+document.getElementById('fsTerm').addEventListener('change', loadFeeSettingsForCurrentSelection);
+
+async function loadFeeSettingsForCurrentSelection(){
+  const id = feeSettingsDocId();
+  const note = document.getElementById('fsExistingNote');
+  note.classList.remove('show'); note.textContent='';
+  try{
+    const snap = await getDoc(doc(db, 'feeSettings', id));
+    // Reset fields first
+    CLASSES.forEach(c=>{ document.getElementById(`fee-${c}`).value=''; });
+    document.getElementById('fsDueDate').value='';
+    document.getElementById('levyRows').innerHTML='';
+
+    if(snap.exists()){
+      const data = snap.data();
+      CLASSES.forEach(c=>{ if(data[c]!==undefined) document.getElementById(`fee-${c}`).value = data[c]; });
+      if(data.dueDate) document.getElementById('fsDueDate').value = data.dueDate;
+      (data.levies||[]).forEach(lv=> addLevyRow(lv.name, lv.amount));
+      note.textContent = `Existing fee settings found for ${id.replace('_',' — ')} Term. Editing will overwrite on save.`;
+      note.classList.add('show');
+    } else {
+      note.textContent = `No fee settings yet for ${id.replace('_',' — ')} Term. Fill the form below to create one.`;
+      note.classList.add('show');
+    }
+  } catch(e){
+    showToast('Failed to load fee settings: '+e.message, 'error');
+  }
+}
+
+window.addLevyRow = function(name='', amount=''){
+  const wrap = document.getElementById('levyRows');
+  const row = document.createElement('div');
+  row.className = 'levy-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Levy name (e.g. PTA Levy)" class="levy-name" value="${escapeAttr(name)}"/>
+    <input type="number" min="0" step="100" placeholder="Amount (₦)" class="levy-amount" value="${amount===''?'':amount}"/>
+    <div class="btn-icon" onclick="this.parentElement.remove()" title="Remove">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+  `;
+  wrap.appendChild(row);
+};
+
+window.saveFeeSettings = async function(){
+  const btn = document.getElementById('fsSaveBtn');
+  const id = feeSettingsDocId();
+  const payload = { dueDate: document.getElementById('fsDueDate').value || null, levies: [] };
+
+  CLASSES.forEach(c=>{
+    const v = document.getElementById(`fee-${c}`).value;
+    payload[c] = v === '' ? 0 : Number(v);
+  });
+
+  document.querySelectorAll('#levyRows .levy-row').forEach(row=>{
+    const name = row.querySelector('.levy-name').value.trim();
+    const amount = row.querySelector('.levy-amount').value;
+    if(name) payload.levies.push({ name, amount: amount===''?0:Number(amount) });
+  });
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  try{
+    await setDoc(doc(db, 'feeSettings', id), { ...payload, updatedAt: serverTimestamp() }, { merge: true });
+    showToast('Fee settings saved successfully', 'success');
+    loadFeeSettingsForCurrentSelection();
+  } catch(e){
+    showToast('Save failed: '+e.message, 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Fee Settings';
+  }
+};
+
+/* ============ ANNOUNCEMENTS ============ */
+function setDefaultAnnDate(){
+  const dEl = document.getElementById('annDate');
+  if(!dEl.value) dEl.value = new Date().toISOString().split('T')[0];
+}
+
+async function loadAnnouncements(){
+  const tbody = document.getElementById('annTbody');
+  try{
+    const snap = await getDocs(query(collection(db,'announcements'), orderBy('date','desc')));
+    allAnnouncements = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    // Pinned first, then by date desc (already sorted by date from query)
+    allAnnouncements.sort((a,b)=> (b.pinned?1:0) - (a.pinned?1:0));
+    renderAnnouncements();
+  } catch(e){
+    tbody.innerHTML = `<tr><td colspan="4" class="empty"><p>Failed to load: ${e.message}</p></td></tr>`;
+  }
+}
+
+function renderAnnouncements(){
+  const tbody = document.getElementById('annTbody');
+  if(!allAnnouncements.length){
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">
+      <svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <p>No announcements yet.</p>
+    </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = allAnnouncements.map(a=>`
+    <tr>
+      <td>
+        ${a.pinned ? '<svg class="pin-icon" viewBox="0 0 24 24" style="margin-right:5px;vertical-align:-2px"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>' : ''}
+        <strong>${escapeHtml(a.title||'Untitled')}</strong>
+      </td>
+      <td>${formatDate(a.date)}</td>
+      <td>${a.pinned ? '<span class="badge b-gold">Pinned</span>' : '<span class="badge b-blue">Normal</span>'}</td>
+      <td>
+        <div class="act-btns">
+          <button class="btn btn-edit btn-sm" onclick="editAnnouncement('${a.id}')">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteAnnouncement('${a.id}')">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.saveAnnouncement = async function(){
+  const btn = document.getElementById('annSaveBtn');
+  const title = document.getElementById('annTitle').value.trim();
+  const body = document.getElementById('annBody').value.trim();
+  const date = document.getElementById('annDate').value;
+  const pinned = document.getElementById('annPinned').checked;
+  const editId = document.getElementById('annEditId').value;
+
+  if(!title || !body || !date){ showToast('Please fill in title, body, and date.', 'error'); return; }
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  try{
+    if(editId){
+      await updateDoc(doc(db,'announcements',editId), { title, body, date, pinned, updatedAt: serverTimestamp() });
+      showToast('Announcement updated', 'success');
+    } else {
+      await addDoc(collection(db,'announcements'), { title, body, date, pinned, createdAt: serverTimestamp() });
+      showToast('Announcement posted', 'success');
+    }
+    resetAnnouncementForm();
+    loadAnnouncements();
+  } catch(e){
+    showToast('Save failed: '+e.message, 'error');
+  } finally{
+    btn.disabled = false;
+  }
+};
+
+window.editAnnouncement = function(id){
+  const a = allAnnouncements.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('annEditId').value = id;
+  document.getElementById('annTitle').value = a.title||'';
+  document.getElementById('annBody').value = a.body||'';
+  document.getElementById('annDate').value = a.date||'';
+  document.getElementById('annPinned').checked = !!a.pinned;
+  document.getElementById('annFormTitle').textContent = 'Edit Announcement';
+  document.getElementById('annSaveBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Update Announcement';
+  document.getElementById('annCancelBtn').style.display = 'inline-flex';
+  document.querySelector('#sec-announcements .card').scrollIntoView({behavior:'smooth', block:'start'});
+};
+
+window.resetAnnouncementForm = function(){
+  document.getElementById('annEditId').value = '';
+  document.getElementById('annTitle').value = '';
+  document.getElementById('annBody').value = '';
+  setDefaultAnnDate();
+  document.getElementById('annPinned').checked = false;
+  document.getElementById('annFormTitle').textContent = 'New Announcement';
+  document.getElementById('annSaveBtn').innerHTML = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Post Announcement';
+  document.getElementById('annCancelBtn').style.display = 'none';
+};
+
+window.confirmDeleteAnnouncement = function(id){
+  showDlg('Delete announcement?', 'This announcement will be permanently removed.', async ()=>{
+    try{
+      await deleteDoc(doc(db,'announcements',id));
+      showToast('Announcement deleted', 'success');
+      loadAnnouncements();
+    } catch(e){
+      showToast('Delete failed: '+e.message, 'error');
+    }
+    closeDlg();
+  });
+};
+
+/* ============ DIALOG / TOAST / HELPERS ============ */
+function showDlg(title, msg, onConfirm){
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgMsg').textContent = msg;
+  const btn = document.getElementById('dlgConfirmBtn');
+  btn.onclick = onConfirm;
+  document.getElementById('dlgOv').classList.add('show');
+}
+
+/* ============ RESULTS ============ */
+const CORE_SUBJECTS = ['English Language','Mathematics','Basic Science','Social Studies','CRS/IRS','Civic Education','Physical & Health Education','Cultural & Creative Arts','Computer Studies'];
+const ELECTIVE_SUBJECTS = ['Further Maths','French','Agricultural Science','Economics','Literature','Government','Yoruba','Igbo','Fine Art','Music','Physical Education'];
+
+let resStudents = [];
+let resExistingMap = {}; // studentId -> result doc {id, data}
+
+window.loadResultsStudents = async function(){
+  const btn = document.getElementById('resLoadBtn');
+  const cls = document.getElementById('resClass').value;
+  const session = document.getElementById('resSession').value;
+  const term = document.getElementById('resTerm').value;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Loading...';
+  document.getElementById('resTableArea').style.display = 'none';
+  document.getElementById('resEmptyBox').style.display = 'none';
+
+  try {
+    // Load active students for selected class
+    const snap = await getDocs(collection(db, 'students'));
+    resStudents = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(s => s.class === cls && s.status === 'active');
+
+    if (resStudents.length === 0) {
+      document.getElementById('resEmptyBox').style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Load Students';
+      return;
+    }
+
+    // Load existing results for this class+session+term
+    const resSnap = await getDocs(collection(db, 'results'));
+    resExistingMap = {};
+    resSnap.docs.forEach(d => {
+      const data = d.data();
+      if (data.session === session && data.term === term && data.class === cls) {
+        resExistingMap[data.studentId] = { id: d.id, data };
+      }
+    });
+
+    // Check publish state (use first doc if exists)
+    const anyPublished = Object.values(resExistingMap).some(r => r.data.published);
+    document.getElementById('resPublishToggle').checked = anyPublished;
+
+    buildResultsTable(cls, session, term);
+    document.getElementById('resTableArea').style.display = 'block';
+  } catch(e) {
+    showToast('Load failed: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Load Students';
+  }
+};
+
+function buildResultsTable(cls, session, term) {
+  // Determine which elective columns are needed (union of all students' subjects)
+  const activeElectives = ELECTIVE_SUBJECTS.filter(sub =>
+    resStudents.some(s => Array.isArray(s.subjects) && s.subjects.includes(sub))
+  );
+  const allSubjects = [...CORE_SUBJECTS, ...activeElectives];
+
+  // Build header
+  const thead = document.getElementById('resThead');
+  thead.innerHTML = '<tr>'
+    + '<th>Reg No.</th><th>Student Name</th>'
+    + allSubjects.map(s => `<th style="min-width:80px;white-space:normal;word-break:break-word">${escapeHtml(s)}</th>`).join('')
+    + '<th>Position</th><th>Remark</th>'
+    + '</tr>';
+
+  // Build body
+  const tbody = document.getElementById('resTbody');
+  tbody.innerHTML = resStudents.map(stu => {
+    const existing = resExistingMap[stu.id];
+    const scores = existing ? (existing.data.scores || {}) : {};
+    const position = existing ? (existing.data.position || '') : '';
+    const remark = existing ? (existing.data.classTeacherRemark || '') : '';
+    const stuElectives = Array.isArray(stu.subjects) ? stu.subjects : [];
+
+    const scoreCells = allSubjects.map(sub => {
+      const isCore = CORE_SUBJECTS.includes(sub);
+      const hasElective = stuElectives.includes(sub);
+      if (isCore || hasElective) {
+        const val = scores[sub] !== undefined ? scores[sub] : '';
+        return `<td><input class="res-score-inp" type="number" min="0" max="100" data-stu="${escapeAttr(stu.id)}" data-sub="${escapeAttr(sub)}" value="${escapeAttr(String(val))}" placeholder="—"/></td>`;
+      } else {
+        return `<td class="res-na">—</td>`;
+      }
+    }).join('');
+
+    return `<tr>
+      <td style="font-size:.78rem;white-space:nowrap">${escapeHtml(stu.regNumber||'')}</td>
+      <td style="white-space:nowrap;font-weight:500">${escapeHtml((stu.firstName||'') + ' ' + (stu.lastName||''))}</td>
+      ${scoreCells}
+      <td><input class="res-pos-inp" type="number" min="1" data-stu="${escapeAttr(stu.id)}" data-field="position" value="${escapeAttr(String(position))}" placeholder="—"/></td>
+      <td><input class="res-remark-inp" type="text" data-stu="${escapeAttr(stu.id)}" data-field="remark" value="${escapeAttr(String(remark))}" placeholder="Remark"/></td>
+    </tr>`;
+  }).join('');
+}
+
+window.saveResults = async function(){
+  const btn = document.getElementById('resSaveBtn');
+  const cls = document.getElementById('resClass').value;
+  const session = document.getElementById('resSession').value;
+  const term = document.getElementById('resTerm').value;
+  const publish = document.getElementById('resPublishToggle').checked;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Saving...';
+
+  try {
+    // Gather all inputs per student
+    const scoreInputs = document.querySelectorAll('.res-score-inp');
+    const posInputs = document.querySelectorAll('.res-pos-inp');
+    const remarkInputs = document.querySelectorAll('.res-remark-inp');
+
+    // Build per-student score map
+    const stuScores = {}; // stuId -> { scores:{}, position, remark }
+    scoreInputs.forEach(inp => {
+      const stuId = inp.dataset.stu;
+      const sub = inp.dataset.sub;
+      if (!stuScores[stuId]) stuScores[stuId] = { scores: {} };
+      const val = inp.value !== '' ? Number(inp.value) : null;
+      if (val !== null) stuScores[stuId].scores[sub] = val;
+    });
+    posInputs.forEach(inp => {
+      const stuId = inp.dataset.stu;
+      if (!stuScores[stuId]) stuScores[stuId] = { scores: {} };
+      stuScores[stuId].position = inp.value !== '' ? Number(inp.value) : null;
+    });
+    remarkInputs.forEach(inp => {
+      const stuId = inp.dataset.stu;
+      if (!stuScores[stuId]) stuScores[stuId] = { scores: {} };
+      stuScores[stuId].remark = inp.value.trim();
+    });
+
+    // Save/update each student's result
+    const saves = resStudents.map(async stu => {
+      const payload = stuScores[stu.id] || { scores: {} };
+      const docData = {
+        studentId: stu.id,
+        regNumber: stu.regNumber || '',
+        studentName: ((stu.firstName||'') + ' ' + (stu.lastName||'')).trim(),
+        session, term,
+        class: cls,
+        scores: payload.scores || {},
+        position: payload.position || null,
+        classTeacherRemark: payload.remark || '',
+        published: publish,
+        updatedAt: serverTimestamp()
+      };
+
+      if (resExistingMap[stu.id]) {
+        await updateDoc(doc(db, 'results', resExistingMap[stu.id].id), docData);
+      } else {
+        const newRef = await addDoc(collection(db, 'results'), docData);
+        resExistingMap[stu.id] = { id: newRef.id, data: docData };
+      }
+    });
+
+    await Promise.all(saves);
+    showToast('Results saved successfully', 'success');
+  } catch(e) {
+    showToast('Save failed: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Results';
+  }
+};
+
+/* ============ PAYMENTS ============ */
+let allPayments = [];
+
+async function loadPayments(){
+  try {
+    const snap = await getDocs(query(collection(db,'payments'), orderBy('date','desc')));
+    allPayments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) {
+    // If no date field or empty, fall back
+    try {
+      const snap2 = await getDocs(collection(db,'payments'));
+      allPayments = snap2.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e2) {
+      allPayments = [];
+    }
+  }
+
+  // Update overview payment stat
+  const totalSuccess = allPayments
+    .filter(p => (p.status||'').toLowerCase() === 'success')
+    .reduce((sum, p) => sum + (Number(p.amount)||0), 0);
+  document.getElementById('s-payments').textContent = '₦' + totalSuccess.toLocaleString();
+
+  renderPayments();
+}
+
+window.renderPayments = function(){
+  const search = (document.getElementById('paySearch')?.value||'').toLowerCase();
+  const fTerm = document.getElementById('payFilterTerm')?.value||'';
+  const fClass = document.getElementById('payFilterClass')?.value||'';
+  const fType = document.getElementById('payFilterType')?.value||'';
+
+  let filtered = allPayments.filter(p => {
+    if (fTerm && p.term !== fTerm) return false;
+    if (fClass && p.class !== fClass) return false;
+    if (fType) {
+      if (fType === 'School Fee' && (p.paymentType||p.type||'').toLowerCase() !== 'school fee') return false;
+      if (fType === 'Levy' && (p.paymentType||p.type||'').toLowerCase() === 'school fee') return false;
+    }
+    if (search) {
+      const name = ((p.studentName||p.name||'')).toLowerCase();
+      const reg = (p.regNumber||'').toLowerCase();
+      if (!name.includes(search) && !reg.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // Summary
+  const totalCollected = filtered
+    .filter(p => (p.status||'').toLowerCase() === 'success')
+    .reduce((sum, p) => sum + (Number(p.amount)||0), 0);
+  document.getElementById('payTotalAmt').textContent = '₦' + totalCollected.toLocaleString();
+  document.getElementById('payCount').textContent = filtered.length;
+
+  const tbody = document.getElementById('payTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><p>No payments found</p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+    const status = (p.status||'pending').toLowerCase();
+    const badgeCls = status === 'success' ? 'b-green' : 'b-gold';
+    const badgeTxt = status === 'success' ? 'Success' : 'Pending';
+    const date = p.date ? (p.date.toDate ? formatDate(p.date.toDate().toISOString().split('T')[0]) : formatDate(p.date)) : '—';
+    const amount = Number(p.amount||0).toLocaleString('en-NG', {style:'currency',currency:'NGN',minimumFractionDigits:0});
+    const type = p.paymentType || p.type || p.paymenttype || '—';
+    return `<tr>
+      <td style="white-space:nowrap">${date}</td>
+      <td>${escapeHtml(p.studentName||p.name||'—')}</td>
+      <td style="font-size:.78rem">${escapeHtml(p.regNumber||'—')}</td>
+      <td>${escapeHtml(p.class||'—')}</td>
+      <td>${escapeHtml(type)}</td>
+      <td>${escapeHtml(p.term||'—')}</td>
+      <td>${escapeHtml(p.session||'—')}</td>
+      <td style="white-space:nowrap">${amount}</td>
+      <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+      <td style="font-size:.75rem;color:var(--muted);word-break:break-all;max-width:140px">${escapeHtml(p.reference||p.paystackRef||'—')}</td>
+    </tr>`;
+  }).join('');
+};
+
+window.closeDlg = ()=> document.getElementById('dlgOv').classList.remove('show');
+
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast '+type+' show';
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+function formatDate(dStr){
+  if(!dStr) return '—';
+  const d = new Date(dStr+'T00:00:00');
+  if(isNaN(d.getTime())) return dStr;
+  return d.toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' });
+}
+</script>
+<script type="module" src="cbt-admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admission Application — School Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════════════════
+   RESET & TOKENS
+══════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* Brand palette */
+  --navy:     #0d1f3c;
+  --navy-mid: #162e52;
+  --navy-lit: #1e3d6b;
+  --accent:   #b8902a;   /* warm gold — the signature */
+  --accent-lt:#fdf8ec;
+
+  /* Surfaces */
+  --bg:       #f5f7fc;
+  --surface:  #ffffff;
+  --surface2: #f5f7fc;
+
+  /* Borders */
+  --border:   #e2e8f2;
+  --border-lt:#eef1f8;
+
+  /* Type */
+  --text:     #0d1a2e;
+  --text-mid: #374151;
+  --muted:    #64748b;
+
+  /* Status */
+  --ok:       #15803d;
+  --ok-bg:    #f0fdf4;
+  --ok-b:     #bbf7d0;
+  --err:      #dc2626;
+  --err-bg:   #fef2f2;
+  --err-b:    #fecaca;
+  --warn:     #b45309;
+  --warn-bg:  #fffbeb;
+  --warn-b:   #fde68a;
+
+  /* Input */
+  --inp:      #f5f7fc;
+  --inp-focus:#ffffff;
+
+  /* Radius & shadow */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   18px;
+  --shadow-card: 0 1px 3px rgba(13,31,60,.06), 0 4px 16px rgba(13,31,60,.05);
+  --shadow-float:0 8px 32px rgba(13,31,60,.13);
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ══════════════════════════════════════════════════════
+   PAGE HEADER  — signature: gold accent stripe at top
+══════════════════════════════════════════════════════ */
+.page-header{
+  background:var(--navy);
+  padding:0;
+  position:relative;
+  overflow:hidden;
+}
+/* Gold top stripe — the single distinguishing mark */
+.page-header::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  background:var(--accent);
+}
+/* Subtle geometric texture */
+.page-header::after{
+  content:'';
+  position:absolute;
+  top:-120px;right:-80px;
+  width:360px;height:360px;
+  border-radius:50%;
+  background:rgba(184,144,42,.06);
+  pointer-events:none;
+}
+.header-inner{
+  max-width:860px;
+  margin:0 auto;
+  padding:20px 28px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  position:relative;
+}
+.header-mark{
+  width:44px;height:44px;
+  border-radius:10px;
+  background:rgba(184,144,42,.15);
+  border:1px solid rgba(184,144,42,.3);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.header-mark svg{
+  width:22px;height:22px;
+  fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;
+}
+.header-text h1{
+  font-family:'DM Serif Display',serif;
+  font-size:1.25rem;
+  color:#fff;
+  line-height:1.25;
+  letter-spacing:-.01em;
+}
+.header-text p{
+  font-size:.68rem;
+  color:rgba(255,255,255,.42);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-top:3px;
+}
+
+/* ══════════════════════════════════════════════════════
+   PAGE BODY
+══════════════════════════════════════════════════════ */
+.page-body{
+  max-width:860px;
+  margin:0 auto;
+  padding:32px 24px 72px;
+}
+
+/* ══════════════════════════════════════════════════════
+   STEP PROGRESS BAR
+══════════════════════════════════════════════════════ */
+.step-bar{
+  display:flex;
+  align-items:stretch;
+  margin-bottom:32px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+}
+.step-item{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px 20px;
+  font-size:.8rem;
+  color:var(--muted);
+  transition:background .25s, color .25s;
+  position:relative;
+  cursor:default;
+}
+.step-item:not(:last-child)::after{
+  content:'';
+  position:absolute;
+  right:0;top:20%;
+  width:1px;height:60%;
+  background:var(--border-lt);
+}
+
+/* Step number bubble */
+.step-num{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:var(--border-lt);
+  border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;
+  color:var(--muted);
+  flex-shrink:0;
+  transition:all .25s;
+}
+
+/* Active step */
+.step-item.active{
+  background:rgba(13,31,60,.03);
+  color:var(--navy);
+}
+.step-item.active .step-num{
+  background:var(--navy);
+  border-color:var(--navy);
+  color:#fff;
+  box-shadow:0 0 0 3px rgba(13,31,60,.12);
+}
+.step-item.active .step-label{font-weight:600}
+
+/* Done step */
+.step-item.done .step-num{
+  background:var(--ok);
+  border-color:var(--ok);
+  color:#fff;
+}
+.step-item.done{color:var(--ok)}
+
+/* Sub-label */
+.step-label span{
+  display:block;
+  font-size:.65rem;
+  color:var(--muted);
+  font-weight:400;
+  margin-top:2px;
+  line-height:1.3;
+}
+.step-item.active .step-label span{color:var(--muted)}
+
+/* ══════════════════════════════════════════════════════
+   SCREENS
+══════════════════════════════════════════════════════ */
+.screen{display:none;animation:fadeUp .32s cubic-bezier(.22,.8,.36,1) both}
+.screen.active{display:block}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+
+/* ══════════════════════════════════════════════════════
+   FORM CARDS
+══════════════════════════════════════════════════════ */
+.form-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:32px;
+  margin-bottom:20px;
+  box-shadow:var(--shadow-card);
+}
+.form-card-hdr{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:26px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border-lt);
+}
+.form-card-hdr .icon{
+  width:40px;height:40px;
+  border-radius:10px;
+  background:var(--accent-lt);
+  border:1px solid rgba(184,144,42,.25);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.form-card-hdr .icon svg{
+  width:18px;height:18px;
+  fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;
+}
+.form-card-hdr h2{
+  font-size:1rem;font-weight:700;
+  color:var(--navy);
+  letter-spacing:-.01em;
+  line-height:1.3;
+}
+.form-card-hdr p{
+  font-size:.77rem;
+  color:var(--muted);
+  margin-top:3px;
+  line-height:1.45;
+}
+
+/* ══════════════════════════════════════════════════════
+   GRID
+══════════════════════════════════════════════════════ */
+.form-grid{display:grid;gap:18px 20px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g1{grid-template-columns:1fr}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+.span-2{grid-column:span 2}
+@media(max-width:600px){.span-2{grid-column:span 1}}
+
+/* ══════════════════════════════════════════════════════
+   FORM ELEMENTS
+══════════════════════════════════════════════════════ */
+.fg{display:flex;flex-direction:column;gap:7px}
+
+.fg label{
+  font-size:.67rem;
+  font-weight:700;
+  color:var(--text-mid);
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.fg label .req{color:var(--accent);margin-left:2px}
+
+.fg input,
+.fg select,
+.fg textarea{
+  width:100%;
+  padding:11px 14px;
+  background:var(--inp);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-size:.875rem;
+  font-family:'DM Sans',sans-serif;
+  outline:none;
+  transition:border-color .18s, background .18s, box-shadow .18s;
+  -webkit-appearance:none;
+}
+.fg input::placeholder,
+.fg textarea::placeholder{color:#94a3b8}
+
+.fg input:focus,
+.fg select:focus,
+.fg textarea:focus{
+  border-color:var(--navy-lit);
+  background:var(--inp-focus);
+  box-shadow:0 0 0 3.5px rgba(30,68,128,.1);
+}
+
+.fg select{
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237386a8' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:38px;
+}
+
+.fg textarea{
+  resize:vertical;
+  min-height:88px;
+  line-height:1.6;
+}
+
+.fg .hint{
+  font-size:.7rem;
+  color:var(--muted);
+  line-height:1.4;
+}
+
+/* ══════════════════════════════════════════════════════
+   SECTION DIVIDER
+══════════════════════════════════════════════════════ */
+.section-divider{
+  font-size:.63rem;
+  font-weight:700;
+  color:var(--accent);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  margin:26px 0 18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.section-divider::before{
+  content:'';
+  width:14px;height:1.5px;
+  background:var(--accent);
+  flex-shrink:0;
+}
+.section-divider::after{
+  content:'';
+  flex:1;height:1px;
+  background:var(--border-lt);
+}
+
+/* ══════════════════════════════════════════════════════
+   ALERT BANNERS
+══════════════════════════════════════════════════════ */
+.form-alert{
+  padding:13px 16px;
+  border-radius:var(--r-sm);
+  font-size:.81rem;
+  line-height:1.5;
+  margin-bottom:20px;
+  display:none;
+  align-items:flex-start;
+  gap:10px;
+}
+.form-alert.show{display:flex}
+.form-alert svg{
+  width:16px;height:16px;
+  fill:none;stroke:currentColor;stroke-width:2;
+  flex-shrink:0;margin-top:1px;
+}
+.form-alert.err{
+  background:var(--err-bg);
+  border:1px solid var(--err-b);
+  color:var(--err);
+}
+.form-alert.warn{
+  background:var(--warn-bg);
+  border:1px solid var(--warn-b);
+  color:var(--warn);
+}
+
+/* ══════════════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════════════ */
+.btn-row{
+  display:flex;
+  gap:12px;
+  margin-top:28px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+.btn{
+  padding:12px 26px;
+  border-radius:var(--r-sm);
+  border:none;
+  font-family:'DM Sans',sans-serif;
+  font-size:.88rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .18s;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+  letter-spacing:.01em;
+}
+.btn svg{
+  width:15px;height:15px;
+  fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;
+}
+
+.btn-primary{
+  background:var(--navy);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(13,31,60,.25);
+}
+.btn-primary:hover{
+  background:var(--navy-mid);
+  box-shadow:0 4px 14px rgba(13,31,60,.32);
+  transform:translateY(-1px);
+}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+.btn-ghost{
+  background:var(--surface);
+  color:var(--text-mid);
+  border:1.5px solid var(--border);
+}
+.btn-ghost:hover{
+  border-color:var(--navy-lit);
+  color:var(--navy);
+  background:var(--surface2);
+}
+
+/* ══════════════════════════════════════════════════════
+   PAYMENT SCREEN
+══════════════════════════════════════════════════════ */
+/* Summary card with gold accent bar at left */
+.summary-card{
+  background:var(--navy);
+  border-radius:var(--r-lg);
+  padding:28px 28px 28px 32px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(13,31,60,.22);
+}
+.summary-card::before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:4px;
+  background:var(--accent);
+}
+.summary-card::after{
+  content:'';
+  position:absolute;
+  bottom:-80px;right:-60px;
+  width:260px;height:260px;
+  border-radius:50%;
+  background:rgba(184,144,42,.06);
+  pointer-events:none;
+}
+
+.sc-label{
+  font-size:.63rem;font-weight:700;
+  color:rgba(255,255,255,.4);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:4px;
+}
+.sc-name{
+  font-family:'DM Serif Display',serif;
+  font-size:1.5rem;color:#fff;
+  margin-bottom:2px;letter-spacing:-.01em;
+}
+.sc-sub{font-size:.82rem;color:rgba(255,255,255,.55);margin-bottom:20px}
+.sc-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+.sc-meta-item .sc-mi-label{
+  font-size:.6rem;
+  color:rgba(255,255,255,.38);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:3px;
+}
+.sc-meta-item .sc-mi-val{
+  font-size:.875rem;
+  color:rgba(255,255,255,.88);
+  font-weight:500;
+}
+
+/* Fee box */
+.fee-box{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  padding:20px 24px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  box-shadow:var(--shadow-card);
+}
+.fee-box-l .fee-label{
+  font-size:.65rem;font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:4px;
+}
+.fee-box-l .fee-name{
+  font-size:.95rem;font-weight:600;
+  color:var(--navy);
+}
+.fee-amount{
+  font-family:'DM Serif Display',serif;
+  font-size:2rem;color:var(--navy);
+}
+
+/* Pay button */
+.pay-btn{
+  width:100%;
+  padding:15px 24px;
+  background:var(--navy);
+  color:#fff;
+  border:none;
+  border-radius:var(--r-sm);
+  font-family:'DM Sans',sans-serif;
+  font-size:.95rem;font-weight:700;
+  cursor:pointer;
+  transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 2px 10px rgba(13,31,60,.26);
+  letter-spacing:.01em;
+}
+.pay-btn:hover{
+  background:var(--navy-mid);
+  box-shadow:0 4px 18px rgba(13,31,60,.34);
+  transform:translateY(-1px);
+}
+.pay-btn:active{transform:translateY(0)}
+.pay-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.pay-btn svg{
+  width:17px;height:17px;
+  fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;
+}
+
+/* Trust line below pay button */
+.pay-note{
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:.73rem;
+  color:var(--muted);
+  justify-content:center;
+  letter-spacing:.01em;
+}
+.pay-note svg{
+  width:13px;height:13px;
+  fill:none;stroke:var(--muted);stroke-width:2;flex-shrink:0;
+}
+
+/* ══════════════════════════════════════════════════════
+   SUCCESS SCREEN
+══════════════════════════════════════════════════════ */
+.success-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:48px 36px;
+  text-align:center;
+  max-width:580px;
+  margin:0 auto;
+  box-shadow:var(--shadow-float);
+}
+@media(max-width:480px){.success-card{padding:36px 22px}}
+
+.success-icon{
+  width:72px;height:72px;
+  border-radius:50%;
+  background:var(--ok-bg);
+  border:2px solid var(--ok-b);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 22px;
+}
+.success-icon svg{
+  width:34px;height:34px;
+  fill:none;stroke:var(--ok);stroke-width:2.2;stroke-linecap:round;
+}
+
+.success-card h2{
+  font-family:'DM Serif Display',serif;
+  font-size:1.75rem;
+  color:var(--navy);
+  margin-bottom:8px;
+  letter-spacing:-.02em;
+}
+.success-card .s-sub{
+  font-size:.87rem;
+  color:var(--muted);
+  margin-bottom:30px;
+  line-height:1.6;
+  max-width:380px;
+  margin-left:auto;margin-right:auto;
+}
+
+.ref-box{
+  background:var(--surface2);
+  border:1.5px dashed var(--border);
+  border-radius:var(--r-md);
+  padding:18px 22px;
+  margin-bottom:20px;
+}
+.ref-label{
+  font-size:.62rem;font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:5px;
+}
+.ref-number{
+  font-size:1.1rem;font-weight:700;
+  color:var(--navy);letter-spacing:.05em;
+  font-family:'DM Serif Display',serif;
+  word-break:break-all;
+}
+
+.success-details{
+  text-align:left;
+  background:var(--surface2);
+  border:1px solid var(--border-lt);
+  border-radius:var(--r-md);
+  padding:4px 20px;
+  margin-bottom:24px;
+}
+.sd-row{
+  display:flex;justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border-lt);
+  font-size:.83rem;
+}
+.sd-row:last-child{border-bottom:none}
+.sd-row span:first-child{
+  color:var(--muted);
+  font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  flex-shrink:0;
+}
+.sd-row span:last-child{
+  color:var(--text);font-weight:500;text-align:right;
+}
+
+.contact-msg{
+  font-size:.8rem;color:var(--warn);
+  line-height:1.65;
+  margin-bottom:24px;
+  padding:14px 18px;
+  background:var(--warn-bg);
+  border:1px solid var(--warn-b);
+  border-radius:var(--r-sm);
+  text-align:left;
+}
+.contact-msg strong{font-weight:700}
+
+.btn-restart{
+  width:100%;
+  padding:13px;
+  background:var(--navy);
+  color:#fff;
+  border:none;
+  border-radius:var(--r-sm);
+  font-family:'DM Sans',sans-serif;
+  font-size:.9rem;font-weight:700;
+  cursor:pointer;
+  transition:all .18s;
+  box-shadow:0 2px 8px rgba(13,31,60,.22);
+}
+.btn-restart:hover{
+  background:var(--navy-mid);
+  transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(13,31,60,.3);
+}
+
+/* ══════════════════════════════════════════════════════
+   SPINNER
+══════════════════════════════════════════════════════ */
+.spinner{
+  display:inline-block;
+  width:15px;height:15px;
+  border:2px solid rgba(255,255,255,.28);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════ */
+.toast{
+  position:fixed;
+  bottom:24px;right:24px;
+  z-index:900;
+  padding:12px 18px;
+  border-radius:var(--r-sm);
+  font-size:.83rem;font-weight:500;
+  display:none;
+  align-items:center;
+  gap:9px;
+  box-shadow:var(--shadow-float);
+  animation:fadeUp .22s ease;
+  max-width:340px;
+  line-height:1.4;
+}
+.toast.show{display:flex}
+.toast svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+.toast.t-ok {background:var(--ok-bg); border:1px solid var(--ok-b); color:var(--ok)}
+.toast.t-err{background:var(--err-bg);border:1px solid var(--err-b);color:var(--err)}
+.toast.t-warn{background:var(--warn-bg);border:1px solid var(--warn-b);color:var(--warn)}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE TWEAKS
+══════════════════════════════════════════════════════ */
+@media(max-width:600px){
+  .page-body{padding:20px 16px 56px}
+  .form-card{padding:22px 18px}
+  .btn-row{justify-content:stretch}
+  .btn-row .btn{flex:1;justify-content:center}
+  .fee-box{flex-direction:column;align-items:flex-start;gap:8px}
+  .fee-amount{font-size:1.65rem}
+  .sc-meta{grid-template-columns:1fr}
+  .step-label span{display:none}
+  .step-item{padding:14px 12px;gap:8px}
+  .header-inner{padding:18px 16px}
+}
+
+/* ══════════════════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════════════════ */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(13,31,60,.14);border-radius:10px}
+
+/* ══════════════════════════════════════════════════════
+   REDUCED MOTION
+══════════════════════════════════════════════════════ */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="header-inner">
+    <div class="header-mark">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Admission Application</h1>
+      <p>School Management System</p>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- STEP INDICATOR -->
+  <div class="step-bar">
+    <div class="step-item active" id="stepItem1">
+      <div class="step-num">1</div>
+      <div class="step-label">Fill Application<span>Personal &amp; parent info</span></div>
+    </div>
+    <div class="step-item" id="stepItem2">
+      <div class="step-num">2</div>
+      <div class="step-label">Pay &amp; Submit<span>₦10,000 registration fee</span></div>
+    </div>
+  </div>
+
+  <!-- ══════════ SCREEN 1: APPLICATION FORM ══════════ -->
+  <div class="screen active" id="screen1">
+
+    <div class="form-alert err" id="formAlert">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="formAlertMsg"></span>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div><h2>Personal Information</h2><p>Details about the applicant</p></div>
+      </div>
+
+      <div class="form-grid g2">
+        <div class="fg">
+          <label>First Name <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="e.g. Amara" autocomplete="given-name"/>
+        </div>
+        <div class="fg">
+          <label>Last Name <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="e.g. Okonkwo" autocomplete="family-name"/>
+        </div>
+        <div class="fg">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob"/>
+        </div>
+        <div class="fg">
+          <label>Gender <span class="req">*</span></label>
+          <select id="gender">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>State of Origin <span class="req">*</span></label>
+          <input type="text" id="stateOfOrigin" placeholder="e.g. Lagos"/>
+        </div>
+        <div class="fg">
+          <label>LGA</label>
+          <input type="text" id="lga" placeholder="e.g. Ikeja"/>
+        </div>
+        <div class="fg">
+          <label>Nationality</label>
+          <input type="text" id="nationality" value="Nigerian"/>
+        </div>
+        <div class="fg">
+          <label>Blood Group</label>
+          <select id="bloodGroup">
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Genotype</label>
+          <select id="genotype">
+            <option value="">Select</option>
+            <option>AA</option><option>AS</option>
+            <option>SS</option><option>AC</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Class Applying For <span class="req">*</span></label>
+          <select id="classApplied">
+            <option value="">Select class</option>
+            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            <option>SS1</option><option>SS2</option><option>SS3</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-divider">Previous School</div>
+
+      <div class="form-grid g2">
+        <div class="fg">
+          <label>Previous School Name</label>
+          <input type="text" id="prevSchool" placeholder="e.g. Sunshine Academy"/>
+        </div>
+        <div class="fg">
+          <label>Last Class Attended</label>
+          <input type="text" id="lastClass" placeholder="e.g. JSS3"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parent / Guardian -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><h2>Parent / Guardian Information</h2><p>Contact details for the applicant's guardian</p></div>
+      </div>
+
+      <div class="form-grid g2">
+        <div class="fg">
+          <label>Father's Full Name</label>
+          <input type="text" id="fatherName" placeholder="e.g. Chukwudi Okonkwo"/>
+        </div>
+        <div class="fg">
+          <label>Mother's Full Name</label>
+          <input type="text" id="motherName" placeholder="e.g. Ngozi Okonkwo"/>
+        </div>
+        <div class="fg">
+          <label>Guardian Name <span class="hint" style="text-transform:none;font-weight:400;letter-spacing:0">(if different)</span></label>
+          <input type="text" id="guardianName" placeholder="Leave blank if same as above"/>
+        </div>
+        <div class="fg">
+          <label>Guardian Relationship</label>
+          <input type="text" id="guardianRelationship" placeholder="e.g. Uncle, Aunt"/>
+        </div>
+        <div class="fg">
+          <label>Primary Phone <span class="req">*</span></label>
+          <input type="tel" id="primaryPhone" placeholder="e.g. 08012345678"/>
+        </div>
+        <div class="fg">
+          <label>Secondary Phone</label>
+          <input type="tel" id="secondaryPhone" placeholder="e.g. 08098765432"/>
+        </div>
+        <div class="fg span-2">
+          <label>Email Address</label>
+          <input type="email" id="parentEmail" placeholder="e.g. parent@example.com"/>
+          <span class="hint">Used for payment receipt — leave blank if none</span>
+        </div>
+        <div class="fg span-2">
+          <label>Home Address</label>
+          <textarea id="homeAddress" placeholder="e.g. 12 Okafor Street, Surulere, Lagos"></textarea>
+        </div>
+        <div class="fg">
+          <label>Emergency Contact Name</label>
+          <input type="text" id="emergencyName" placeholder="e.g. Emeka Eze"/>
+        </div>
+        <div class="fg">
+          <label>Emergency Contact Phone</label>
+          <input type="tel" id="emergencyPhone" placeholder="e.g. 07011223344"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passport Photo + Documents -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <div><h2>Passport Photograph</h2><p>Upload a clear recent passport photo of the applicant</p></div>
+      </div>
+
+      <div class="fg" style="margin-bottom:20px">
+        <label>Passport Photo <span class="req">*</span></label>
+        <div id="passportDropzone" style="border:2px dashed var(--border);border-radius:11px;padding:24px;text-align:center;cursor:pointer;background:var(--inp);transition:all .2s" onclick="document.getElementById('passportFileInput').click()">
+          <input type="file" id="passportFileInput" accept="image/*" style="display:none" onchange="handlePassportSelect(this)"/>
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;margin-bottom:8px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div style="font-size:.82rem;font-weight:600;color:var(--navy2)">Click to select passport photo</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:4px">JPG, PNG or WEBP · Max 1MB · Will be compressed automatically</div>
+        </div>
+
+        <!-- Preview -->
+        <div id="passportPreview" style="display:none;margin-top:12px;display:none;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px">
+          <img id="passportThumb" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)" src="" alt="preview"/>
+          <div style="flex:1;min-width:0">
+            <div id="passportFileName" style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+            <div id="passportFileSize" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+          </div>
+          <button onclick="clearPassport()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px">✕</button>
+        </div>
+        <div id="passportError" style="display:none;font-size:.75rem;color:var(--err);margin-top:6px"></div>
+      </div>
+
+      <!-- Other docs notice -->
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;">
+        <p style="font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:8px">📋 Other Required Documents — Bring Physically on Resumption</p>
+        <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:.78rem;color:var(--muted)">Birth certificate or sworn affidavit</li>
+          <li style="font-size:.78rem;color:var(--muted)">Previous school report card (last term)</li>
+          <li style="font-size:.78rem;color:var(--muted)">JSCE / BECE result <span style="color:var(--muted);font-style:italic">(SS1 applicants only)</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="nextBtn" onclick="goToStep2()">
+        Next: Proceed to Payment
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div><!-- /screen1 -->
+
+  <!-- ══════════ SCREEN 2: PAYMENT ══════════ -->
+  <div class="screen" id="screen2">
+
+    <div class="form-alert err" id="payAlert">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="payAlertMsg"></span>
+    </div>
+
+    <!-- Summary card -->
+    <div class="summary-card">
+      <div class="sc-label">Application Summary</div>
+      <div class="sc-name" id="summaryName">—</div>
+      <div class="sc-sub" id="summaryClass">—</div>
+      <div class="sc-meta">
+        <div class="sc-meta-item">
+          <div class="sc-mi-label">Primary Phone</div>
+          <div class="sc-mi-val" id="summaryPhone">—</div>
+        </div>
+        <div class="sc-meta-item">
+          <div class="sc-mi-label">Email</div>
+          <div class="sc-mi-val" id="summaryEmail">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fee box -->
+    <div class="fee-box">
+      <div class="fee-box-l">
+        <div class="fee-label">Registration Fee</div>
+        <div class="fee-name">One-time admission processing fee</div>
+      </div>
+      <div class="fee-amount">₦10,000</div>
+    </div>
+
+    <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Pay Registration Fee
+    </button>
+
+    <div class="pay-note">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Secured by Paystack · Your payment details are encrypted
+    </div>
+
+    <div class="btn-row" style="margin-top:18px;justify-content:flex-start">
+      <button class="btn btn-ghost" onclick="goBackToForm()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Form
+      </button>
+    </div>
+  </div><!-- /screen2 -->
+
+  <!-- ══════════ SCREEN 3: SUCCESS ══════════ -->
+  <div class="screen" id="screen3">
+    <div class="success-card">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Application Submitted!</h2>
+      <p class="s-sub">Your admission application has been received and is now under review.</p>
+
+      <div class="ref-box">
+        <div class="ref-label">Application Reference Number</div>
+        <div class="ref-number" id="refNumber">—</div>
+      </div>
+
+      <div class="success-details">
+        <div class="sd-row"><span>Applicant</span><span id="sucName">—</span></div>
+        <div class="sd-row"><span>Class Applied</span><span id="sucClass">—</span></div>
+        <div class="sd-row"><span>Parent Phone</span><span id="sucPhone">—</span></div>
+        <div class="sd-row"><span>Payment Status</span><span style="color:var(--ok);font-weight:700">✓ Paid</span></div>
+      </div>
+
+      <div class="contact-msg">
+        <strong>Keep your reference number safe.</strong><br/>
+        The school will contact you on <strong id="sucPhoneInline">—</strong> once your application is reviewed.
+      </div>
+
+      <button class="btn-restart" onclick="resetForm()">Apply for Another Student</button>
+    </div>
+  </div><!-- /screen3 -->
+
+</div><!-- /page-body -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+/* ═══════════════════════════════════════════
+   CONFIG — Replace placeholders before going live
+   ═══════════════════════════════════════════ */
+const PAYSTACK_PUBLIC_KEY = "pk_test_18ca2741786aa5eb29938cac8334563f20dd0e4b";
+const VERIFY_ENDPOINT     = "https://paystacktest.vercel.app/api/verify";
+
+/* ── Firebase (same project as admin.html + student.html) ── */
+const cfg = {
+  apiKey:            "AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",
+  authDomain:        "veil-1-bd7b5.firebaseapp.com",
+  projectId:         "veil-1-bd7b5",
+  storageBucket:     "veil-1-bd7b5.firebasestorage.app",
+  messagingSenderId: "526021682048",
+  appId:             "1:526021682048:web:a52dae5b2650ca951ad765"
+};
+const app = initializeApp(cfg);
+const db  = getFirestore(app);
+
+const REGISTRATION_FEE_KOBO = 1000000; // ₦10,000
+
+let pendingDocId = null;
+let passportBase64 = null; // stores compressed Base64 string
+
+/* ══════════════════════════════════════════
+   PASSPORT PHOTO — Base64 via Canvas
+   ══════════════════════════════════════════ */
+window.handlePassportSelect = function(input){
+  const file = input.files[0];
+  if(!file) return;
+
+  const errEl = document.getElementById('passportError');
+  errEl.style.display = 'none';
+
+  if(!file.type.startsWith('image/')){
+    errEl.textContent = 'Please select an image file (JPG, PNG, WEBP).';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    errEl.textContent = 'File too large. Please select an image under 5MB.';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      // Compress via canvas — max 400x400, quality 0.75
+      const canvas = document.createElement('canvas');
+      const MAX = 400;
+      let w = img.width, h = img.height;
+      if(w > h){ if(w > MAX){ h = Math.round(h * MAX/w); w = MAX; } }
+      else      { if(h > MAX){ w = Math.round(w * MAX/h); h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      passportBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+      // Show preview
+      const preview = document.getElementById('passportPreview');
+      document.getElementById('passportThumb').src = passportBase64;
+      document.getElementById('passportFileName').textContent = file.name;
+      const sizeKB = Math.round((passportBase64.length * 3/4) / 1024);
+      document.getElementById('passportFileSize').textContent = `Compressed: ~${sizeKB} KB`;
+      preview.style.display = 'flex';
+
+      // Style dropzone
+      document.getElementById('passportDropzone').style.borderColor = 'var(--ok-b)';
+      document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.clearPassport = function(){
+  passportBase64 = null;
+  document.getElementById('passportFileInput').value = '';
+  document.getElementById('passportPreview').style.display = 'none';
+  document.getElementById('passportDropzone').style.borderColor = '';
+  document.getElementById('passportDropzone').style.background = '';
+};
+/* ══════════════════════════════════════════
+   FORM VALIDATION
+   ══════════════════════════════════════════ */
+function getFormData(){
+  return {
+    firstName:       v('firstName'),
+    lastName:        v('lastName'),
+    dob:             v('dob'),
+    gender:          v('gender'),
+    stateOfOrigin:   v('stateOfOrigin'),
+    lga:             v('lga'),
+    nationality:     v('nationality') || 'Nigerian',
+    bloodGroup:      v('bloodGroup'),
+    genotype:        v('genotype'),
+    classApplied:    v('classApplied'),
+    prevSchool:      v('prevSchool'),
+    lastClass:       v('lastClass'),
+    fatherName:      v('fatherName'),
+    motherName:      v('motherName'),
+    guardianName:    v('guardianName'),
+    guardianRelationship: v('guardianRelationship'),
+    primaryPhone:    v('primaryPhone'),
+    secondaryPhone:  v('secondaryPhone'),
+    parentEmail:     v('parentEmail'),
+    homeAddress:     v('homeAddress'),
+    emergencyName:   v('emergencyName'),
+    emergencyPhone:  v('emergencyPhone')
+  };
+}
+
+function v(id){ return document.getElementById(id).value.trim(); }
+
+function validateForm(){
+  const d = getFormData();
+  if(!d.firstName)         return 'First name is required.';
+  if(!d.lastName)          return 'Last name is required.';
+  if(!d.dob)               return 'Date of birth is required.';
+  if(!d.gender)            return 'Please select a gender.';
+  if(!d.stateOfOrigin)     return 'State of origin is required.';
+  if(!d.classApplied)      return 'Please select the class applying for.';
+  if(!d.primaryPhone)      return 'Primary phone number is required.';
+  if(!passportBase64)      return 'Passport photograph is required.';
+  return null;
+}
+
+/* ══════════════════════════════════════════
+   STEP NAVIGATION
+   ══════════════════════════════════════════ */
+window.goToStep2 = function(){
+  hideAlert('formAlert');
+  const err = validateForm();
+  if(err){ showAlert('formAlert', 'formAlertMsg', err); scrollToTop(); return; }
+
+  const d = getFormData();
+  const fullName = `${d.firstName} ${d.lastName}`;
+  document.getElementById('summaryName').textContent  = fullName;
+  document.getElementById('summaryClass').textContent = `Applying for ${d.classApplied}`;
+  document.getElementById('summaryPhone').textContent = d.primaryPhone;
+  document.getElementById('summaryEmail').textContent = d.parentEmail || '(not provided)';
+
+  showScreen(2);
+};
+
+window.goBackToForm = function(){
+  showScreen(1);
+};
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen'+n).classList.add('active');
+  updateStepBar(n);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function updateStepBar(n){
+  const s1 = document.getElementById('stepItem1');
+  const s2 = document.getElementById('stepItem2');
+  s1.className = 'step-item';
+  s2.className = 'step-item';
+  if(n === 1){ s1.classList.add('active'); }
+  if(n === 2){ s1.classList.add('done'); s2.classList.add('active'); }
+  if(n === 3){ s1.classList.add('done'); s2.classList.add('done'); }
+}
+
+/* ══════════════════════════════════════════
+   PAYSTACK PAYMENT
+   ══════════════════════════════════════════ */
+window.initiatePayment = function(){
+  hideAlert('payAlert');
+
+  if(PAYSTACK_PUBLIC_KEY.includes('REPLACE')){
+    showAlert('payAlert','payAlertMsg','Payment is not configured yet. Set PAYSTACK_PUBLIC_KEY first.');
+    return;
+  }
+  if(!window.PaystackPop){
+    showAlert('payAlert','payAlertMsg','Payment service failed to load. Please check your connection and refresh.');
+    return;
+  }
+
+  const d = getFormData();
+  const fullName = `${d.firstName} ${d.lastName}`;
+  const email = d.parentEmail || `applicant.${Date.now()}@register.local`;
+
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Opening payment…';
+
+  const handler = window.PaystackPop.setup({
+    key:      PAYSTACK_PUBLIC_KEY,
+    email,
+    amount:   REGISTRATION_FEE_KOBO,
+    currency: 'NGN',
+    metadata: {
+      applicantName: fullName,
+      classApplied:  d.classApplied,
+      phone:         d.primaryPhone
+    },
+    callback: function(response){
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      verifyAndSubmit(response.reference);
+    },
+    onClose: function(){
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      showToast('Payment window closed. Try again when ready.', 'warn');
+    }
+  });
+  handler.openIframe();
+};
+
+async function verifyAndSubmit(reference){
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Verifying payment…';
+  showToast('Verifying payment…', 'warn');
+
+  try{
+    // Verify with Vercel endpoint
+    const verifyRes = await fetch(VERIFY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference })
+    });
+    const verifyData = await verifyRes.json();
+
+    if(!verifyRes.ok || !verifyData.status){
+      showAlert('payAlert','payAlertMsg',
+        'Payment verification failed. Please contact the school office with reference: ' + reference);
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      return;
+    }
+
+    // Payment verified — now build the full Firestore record
+    btn.innerHTML = '<span class="spinner"></span> Submitting application…';
+
+    const d = getFormData();
+    const fullName = `${d.firstName} ${d.lastName}`;
+
+    const docData = {
+      firstName:       d.firstName,
+      lastName:        d.lastName,
+      fullName,
+      dob:             d.dob,
+      gender:          d.gender,
+      stateOfOrigin:   d.stateOfOrigin,
+      lga:             d.lga,
+      nationality:     d.nationality,
+      bloodGroup:      d.bloodGroup,
+      genotype:        d.genotype,
+      classApplied:    d.classApplied,
+      prevSchool:      d.prevSchool,
+      lastClass:       d.lastClass,
+      fatherName:      d.fatherName,
+      motherName:      d.motherName,
+      guardianName:    d.guardianName,
+      guardianRelationship: d.guardianRelationship,
+      primaryPhone:    d.primaryPhone,
+      secondaryPhone:  d.secondaryPhone,
+      parentEmail:     d.parentEmail,
+      homeAddress:     d.homeAddress,
+      emergencyName:   d.emergencyName,
+      emergencyPhone:  d.emergencyPhone,
+      paystackReference: reference,
+      amountPaid:     10000,
+      paymentStatus:  'success',
+      passportPhoto:  passportBase64,
+      status:         'pending',
+      submittedAt:    serverTimestamp()
+    };
+
+    const newRef = await addDoc(collection(db, 'applications'), docData);
+    const finalDocId = newRef.id;
+
+    // Show success screen
+    document.getElementById('refNumber').textContent    = finalDocId;
+    document.getElementById('sucName').textContent      = fullName;
+    document.getElementById('sucClass').textContent     = d.classApplied;
+    document.getElementById('sucPhone').textContent     = d.primaryPhone;
+    document.getElementById('sucPhoneInline').textContent = d.primaryPhone;
+
+    showScreen(3);
+
+  } catch(e){
+    showAlert('payAlert','payAlertMsg','Submission failed: ' + e.message + '. Reference: ' + reference);
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+  }
+}
+
+/* ══════════════════════════════════════════
+   RESET
+   ══════════════════════════════════════════ */
+window.resetForm = function(){
+  // Clear inputs
+  ['firstName','lastName','dob','gender','stateOfOrigin','lga',
+   'bloodGroup','genotype','classApplied','prevSchool','lastClass',
+   'fatherName','motherName','guardianName','guardianRelationship',
+   'primaryPhone','secondaryPhone','parentEmail','homeAddress',
+   'emergencyName','emergencyPhone'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = id === 'nationality' ? 'Nigerian' : '';
+  });
+  document.getElementById('nationality').value = 'Nigerian';
+
+  clearPassport();
+  pendingDocId = null;
+  hideAlert('formAlert');
+  hideAlert('payAlert');
+  showScreen(1);
+};
+
+/* ══════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════ */
+function showAlert(alertId, msgId, msg){
+  document.getElementById(msgId).textContent = msg;
+  document.getElementById(alertId).classList.add('show');
+}
+function hideAlert(alertId){
+  document.getElementById(alertId).classList.remove('show');
+}
+
+function showToast(msg, type='ok'){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast t-'+type+' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove('show'), 3400);
+}
+
+function scrollToTop(){
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+
+
+// Expose for inline handlers
+window.showToast = showToast;
+
+// Step-1 done mark on step number
+document.getElementById('stepItem1').querySelector('.step-num').innerHTML =
+  `<svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round"><polyline points="20 6 9 17 4 12"/></svg>`;
+// Reset to number immediately — only show check when done
+document.getElementById('stepItem1').querySelector('.step-num').textContent = '1';
+
+</script>
+</body>
+</html>
