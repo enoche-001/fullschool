@@ -3,532 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Brighton Heights School — Nurturing Excellence, Building Character</title>
-<meta name="description" content="Brighton Heights School, Lokoja — a premier boarding school providing world-class education for primary and secondary students in Kogi State, Nigeria."/>
+<title>Newtown Academy — Nurturing Excellence, Building Character</title>
+<meta name="description" content="Newtown Academy, Lokoja — a premier boarding school providing world-class education for primary and secondary students in Kogi State, Nigeria."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  /* Primary palette */
-  --navy:#0d1f3c;
-  --navy2:#162e52;
-  --navy3:#1e3d6b;
-  --blue:#1d4ed8;
-  --blue-mid:#3b82f6;
-  --blue-light:#eff6ff;
-
-  /* Gold accent */
-  --accent:#b8902a;
-  --accent2:#d4a93a;
-  --accent3:#f0c94a;
-  --accent-bg:#fdf8ec;
-  --accent-border:#f0d98a;
-
-  /* Surfaces */
-  --bg:#f5f7fc;
-  --bg2:#eef1f8;
-  --white:#ffffff;
-  --surface:#ffffff;
-
-  /* Borders */
-  --border:#e2e8f2;
-  --border2:#c8d0e0;
-
-  /* Text */
-  --text:#0d1a2e;
-  --soft:#374151;
-  --muted:#64748b;
-  --subtle:#94a3b8;
-
-  /* Semantic */
-  --ok:#15803d;--ok-bg:#f0fdf4;--ok-b:#bbf7d0;
-  --err:#dc2626;--err-bg:#fef2f2;--err-b:#fecaca;
-  --warn:#b45309;--warn-bg:#fffbeb;--warn-b:#fde68a;
-
-  /* Shadows */
-  --shadow-sm:0 1px 4px rgba(13,31,60,.06),0 1px 2px rgba(13,31,60,.04);
-  --shadow-md:0 4px 20px rgba(13,31,60,.08),0 2px 8px rgba(13,31,60,.05);
-  --shadow-lg:0 12px 44px rgba(13,31,60,.11),0 4px 14px rgba(13,31,60,.06);
-  --shadow-xl:0 24px 64px rgba(13,31,60,.15),0 8px 24px rgba(13,31,60,.07);
-
-  /* Radius */
-  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-2xl:28px;
-
-  /* Sidebar bg (portals) */
-  --sbg:linear-gradient(180deg,#0d1f3c 0%,#102544 100%);
-}
-html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--white);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-img{max-width:100%;display:block}
-a{color:inherit;text-decoration:none}
-
-/* ── REVEAL ── */
-.rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
-.rv.on{opacity:1;transform:none}
-.rv-l{opacity:0;transform:translateX(-24px);transition:opacity .65s ease,transform .65s ease}
-.rv-l.on{opacity:1;transform:none}
-.rv-r{opacity:0;transform:translateX(24px);transition:opacity .65s ease,transform .65s ease}
-.rv-r.on{opacity:1;transform:none}
-
-/* ── NAV — bright white, sharp, elevated ── */
-nav{
-  position:fixed;top:0;left:0;width:100%;z-index:300;
-  height:68px;display:flex;align-items:center;padding:0 5%;
-  background:#ffffff;
-  border-bottom:1px solid #e8edf5;
-  box-shadow:0 1px 0 rgba(13,31,60,.04),0 2px 12px rgba(13,31,60,.06);
-  transition:box-shadow .3s;
-}
-nav.scrolled{box-shadow:0 2px 20px rgba(13,31,60,.1),0 1px 0 #e8edf5}
-.nav-inner{max-width:1200px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:flex;align-items:center;gap:11px}
-.bmark{width:38px;height:38px;border-radius:9px;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.bmark span{font-family:'Plus Jakarta Sans',sans-serif;color:var(--accent2);font-size:.78rem;font-weight:800;letter-spacing:-.5px}
-.bname strong{font-size:.92rem;font-weight:700;color:var(--navy);display:block;letter-spacing:-.01em}
-.bname small{font-size:.58rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-
-.nav-links{display:flex;gap:0;list-style:none}
-.nav-links a{padding:7px 13px;border-radius:7px;font-size:.81rem;font-weight:500;color:var(--soft);transition:all .18s}
-.nav-links a:hover{color:var(--navy);background:var(--bg)}
-
-.nav-right{display:flex;align-items:center;gap:8px}
-.nbtn{padding:8px 17px;border-radius:7px;font-size:.81rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif;border:none}
-.nbtn-ghost{color:var(--navy);background:transparent;border:1.5px solid var(--border2)}
-.nbtn-ghost:hover{border-color:var(--navy);background:var(--bg)}
-.nbtn-solid{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(184,144,42,.3)}
-.nbtn-solid:hover{background:#a67c22;transform:translateY(-1px);box-shadow:0 4px 14px rgba(184,144,42,.35)}
-
-.ham{display:none;flex-direction:column;gap:4.5px;cursor:pointer;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--white)}
-.ham span{display:block;width:18px;height:1.5px;background:var(--navy);border-radius:2px;transition:all .3s}
-.ham.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-.ham.open span:nth-child(2){opacity:0}
-.ham.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
-
-.mob-nav{
-  display:block;
-  position:fixed;top:68px;left:0;right:0;
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  box-shadow:0 8px 30px rgba(13,31,60,.1);
-  z-index:299;padding:14px 20px 20px;
-  max-height:calc(100vh - 68px);overflow-y:auto;
-  opacity:0;transform:translateY(-8px);pointer-events:none;
-  transition:opacity .22s ease,transform .22s ease;
-}
-.mob-nav.open{opacity:1;transform:translateY(0);pointer-events:all}
-.mob-nav a{display:block;padding:11px 14px;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--soft);margin-bottom:2px;transition:all .2s}
-.mob-nav a:hover{color:var(--navy);background:var(--bg)}
-.mob-divider{border-top:1px solid var(--border);margin:10px 0}
-.mob-cta{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.mob-cta a{text-align:center;border-radius:8px;padding:12px;font-weight:700;font-size:.88rem}
-.mob-cta a.solid{background:var(--accent);color:#fff}
-.mob-cta a.ghost{border:1.5px solid var(--border2);color:var(--navy)}
-
-/* tap-outside overlay */
-.mob-overlay{
-  display:none;position:fixed;inset:0;z-index:298;
-  background:rgba(0,0,0,.35);
-}
-.mob-overlay.open{display:block}
-
-@media(max-width:920px){
-  .nav-links,.nav-right{display:none}
-  .ham{display:flex}
-}
-
-/* ── SECTION SHELL ── */
-.sec{padding:104px 5%}
-.sec-alt{background:var(--bg)}
-.inner{max-width:1200px;margin:0 auto}
-.eyebrow{font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.eyebrow::before{content:'';width:18px;height:2px;background:var(--accent);border-radius:2px;opacity:.6}
-.slabel{text-align:center;margin-bottom:68px}
-.slabel .eyebrow{justify-content:center}
-.slabel .eyebrow::before,.slabel .eyebrow::after{content:'';width:18px;height:2px;background:var(--accent);border-radius:2px;opacity:.6}
-.slabel h2{font-family:'DM Serif Display',serif;font-size:clamp(1.85rem,3.2vw,2.65rem);color:var(--navy);margin-bottom:16px;line-height:1.18;letter-spacing:-.02em}
-.slabel h2 em{font-style:italic;color:var(--blue)}
-.slabel p{font-size:.93rem;color:var(--muted);max-width:500px;margin:0 auto;line-height:1.82;font-weight:400}
-
-/* ── HERO ── */
-.hero{
-  min-height:100vh;
-  position:relative;overflow:hidden;
-  display:flex;align-items:center;
-  padding:68px 5% 0;
-  background:
-    linear-gradient(to bottom, rgba(8,18,42,.78) 0%, rgba(13,30,60,.62) 50%, rgba(8,18,42,.82) 100%),
-    url('https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1800&q=80&auto=format&fit=crop') center 30%/cover no-repeat;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 70% 60% at 65% 50%, rgba(29,78,216,.2) 0%, transparent 70%);
-  pointer-events:none;
-}
-.hero-bg-text{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  font-family:'DM Serif Display',serif;
-  font-size:clamp(8rem,22vw,18rem);
-  font-weight:700;
-  color:rgba(255,255,255,.025);
-  pointer-events:none;user-select:none;
-  white-space:nowrap;letter-spacing:-4px;line-height:1;
-}
-.hero-inner{
-  position:relative;z-index:2;
-  max-width:1200px;margin:0 auto;width:100%;
-  display:grid;grid-template-columns:1fr 420px;gap:60px;align-items:center;
-  padding:70px 0 130px;
-}
-.hero-left{}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.22);
-  color:#fff;
-  font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-  padding:7px 16px;border-radius:50px;
-  margin-bottom:26px;
-  backdrop-filter:blur(8px);
-}
-.hero-badge span{width:6px;height:6px;background:var(--accent3);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
-.hero h1{
-  font-family:'DM Serif Display',serif;
-  font-size:clamp(2.2rem,5vw,3.6rem);
-  color:#fff;line-height:1.15;
-  margin-bottom:20px;font-weight:700;
-}
-.hero h1 em{font-style:italic;color:var(--accent2)}
-.hero-sub{
-  font-size:1rem;color:rgba(255,255,255,.7);
-  line-height:1.8;max-width:500px;margin-bottom:36px;font-weight:300;
-}
-.hcta{display:flex;gap:12px;flex-wrap:wrap}
-.hbtn{padding:13px 26px;border-radius:50px;font-size:.88rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .22s;border:none;font-family:'Plus Jakarta Sans',sans-serif}
-.hbtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.hbtn-p{background:var(--accent);color:#fff;box-shadow:0 4px 20px rgba(184,144,42,.4)}
-.hbtn-p:hover{background:#a67c22;transform:translateY(-2px)}
-.hbtn-o{background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.3);backdrop-filter:blur(8px)}
-.hbtn-o:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.55)}
-
-/* Glass stats panel */
-.hero-glass{
-  background:rgba(255,255,255,.09);
-  border:1px solid rgba(255,255,255,.16);
-  border-radius:24px;
-  padding:36px 32px;
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
-  box-shadow:0 20px 60px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.15);
-}
-.hg-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.hg-item{text-align:center;padding:14px 10px;background:rgba(255,255,255,.05);border-radius:14px;border:1px solid rgba(255,255,255,.09)}
-.hg-num{font-family:'DM Serif Display',serif;font-size:2.1rem;font-weight:700;color:#fff;line-height:1;margin-bottom:4px}
-.hg-num .suf{color:var(--accent2);font-size:1.5rem}
-.hg-label{font-size:.68rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
-.hg-divider{grid-column:1/-1;height:1px;background:rgba(255,255,255,.1);margin:4px 0}
-.hg-tagline{grid-column:1/-1;text-align:center;font-size:.82rem;color:rgba(255,255,255,.45);font-style:italic;font-family:'DM Serif Display',serif;padding-top:4px}
-
-/* scroll hint */
-.scroll-hint{
-  position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
-  font-size:.72rem;color:rgba(255,255,255,.35);letter-spacing:.1em;
-  animation:float 2.2s ease-in-out infinite;
-}
-@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
-
-@media(max-width:900px){
-  .hero-inner{grid-template-columns:1fr;gap:40px;padding:60px 0 100px}
-  .hero-glass{max-width:420px}
-  .scroll-hint{display:none}
-}
-
-/* ── ABOUT ── */
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-.about-text .eyebrow{margin-bottom:14px}
-.about-text h2{font-family:'DM Serif Display',serif;font-size:clamp(1.65rem,3vw,2.3rem);color:var(--navy);margin-bottom:22px;line-height:1.2;letter-spacing:-.02em}
-.about-text > p{font-size:.93rem;color:var(--soft);line-height:1.88;margin-bottom:30px}
-.about-block{
-  margin-bottom:0;padding:20px 22px;
-  border:1.5px solid var(--border);border-left:3px solid var(--accent);
-  border-radius:0 var(--r-md) var(--r-md) 0;
-  background:var(--white);
-  transition:all .2s;
-  margin-bottom:12px;
-}
-.about-block:hover{border-color:var(--border2);border-left-color:var(--navy);box-shadow:var(--shadow-sm)}
-.about-block h3{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-.about-block p{font-size:.88rem;color:var(--soft);line-height:1.75}
-.values-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.value-chip{
-  background:var(--white);border:1.5px solid var(--border2);
-  color:var(--navy);font-size:.74rem;font-weight:600;
-  padding:6px 15px;border-radius:30px;
-  transition:all .2s;
-}
-.value-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
-
-/* About image panel */
-.about-photo-wrap{
-  position:relative;border-radius:20px;overflow:hidden;
-  aspect-ratio:4/5;
-  background:
-    linear-gradient(145deg, rgba(11,31,69,.45) 0%, rgba(22,45,94,.35) 100%),
-    url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=900&q=80&auto=format&fit=crop') center/cover no-repeat;
-  box-shadow:0 28px 64px rgba(11,31,69,.18);
-}
-.about-glass-card{
-  position:absolute;bottom:24px;left:20px;right:20px;
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.22);
-  border-radius:16px;
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  padding:18px 20px;
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;
-}
-.agc-item{text-align:center}
-.agc-num{font-family:'DM Serif Display',serif;font-size:1.6rem;font-weight:700;color:#fff;line-height:1}
-.agc-num .suf{color:var(--accent2);font-size:1.1rem}
-.agc-label{font-size:.62rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
-
-@media(max-width:860px){
-  .about-grid{grid-template-columns:1fr;gap:48px}
-  .about-photo-wrap{max-width:400px;aspect-ratio:5/3;margin:0 auto}
-}
-
-/* ── ACADEMICS ── */
-.acad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.acad-card{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:var(--r-xl);padding:34px 30px;transition:all .25s;
-  position:relative;overflow:hidden;box-shadow:var(--shadow-sm);
-  display:flex;flex-direction:column;
-}
-.acad-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  transform:scaleX(0);transform-origin:left;transition:transform .3s;
-}
-.acad-card:hover{border-color:rgba(184,144,42,.3);box-shadow:var(--shadow-lg);transform:translateY(-5px)}
-.acad-card:hover::before{transform:scaleX(1)}
-.acad-icon{
-  width:48px;height:48px;border-radius:12px;
-  background:linear-gradient(135deg,var(--navy),var(--navy2));
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:22px;
-  box-shadow:0 4px 14px rgba(13,31,60,.2);
-}
-.acad-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.acad-card h3{font-family:'DM Serif Display',serif;font-size:1.18rem;font-weight:700;color:var(--navy);margin-bottom:4px;letter-spacing:-.01em}
-.acad-range{font-size:.68rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
-.acad-card p{font-size:.86rem;color:var(--soft);line-height:1.72;margin-bottom:20px;flex:1}
-.acad-subjects{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
-.subj-chip{font-size:.67rem;background:var(--bg);color:var(--navy);border:1px solid var(--border);padding:4px 11px;border-radius:20px;font-weight:600}
-@media(max-width:860px){.acad-grid{grid-template-columns:1fr}}
-
-/* ── ANNOUNCEMENTS ── */
-.ann-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.ann-card{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:var(--r-lg);padding:28px 26px;
-  position:relative;transition:all .25s;box-shadow:var(--shadow-sm);
-  display:flex;flex-direction:column;
-}
-.ann-card:hover{border-color:var(--border2);box-shadow:var(--shadow-md);transform:translateY(-3px)}
-.ann-pin{
-  position:absolute;top:-1px;left:22px;
-  background:var(--accent);color:#fff;
-  font-size:.6rem;font-weight:700;
-  padding:4px 11px;border-radius:0 0 8px 8px;
-  letter-spacing:.06em;text-transform:uppercase;
-}
-.ann-date{font-size:.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;margin-top:8px}
-.ann-card h3{font-family:'DM Serif Display',serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:10px;line-height:1.3}
-.ann-card p{font-size:.84rem;color:var(--muted);line-height:1.68;flex:1}
-.ann-empty,.ann-loading{grid-column:1/-1;text-align:center;padding:56px 20px;color:var(--muted);font-size:.88rem}
-.ann-loading{display:flex;flex-direction:column;align-items:center;gap:10px}
-.spinner{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:860px){.ann-grid{grid-template-columns:1fr}}
-
-/* ── ADMISSIONS ── */
-.adm-wrap{max-width:840px;margin:0 auto}
-.adm-step{
-  border:1.5px solid var(--border);border-radius:var(--r-md);
-  margin-bottom:10px;overflow:hidden;
-  background:var(--white);transition:all .2s;
-  box-shadow:var(--shadow-sm);
-}
-.adm-step:hover{border-color:var(--border2);box-shadow:var(--shadow-md)}
-.adm-step.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(184,144,42,.08)}
-.adm-step-head{display:flex;align-items:center;gap:16px;padding:20px 22px;cursor:pointer;user-select:none}
-.adm-step-num{
-  width:34px;height:34px;border-radius:8px;
-  background:var(--bg);border:1.5px solid var(--border);
-  color:var(--navy);font-size:.82rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .22s;
-}
-.adm-step.active .adm-step-num{background:var(--navy);color:var(--accent2);border-color:var(--navy)}
-.adm-step-title{font-size:.95rem;font-weight:600;color:var(--navy);flex:1;letter-spacing:-.01em}
-.adm-chevron{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;transition:transform .3s;flex-shrink:0}
-.adm-step.active .adm-chevron{transform:rotate(180deg);stroke:var(--accent)}
-.adm-step-body{display:none;padding:0 22px 22px 72px;font-size:.88rem;color:var(--soft);line-height:1.82}
-.adm-step.active .adm-step-body{display:block}
-.adm-cta{text-align:center;margin-top:44px}
-
-/* ── FAQ ── */
-.faq-wrap{max-width:840px;margin:0 auto}
-.faq-item{border-bottom:1.5px solid var(--border)}
-.faq-item:first-child{border-top:1.5px solid var(--border)}
-.faq-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 4px;cursor:pointer;user-select:none}
-.faq-q span{font-size:.95rem;font-weight:600;color:var(--navy);line-height:1.35}
-.faq-icon{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;flex-shrink:0;transition:all .3s}
-.faq-item.open .faq-icon{transform:rotate(45deg);stroke:var(--accent)}
-.faq-a{display:none;padding:0 4px 20px;font-size:.88rem;color:var(--soft);line-height:1.82}
-.faq-item.open .faq-a{display:block}
-.faq-item.open .faq-q span{color:var(--navy)}
-
-/* ── CONTACT ── */
-.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.contact-card{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:var(--r-lg);padding:36px 28px;
-  text-align:center;transition:all .25s;box-shadow:var(--shadow-sm);
-  position:relative;overflow:hidden;
-}
-.contact-card::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  transform:scaleX(0);transform-origin:center;transition:transform .3s;
-}
-.contact-card:hover{border-color:rgba(184,144,42,.25);box-shadow:var(--shadow-lg);transform:translateY(-4px)}
-.contact-card:hover::after{transform:scaleX(1)}
-.contact-icon{
-  width:56px;height:56px;border-radius:14px;
-  background:linear-gradient(135deg,var(--navy),var(--navy2));
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;
-  box-shadow:0 4px 14px rgba(13,31,60,.18);
-}
-.contact-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.contact-card h3{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
-.contact-card p{font-size:.88rem;color:var(--soft);line-height:1.8}
-.contact-card a{color:var(--blue);font-weight:500}
-.contact-card a:hover{text-decoration:underline}
-@media(max-width:760px){.contact-grid{grid-template-columns:1fr}}
-
-/* ── PORTAL CTA BANNER ── */
-.portal-sec{padding:0 5% 96px}
-.portal-banner{
-  max-width:1200px;margin:0 auto;
-  border-radius:22px;overflow:hidden;
-  position:relative;
-  min-height:300px;
-  display:flex;align-items:center;justify-content:center;
-  background:
-    linear-gradient(145deg, rgba(10,20,45,.90) 0%, rgba(16,35,72,.87) 100%),
-    url('https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1400&q=80&auto=format&fit=crop') center/cover no-repeat;
-}
-.portal-banner::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 70% at 80% 50%, rgba(30,64,175,.25) 0%,transparent 65%);
-  pointer-events:none;
-}
-.portal-content{
-  position:relative;z-index:1;
-  text-align:center;padding:64px 40px;
-}
-.portal-content h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:700;margin-bottom:12px}
-.portal-content p{font-size:.92rem;color:rgba(255,255,255,.62);margin-bottom:34px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.8}
-.portal-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.pbtn{padding:12px 26px;border-radius:50px;font-size:.87rem;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all .22s;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
-.pbtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.pbtn-solid{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(184,144,42,.4)}
-.pbtn-solid:hover{background:#a67c22;transform:translateY(-2px)}
-.pbtn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25);backdrop-filter:blur(8px)}
-.pbtn-ghost:hover{background:rgba(255,255,255,.18)}
-
-/* ── MARQUEE ── */
-.marquee-wrap{background:var(--navy);overflow:hidden;padding:11px 0;border-top:1px solid rgba(255,255,255,.06)}
-.marquee-track{display:flex;white-space:nowrap;animation:marquee 30s linear infinite}
-.marquee-track span{font-size:.65rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:0 24px}
-.marquee-track span.dot{padding:0 4px;color:var(--accent);opacity:.6}
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(prefers-reduced-motion:reduce){.marquee-track{animation:none}}
-
-/* ── FOOTER ── */
-footer{
-  background:var(--navy);color:rgba(255,255,255,.55);
-  padding:72px 5% 36px;
-  border-top:3px solid var(--accent);
-}
-.foot-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:56px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.08)}
-.foot-brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
-.foot-brand .bmark{background:var(--accent);border:none}
-.foot-brand .bmark span{color:var(--navy)}
-.foot-brand strong{color:#fff;font-size:1rem;font-weight:700}
-.foot-col p{font-size:.84rem;line-height:1.8;color:rgba(255,255,255,.44);max-width:300px}
-.foot-col h4{font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent2);margin-bottom:18px;font-weight:700}
-.foot-col a{display:block;font-size:.86rem;color:rgba(255,255,255,.55);margin-bottom:12px;transition:color .2s}
-.foot-col a:hover{color:var(--accent2)}
-.foot-bottom{max-width:1200px;margin:0 auto;padding-top:26px;font-size:.76rem;color:rgba(255,255,255,.25);text-align:center}
-@media(max-width:760px){.foot-inner{grid-template-columns:1fr;gap:32px}}
-
-@media(max-width:700px){.sec{padding:76px 5%}.portal-sec{padding:0 4% 76px}}
-
-/* ── ANNOUNCEMENT POPUP ── */
-#ann-popup{
-  position:fixed;
-  bottom:28px;right:24px;
-  z-index:500;
-  width:min(360px, calc(100vw - 48px));
-  background:#fff;
-  border:1.5px solid var(--border);
-  border-left:4px solid var(--accent);
-  border-radius:12px;
-  box-shadow:0 16px 48px rgba(13,31,60,.14),0 4px 16px rgba(13,31,60,.07);
-  padding:20px 22px 18px;
-  /* hidden by default */
-  opacity:0;transform:translateY(18px);pointer-events:none;
-  transition:opacity .35s ease,transform .35s ease;
-}
-#ann-popup.visible{
-  opacity:1;transform:translateY(0);pointer-events:all;
-}
-.ann-popup-top{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-  margin-bottom:10px;
-}
-.ann-popup-label{
-  font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--accent);display:flex;align-items:center;gap:5px;
-}
-.ann-popup-label::before{content:'📌';font-size:.7rem}
-.ann-popup-close{
-  width:22px;height:22px;
-  border:none;background:none;cursor:pointer;
-  color:var(--muted);font-size:1rem;line-height:1;
-  border-radius:4px;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;transition:color .2s,background .2s;padding:0;margin-top:-1px;
-}
-.ann-popup-close:hover{color:var(--navy);background:var(--bg)}
-#ann-popup-title{
-  font-family:'DM Serif Display',serif;
-  font-size:.98rem;font-weight:700;color:var(--navy);
-  line-height:1.3;margin-bottom:7px;
-}
-#ann-popup-body{
-  font-size:.82rem;color:var(--muted);line-height:1.65;
-}
-.ann-popup-date{
-  font-size:.65rem;color:var(--subtle);font-weight:600;
-  text-transform:uppercase;letter-spacing:.06em;margin-top:12px;
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
 </head>
 <body>
 
@@ -543,19 +23,34 @@ footer{
   <div class="ann-popup-date" id="ann-popup-date"></div>
 </div>
 
+<!-- ═══════ ANNOUNCEMENT DETAIL MODAL ═══════ -->
+<div id="ann-modal-overlay" class="ann-modal-overlay">
+  <div class="ann-modal" role="dialog" aria-modal="true" aria-labelledby="ann-modal-title">
+    <button class="ann-modal-close" id="ann-modal-close" aria-label="Close">✕</button>
+    <div id="ann-modal-pin" class="ann-modal-pin">Pinned</div>
+    <div class="ann-modal-date" id="ann-modal-date"></div>
+    <h3 id="ann-modal-title"></h3>
+    <p id="ann-modal-body"></p>
+  </div>
+</div>
+
+<!-- ═══════ SCROLL PROGRESS ═══════ -->
+<div id="scrollProgress" aria-hidden="true"></div>
+
 <!-- ═══════ NAV ═══════ -->
 <nav id="mainNav">
   <div class="nav-inner">
     <a href="#home" class="brand">
-      <div class="bmark"><span>BHS</span></div>
+      <div class="bmark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest"/></div>
       <div class="bname">
-        <strong>Brighton Heights School</strong>
+        <strong>Newtown Academy</strong>
         <small>Excellence &amp; Character</small>
       </div>
     </a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#academics">Academics</a></li>
+      <li><a href="#gallery">Gallery</a></li>
       <li><a href="#admissions">Admissions</a></li>
       <li><a href="#announcements">News</a></li>
       <li><a href="#faq">FAQ</a></li>
@@ -564,7 +59,6 @@ footer{
     <div class="nav-right">
       <a href="register.html" class="nbtn nbtn-solid">Apply Now</a>
       <a href="student.html" class="nbtn nbtn-ghost">Student Login</a>
-      <a href="cbt.html" class="nbtn nbtn-ghost">CBT Exams</a>
     </div>
     <div class="ham" id="hamBtn" onclick="toggleMobNav()"><span></span><span></span><span></span></div>
   </div>
@@ -573,6 +67,7 @@ footer{
 <div class="mob-nav" id="mobNav">
   <a href="#about" onclick="closeMobNav()">About</a>
   <a href="#academics" onclick="closeMobNav()">Academics</a>
+  <a href="#gallery" onclick="closeMobNav()">Gallery</a>
   <a href="#admissions" onclick="closeMobNav()">Admissions</a>
   <a href="#announcements" onclick="closeMobNav()">News</a>
   <a href="#faq" onclick="closeMobNav()">FAQ</a>
@@ -581,18 +76,17 @@ footer{
   <div class="mob-cta">
     <a href="register.html" class="solid">Apply Now</a>
     <a href="student.html" class="ghost">Student Login</a>
-    <a href="cbt.html" class="ghost">CBT Exams</a>
   </div>
 </div>
 
 <!-- ═══════ HERO ═══════ -->
 <header class="hero" id="home">
-  <div class="hero-bg-text">BHS</div>
+  <div class="hero-bg-text">NA</div>
   <div class="hero-inner">
     <div class="hero-left">
       <div class="hero-badge"><span></span>Admissions Open — 2026/2027 Academic Session</div>
       <h1>Nurturing <em>Excellence</em>,<br>Building Character</h1>
-      <p class="hero-sub">Brighton Heights School is a government-approved co-educational boarding institution committed to the holistic development of pupils across the primary and secondary levels of education, in full alignment with the national curriculum framework of the Federal Republic of Nigeria.</p>
+      <p class="hero-sub">Newtown Academy is a government-approved co-educational boarding institution committed to the holistic development of pupils across the primary and secondary levels of education, in full alignment with the national curriculum framework of the Federal Republic of Nigeria.</p>
       <div class="hcta">
         <a href="register.html" class="hbtn hbtn-p">
           <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -608,7 +102,7 @@ footer{
     <div class="hero-glass">
       <div class="hg-grid">
         <div class="hg-item">
-          <div class="hg-num" id="statStudents">—</div>
+          <div class="hg-num" id="statStu">200+</div>
           <div class="hg-label">Total Students</div>
         </div>
         <div class="hg-item">
@@ -661,7 +155,7 @@ footer{
     <div class="about-text rv-l">
       <div class="eyebrow">About Us</div>
       <h2>A Legacy of Excellence<br>Since the Year 2000</h2>
-      <p>Established in the year 2000 and duly accredited by the relevant educational authorities, Brighton Heights School has maintained a distinguished record of academic attainment and moral formation across its primary and secondary programmes. The institution operates in strict adherence to the policies and guidelines of the Federal Ministry of Education and the Kogi State Ministry of Education, Science and Technology.</p>
+      <p>Established in the year 2000 and duly accredited by the relevant educational authorities, Newtown Academy has maintained a distinguished record of academic attainment and moral formation across its primary and secondary programmes. The institution operates in strict adherence to the policies and guidelines of the Federal Ministry of Education and the Kogi State Ministry of Education, Science and Technology.</p>
       <div class="about-block">
         <h3>Our Mission</h3>
         <p>To deliver a structured, value-driven educational experience that equips every pupil with the intellectual capacity, ethical grounding, and personal discipline required to contribute meaningfully to national development and global progress.</p>
@@ -711,7 +205,7 @@ footer{
     <div class="slabel rv">
       <div class="eyebrow">Academics</div>
       <h2>Our Academic <em>Programmes</em></h2>
-      <p>Brighton Heights School offers a structured sequence of learning across three tiers of formal education, each designed in conformity with the approved national curriculum.</p>
+      <p>Newtown Academy offers a structured sequence of learning across three tiers of formal education, each designed in conformity with the approved national curriculum.</p>
     </div>
     <div class="acad-grid">
       <div class="acad-card rv">
@@ -751,8 +245,71 @@ footer{
   </div>
 </section>
 
+<!-- ═══════ GALLERY ═══════ -->
+<section class="sec" id="gallery">
+  <div class="inner">
+    <div class="slabel rv">
+      <div class="eyebrow">Gallery</div>
+      <h2>Life at <em>Newtown Academy</em></h2>
+      <p>A glimpse into the everyday moments, milestones, and memories that make up school life at Newtown Academy.</p>
+    </div>
+    <div class="gallery-grid rv" id="galleryGrid">
+      <div class="gallery-item g-big" onclick="openLightbox(this)">
+        <img src="https://i.ibb.co/n2jr0VX/0ee22672b305733566a9dd02eb7b2bd7-1.jpg" alt="Newtown Academy students"/>
+        <div class="gallery-cap">Newtown Academy campus life</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://i.ibb.co/5gRQbQxr/15e12e2a8fb2969fcb865e75116b9cf3.jpg" alt="Newtown Academy students in class"/>
+        <div class="gallery-cap">In the classroom</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://i.ibb.co/tTyN7tqp/c30cecb6cb81b49e634270de495fa89b.jpg" alt="Newtown Academy students"/>
+        <div class="gallery-cap">School community</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://i.ibb.co/YTp0yfxP/bdf3508ca2e6bc9aea0428981d883d62.jpg" alt="Newtown Academy pupils"/>
+        <div class="gallery-cap">Our pupils</div>
+      </div>
+      <div class="gallery-item g-wide" onclick="openLightbox(this)">
+        <img src="https://i.ibb.co/N6H0jw0b/a10c07f0d28af6d0298abf2d2c29973b.jpg" alt="Newtown Academy activities"/>
+        <div class="gallery-cap">School activities</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://images.unsplash.com/photo-1473649085228-583485e6e4d7?w=700&q=80&auto=format&fit=crop" alt="Pupils in classroom"/>
+        <div class="gallery-cap">Classroom time</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://images.unsplash.com/photo-1617056239820-8ce90ba48193?w=700&q=80&auto=format&fit=crop" alt="Student in uniform"/>
+        <div class="gallery-cap">Proud in uniform</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://images.unsplash.com/photo-1548102249-acdce64fffbd?w=700&q=80&auto=format&fit=crop" alt="Boys smiling in school uniform"/>
+        <div class="gallery-cap">Friends at school</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://images.unsplash.com/photo-1623743995364-03fbd84dbaf3?w=700&q=80&auto=format&fit=crop" alt="Students together"/>
+        <div class="gallery-cap">Better together</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://images.unsplash.com/photo-1666281269793-da06484657e8?w=700&q=80&auto=format&fit=crop" alt="Students holding books"/>
+        <div class="gallery-cap">Ready to learn</div>
+      </div>
+      <div class="gallery-item" onclick="openLightbox(this)">
+        <img src="https://images.unsplash.com/photo-1543689604-6fe8dbcd1f59?w=700&q=80&auto=format&fit=crop" alt="Pupils outdoors"/>
+        <div class="gallery-cap">Outdoor moments</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lightbox-close" aria-label="Close">✕</button>
+  <img id="lightbox-img" src="" alt="Gallery preview"/>
+</div>
+
 <!-- ═══════ ANNOUNCEMENTS ═══════ -->
-<section class="sec" id="announcements">
+<section class="sec sec-alt" id="announcements">
   <div class="inner">
     <div class="slabel rv">
       <div class="eyebrow">Latest News</div>
@@ -770,7 +327,7 @@ footer{
   <div class="inner">
     <div class="slabel rv">
       <div class="eyebrow">Admissions</div>
-      <h2>Admission into <em>Brighton Heights</em></h2>
+      <h2>Admission into <em>Newtown Academy</em></h2>
       <p>The school operates a structured and transparent admissions procedure in compliance with the guidelines of the Kogi State Secondary Education Board. Prospective applicants are advised to follow the steps outlined below.</p>
     </div>
     <div class="adm-wrap">
@@ -812,7 +369,7 @@ footer{
           <div class="adm-step-title">Enrolment &amp; Portal Activation</div>
           <svg class="adm-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div class="adm-step-body">Following acceptance of the offer of admission, candidates are required to complete the payment of applicable school fees in order to secure their placement. Upon confirmation of payment, login credentials for the Brighton Heights student portal will be issued, granting access to the academic timetable, examination results, and official school communications. Resumption schedules and hostel allocation details will be conveyed at this stage.</div>
+        <div class="adm-step-body">Following acceptance of the offer of admission, candidates are required to complete the payment of applicable school fees in order to secure their placement. Upon confirmation of payment, login credentials for the Newtown Academy student portal will be issued, granting access to the academic timetable, examination results, and official school communications. Resumption schedules and hostel allocation details will be conveyed at this stage.</div>
       </div>
     </div>
     <div class="adm-cta rv">
@@ -835,17 +392,17 @@ footer{
     <div class="faq-wrap rv">
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
-          <span>What is the school fees structure at Brighton Heights?</span>
+          <span>What is the school fees structure at Newtown Academy?</span>
           <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
         <div class="faq-a">School fees are structured according to the level of study — Primary, Junior Secondary, or Senior Secondary — and are further differentiated by boarding arrangement. A detailed schedule of tuition, boarding, and sundry charges is enclosed with each offer of admission. Prospective parents seeking advance information on the current fee schedule are advised to contact the school's Bursary Department directly.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
-          <span>Is Brighton Heights a day school or a full boarding school?</span>
+          <span>Is Newtown Academy a day school or a full boarding school?</span>
           <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
-        <div class="faq-a">Brighton Heights School operates principally as a full boarding institution for both primary and secondary pupils. The boarding structure is considered integral to the school's pastoral care model and its approach to academic oversight. Day student arrangements may be available for select classes subject to capacity and administrative approval — prospective parents are encouraged to direct such enquiries to the Admissions Office.</div>
+        <div class="faq-a">Newtown Academy operates principally as a full boarding institution for both primary and secondary pupils. The boarding structure is considered integral to the school's pastoral care model and its approach to academic oversight. Day student arrangements may be available for select classes subject to capacity and administrative approval — prospective parents are encouraged to direct such enquiries to the Admissions Office.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
@@ -859,7 +416,7 @@ footer{
           <span>What is the school's performance record in public examinations?</span>
           <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
-        <div class="faq-a">Brighton Heights School has consistently returned a pass rate in excess of 98% in both the West African Senior School Certificate Examination (WASSCE) and the National Examination Council (NECO) examinations, with notable distinctions recorded in Mathematics, English Language, Biology, and Economics. The school's SS3 programme incorporates a structured examination preparedness curriculum administered throughout the final academic session.</div>
+        <div class="faq-a">Newtown Academy has consistently returned a pass rate in excess of 98% in both the West African Senior School Certificate Examination (WASSCE) and the National Examination Council (NECO) examinations, with notable distinctions recorded in Mathematics, English Language, Biology, and Economics. The school's SS3 programme incorporates a structured examination preparedness curriculum administered throughout the final academic session.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
@@ -873,7 +430,7 @@ footer{
           <span>Can parents access their ward's academic records online?</span>
           <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
-        <div class="faq-a">Yes. Brighton Heights School operates a secure digital portal through which parents and legal guardians may access terminal examination results, academic progress reports, and official school communications pertaining to their ward. Login credentials are issued to guardians following the successful completion of the enrolment process.</div>
+        <div class="faq-a">Yes. Newtown Academy operates a secure digital portal through which parents and legal guardians may access terminal examination results, academic progress reports, and official school communications pertaining to their ward. Login credentials are issued to guardians following the successful completion of the enrolment process.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
@@ -915,7 +472,7 @@ footer{
       <div class="contact-card rv" style="transition-delay:.2s">
         <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22 6 12 13 2 6"/></svg></div>
         <h3>Email</h3>
-        <p><a href="mailto:info@brightonheights.edu.ng">info@brightonheights.edu.ng</a><br/><a href="mailto:admissions@brightonheights.edu.ng">admissions@brightonheights.edu.ng</a></p>
+        <p><a href="mailto:info@newtownacademy.edu.ng">info@newtownacademy.edu.ng</a><br/><a href="mailto:admissions@newtownacademy.edu.ng">admissions@newtownacademy.edu.ng</a></p>
       </div>
     </div>
   </div>
@@ -926,15 +483,11 @@ footer{
   <div class="portal-banner">
     <div class="portal-content">
       <h2>Student &amp; Parent Portal</h2>
-      <p>Enrolled students and their parents or guardians may access examination results, official school notices, and academic records through the Brighton Heights digital portal.</p>
+      <p>Enrolled students and their parents or guardians may access examination results, official school notices, and academic records through the Newtown Academy digital portal.</p>
       <div class="portal-btns">
         <a href="student.html" class="pbtn pbtn-solid">
           <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Student Login
-        </a>
-        <a href="cbt.html" class="pbtn pbtn-ghost">
-          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          CBT Exams
         </a>
         <a href="register.html" class="pbtn pbtn-ghost">
           <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -950,8 +503,8 @@ footer{
   <div class="foot-inner">
     <div class="foot-col">
       <div class="foot-brand">
-        <div class="bmark"><span>BHS</span></div>
-        <strong>Brighton Heights School</strong>
+        <div class="bmark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest"/></div>
+        <strong>Newtown Academy</strong>
       </div>
       <p>A government-approved co-educational boarding institution committed to academic excellence and the moral formation of young Nigerians. Located in Lokoja, Kogi State.</p>
     </div>
@@ -959,8 +512,6 @@ footer{
       <h4>Quick Links</h4>
       <a href="register.html">Apply Now</a>
       <a href="student.html">Student Login</a>
-      <a href="cbt.html">CBT Exam Hall</a>
-      <a href="teacher.html">Teacher Login</a>
       <a href="#about">About Us</a>
       <a href="#academics">Academics</a>
       <a href="#faq">FAQ</a>
@@ -968,16 +519,16 @@ footer{
     <div class="foot-col">
       <h4>Reach Us</h4>
       <a href="tel:+2348000000000">+234 800 000 0000</a>
-      <a href="mailto:info@brightonheights.edu.ng">info@brightonheights.edu.ng</a>
+      <a href="mailto:info@newtownacademy.edu.ng">info@newtownacademy.edu.ng</a>
       <a>12 Heights Road, GRA<br>Lokoja, Kogi State</a>
     </div>
   </div>
-  <div class="foot-bottom">© <span id="yr"></span> Brighton Heights School. All rights reserved.</div>
+  <div class="foot-bottom">© <span id="yr"></span> Newtown Academy. All rights reserved.</div>
 </footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy, limit }
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, getDocs, getDoc, doc, query, orderBy, limit }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
@@ -989,14 +540,20 @@ const cfg = {
   appId:             "1:526021682048:web:a52dae5b2650ca951ad765"
 };
 const app = initializeApp(cfg);
-const db  = getFirestore(app);
+const db  = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+});
 
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* nav shadow on scroll */
+/* nav shadow on scroll + scroll progress bar */
+const scrollProgressEl = document.getElementById('scrollProgress');
 window.addEventListener('scroll', () => {
   document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 20);
-});
+  const h = document.documentElement;
+  const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  if(scrollProgressEl) scrollProgressEl.style.width = (isFinite(pct) ? pct : 0) + '%';
+}, { passive: true });
 
 /* mobile nav */
 function _closeMob(){
@@ -1024,6 +581,24 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.rv,.rv-l,.rv-r').forEach(el => observer.observe(el));
 
+/* gallery lightbox */
+window.openLightbox = function(el){
+  const src = el.querySelector('img').src;
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeLightbox = function(e){
+  if(e.target.id === 'lightbox' || e.target.id === 'lightbox-close'){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+};
+document.getElementById('lightbox-close').addEventListener('click', () => {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+});
+
 /* admissions accordion */
 window.toggleStep = function(head){
   const step = head.parentElement;
@@ -1037,11 +612,13 @@ window.toggleFaq = function(q){
   q.parentElement.classList.toggle('open');
 };
 
-/* student count */
+/* student count — reads a single admin-maintained counter doc instead of
+   scanning the whole students collection (which would expose every
+   student's data, including password hashes, to any site visitor) */
 (async function loadStudentCount(){
   try{
-    const snap = await getDocs(collection(db,'students'));
-    const count = snap.size.toLocaleString();
+    const snap = await getDoc(doc(db,'settings','publicStats'));
+    const count = (snap.exists() ? (snap.data().studentCount||0) : 0).toLocaleString();
     document.getElementById('statStudents').textContent = count;
     const ab = document.getElementById('aboutStudents');
     if(ab) ab.textContent = count;
@@ -1067,21 +644,43 @@ function truncate(str, n){
   if(!str) return '';
   return str.length > n ? str.slice(0, n).trim() + '…' : str;
 }
+let announcementItems = [];
 function renderAnnouncements(items){
+  announcementItems = items;
   const grid = document.getElementById('annGrid');
   if(!items.length){
     grid.innerHTML = `<div class="ann-empty">No announcements at this time.</div>`;
     return;
   }
-  grid.innerHTML = items.map(a => `
-    <div class="ann-card">
-      ${a.pinned ? '<div class="ann-pin">📌 Pinned</div>' : ''}
+  grid.innerHTML = items.map((a, i) => `
+    <div class="ann-card" data-idx="${i}">
+      ${a.pinned ? '<div class="ann-pin">Pinned</div>' : ''}
       <div class="ann-date">${formatDate(a.date)}</div>
       <h3>${escapeHtml(a.title || 'Untitled')}</h3>
       <p>${escapeHtml(truncate(a.body || '', 120))}</p>
+      ${(a.body || '').length > 120 ? '<span class="ann-more">See more →</span>' : ''}
     </div>
   `).join('');
+  grid.querySelectorAll('.ann-card').forEach(card=>{
+    card.addEventListener('click', ()=> openAnnouncementModal(announcementItems[+card.dataset.idx]));
+  });
 }
+function openAnnouncementModal(a){
+  if(!a) return;
+  document.getElementById('ann-modal-title').textContent = a.title || 'Untitled';
+  document.getElementById('ann-modal-body').textContent = a.body || '';
+  document.getElementById('ann-modal-date').textContent = formatDate(a.date);
+  document.getElementById('ann-modal-pin').classList.toggle('show', !!a.pinned);
+  document.getElementById('ann-modal-overlay').classList.add('visible');
+}
+function closeAnnouncementModal(){
+  document.getElementById('ann-modal-overlay').classList.remove('visible');
+}
+document.getElementById('ann-modal-close')?.addEventListener('click', closeAnnouncementModal);
+document.getElementById('ann-modal-overlay')?.addEventListener('click', e=>{
+  if(e.target.id === 'ann-modal-overlay') closeAnnouncementModal();
+});
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeAnnouncementModal(); });
 (async function loadAnnouncements(){
   const grid = document.getElementById('annGrid');
   try{
@@ -1125,8 +724,17 @@ function renderAnnouncements(items){
     // Show immediately on load
     const popup = document.getElementById('ann-popup');
     popup.classList.add('visible');
+    // Clicking the notice (but not the close button) opens the full text
+    if((pinned.body || '').length > 160){
+      popup.style.cursor = 'pointer';
+      popup.addEventListener('click', (e) => {
+        if(e.target.id === 'ann-popup-close') return;
+        openAnnouncementModal(pinned);
+      });
+    }
     // Close only when user dismisses
-    document.getElementById('ann-popup-close').addEventListener('click', () => {
+    document.getElementById('ann-popup-close').addEventListener('click', (e) => {
+      e.stopPropagation();
       popup.classList.remove('visible');
     });
   } catch(e){

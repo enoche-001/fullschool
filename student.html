@@ -4,588 +4,22 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="robots" content="noindex,nofollow"/>
-<title>Student Portal — Dashboard</title>
+<title>Newtown Academy — Student Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  /* Core palette */
-  --ink:#0d1a2e;
-  --navy:#0d1f3c;
-  --navy2:#162e52;
-  --accent:#0d1f3c;
-  --accent-gold:#b8902a;
-  --accent-light:#eff6ff;
-  --accent-mid:#c8d0e0;
-
-  /* Surfaces */
-  --bg:#f5f7fc;
-  --surface:#ffffff;
-  --surface2:#f5f7fc;
-  --border:#e2e8f2;
-  --border-strong:#c8d0e0;
-
-  /* Text */
-  --text:#0d1a2e;
-  --muted:#64748b;
-  --faint:#94a3b8;
-
-  /* Semantic */
-  --ok:#15803d;--ok-bg:#f0fdf4;--ok-b:#bbf7d0;
-  --err:#dc2626;--err-bg:#fef2f2;--err-b:#fecaca;
-  --warn:#b45309;--warn-bg:#fffbeb;--warn-b:#fde68a;
-
-  /* Sidebar */
-  --sbg:#0d1f3c;
-  --sbg2:#0d1f3c;
-  --s-active:rgba(255,255,255,.13);
-  --s-hover:rgba(255,255,255,.07);
-  --s-text:rgba(255,255,255,.9);
-  --s-muted:rgba(255,255,255,.45);
-  --s-faint:rgba(255,255,255,.22);
-
-  --inp:#f5f7fc;
-  --radius:12px;
-  --radius-sm:8px;
-  --shadow-sm:0 1px 3px rgba(13,31,60,.06),0 1px 2px rgba(13,31,60,.04);
-  --shadow:0 4px 16px rgba(13,31,60,.09),0 1px 4px rgba(13,31,60,.05);
-  --shadow-lg:0 12px 40px rgba(13,31,60,.14),0 3px 10px rgba(13,31,60,.06);
-}
-
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-
-/* ═══════════════════════════════
-   LOGIN
-═══════════════════════════════ */
-#loginScreen{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:24px;background:var(--bg);
-}
-.lw{
-  display:flex;width:820px;max-width:96vw;min-height:500px;
-  border-radius:20px;overflow:hidden;
-  box-shadow:var(--shadow-lg);
-  animation:fadeUp .38s cubic-bezier(.22,.68,0,1.2) both;
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
-/* Left panel — brand only, no clutter */
-.ll{
-  flex:0 0 44%;background:var(--sbg);
-  padding:52px 40px;
-  display:flex;flex-direction:column;justify-content:center;
-  position:relative;overflow:hidden;
-}
-.ll::before{
-  content:'';position:absolute;top:-80px;right:-80px;
-  width:280px;height:280px;border-radius:50%;
-  background:rgba(184,144,42,.10);
-  pointer-events:none;
-}
-.ll::after{
-  content:'';position:absolute;bottom:-60px;left:-40px;
-  width:200px;height:200px;border-radius:50%;
-  background:rgba(255,255,255,.04);
-  pointer-events:none;
-}
-.ll-brand{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
-.ll-mark{
-  width:48px;height:48px;border-radius:13px;
-  background:rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,.16);
-  flex-shrink:0;
-}
-.ll-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round}
-.ll h1{
-  font-family:'DM Serif Display',serif;
-  font-size:1.75rem;color:#fff;line-height:1.15;
-  margin-bottom:5px;position:relative;z-index:1;
-  margin-top:22px;
-}
-.ll .sub{
-  font-size:.7rem;color:var(--s-muted);
-  letter-spacing:.12em;text-transform:uppercase;
-  position:relative;z-index:1;
-}
-
-/* These stay in the DOM for JS but are visually hidden via display:none below */
-.ll-feats{display:none}
-.ll-note{display:none}
-.lf,.lf-dot{display:none}
-
-/* Right panel — form */
-.lr{
-  flex:1;background:var(--surface);
-  padding:52px 48px;
-  display:flex;flex-direction:column;justify-content:center;
-}
-.lr-badge{
-  display:inline-flex;align-items:center;gap:7px;
-  background:var(--accent-light);border:1px solid var(--accent-mid);
-  color:var(--accent);font-size:.67rem;font-weight:700;
-  letter-spacing:.09em;text-transform:uppercase;
-  padding:5px 13px;border-radius:30px;margin-bottom:20px;
-}
-.lr-badge span{width:5px;height:5px;border-radius:50%;background:var(--accent)}
-.lr h2{font-size:1.5rem;color:var(--ink);font-weight:700;margin-bottom:5px;letter-spacing:-.02em}
-.lr .desc{font-size:.84rem;color:var(--muted);margin-bottom:28px;line-height:1.5}
-.fg{margin-bottom:16px}
-.fg label{
-  display:block;font-size:.69rem;font-weight:700;
-  color:var(--navy2);margin-bottom:7px;
-  letter-spacing:.06em;text-transform:uppercase;
-}
-.fg input{
-  width:100%;padding:12px 15px;
-  background:var(--inp);border:1.5px solid var(--border);
-  border-radius:var(--radius-sm);color:var(--text);
-  font-size:.9rem;font-family:'DM Sans',sans-serif;
-  transition:border-color .18s,box-shadow .18s,background .18s;outline:none;
-}
-.fg input::placeholder{color:var(--faint)}
-.fg input:focus{
-  border-color:var(--accent);background:var(--surface);
-  box-shadow:0 0 0 3px rgba(13,31,60,.1);
-}
-.btn-login{
-  width:100%;padding:13px;
-  background:var(--accent);color:#fff;
-  font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:700;
-  border:none;border-radius:var(--radius-sm);cursor:pointer;
-  margin-top:4px;transition:background .18s,transform .1s,box-shadow .18s;
-  box-shadow:0 2px 8px rgba(13,31,60,.3);
-  letter-spacing:.01em;
-}
-.btn-login:hover{background:#162e52;box-shadow:0 4px 14px rgba(13,31,60,.38)}
-.btn-login:active{transform:scale(.99)}
-.btn-login:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-.l-alert{
-  padding:11px 14px;border-radius:var(--radius-sm);
-  font-size:.8rem;margin-bottom:14px;
-  display:none;align-items:center;gap:8px;
-  background:var(--err-bg);border:1px solid var(--err-b);color:var(--err);
-}
-.l-alert.show{display:flex}
-.sec-note{
-  display:flex;align-items:center;gap:8px;margin-top:16px;
-  padding:10px 13px;background:var(--bg);border-radius:var(--radius-sm);
-  border:1px solid var(--border);font-size:.74rem;color:var(--faint);
-}
-.sec-note svg{width:13px;height:13px;stroke:var(--faint);fill:none;stroke-width:2;flex-shrink:0}
-
-@media(max-width:640px){
-  #loginScreen{padding:16px;align-items:flex-start;padding-top:20px}
-  .lw{flex-direction:column;width:100%;max-width:100%;min-height:auto;border-radius:16px}
-  .ll{padding:28px 24px;flex:none}
-  .ll h1{font-size:1.4rem;margin-top:14px}
-  .lr{padding:28px 24px}
-  .lr h2{font-size:1.25rem}
-  .lr .desc{margin-bottom:20px}
-  .fg input{font-size:1rem;padding:13px 14px}
-  .btn-login{padding:14px;font-size:1rem}
-}
-
-/* ═══════════════════════════════
-   PORTAL SHELL
-═══════════════════════════════ */
-#portalScreen{display:none;height:100vh;overflow:hidden;flex-direction:row}
-#portalScreen.open{display:flex}
-
-/* ── Sidebar ── */
-.sidebar{
-  width:240px;flex-shrink:0;
-  background:var(--sbg);
-  display:flex;flex-direction:column;
-  height:100vh;overflow-y:auto;z-index:10;
-  border-right:1px solid rgba(255,255,255,.04);
-}
-.sb-brand{
-  padding:22px 18px 16px;
-  border-bottom:1px solid rgba(255,255,255,.07);
-  display:flex;align-items:center;gap:11px;
-}
-.sb-mark{
-  width:34px;height:34px;border-radius:9px;
-  background:rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,.14);flex-shrink:0;
-}
-.sb-mark svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
-.sb-brand-text h2{font-size:.88rem;color:#fff;font-weight:700;line-height:1.25}
-.sb-brand-text span{font-size:.6rem;color:var(--s-muted);text-transform:uppercase;letter-spacing:.11em}
-.sb-nav{padding:10px 10px;flex:1}
-.nav-label{
-  font-size:.58rem;color:var(--s-faint);
-  text-transform:uppercase;letter-spacing:.13em;
-  padding:0 10px;margin:16px 0 5px;
-}
-.nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 10px;border-radius:var(--radius-sm);
-  cursor:pointer;transition:background .15s,color .15s;
-  font-size:.84rem;color:var(--s-muted);
-  margin-bottom:2px;text-decoration:none;user-select:none;
-}
-.nav-item:hover{background:var(--s-hover);color:var(--s-text)}
-.nav-item.active{
-  background:var(--s-active);color:#fff;font-weight:600;
-  box-shadow:inset 3px 0 0 var(--accent);
-}
-.nav-item svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
-.sb-footer{padding:10px 10px 14px;border-top:1px solid rgba(255,255,255,.07)}
-.ucard{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 10px;border-radius:var(--radius-sm);
-  background:rgba(255,255,255,.06);
-}
-.uav{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--accent-gold);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.79rem;font-weight:700;color:#fff;flex-shrink:0;
-}
-.un{font-size:.82rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ur{font-size:.65rem;color:var(--s-muted)}
-.btn-out{
-  margin-top:8px;width:100%;padding:8px 10px;
-  background:transparent;border:1px solid rgba(255,255,255,.1);
-  border-radius:var(--radius-sm);
-  color:var(--s-muted);font-size:.78rem;font-family:'DM Sans',sans-serif;
-  cursor:pointer;transition:border-color .15s,color .15s;
-}
-.btn-out:hover{border-color:rgba(220,38,38,.5);color:#f87171}
-
-/* ── Main area ── */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{
-  padding:0 24px;height:58px;min-height:58px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  background:var(--surface);flex-shrink:0;
-  box-shadow:var(--shadow-sm);
-}
-.topbar-l h1{font-size:1.05rem;color:var(--ink);font-weight:700;letter-spacing:-.01em}
-.topbar-l p{font-size:.75rem;color:var(--muted);margin-top:1px}
-.content{flex:1;overflow-y:auto;padding:22px 24px}
-.section{display:none;animation:fadeIn .18s ease}
-.section.active{display:block}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-
-/* ═══════════════════════════════
-   SHARED COMPONENTS
-═══════════════════════════════ */
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.sec-hdr-l h2{font-size:1rem;font-weight:700;color:var(--ink)}
-.sec-hdr-l p{font-size:.76rem;color:var(--muted);margin-top:1px}
-
-.card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:22px;margin-bottom:16px;
-  box-shadow:var(--shadow-sm);
-}
-.card h3{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:14px}
-
-.form-group{margin-bottom:0}
-.form-group label{
-  display:block;font-size:.67rem;font-weight:700;
-  color:var(--navy2);margin-bottom:6px;
-  letter-spacing:.07em;text-transform:uppercase;
-}
-.form-group select,.form-group input{
-  width:100%;padding:10px 13px;
-  background:var(--inp);border:1.5px solid var(--border);
-  border-radius:var(--radius-sm);color:var(--text);
-  font-size:.86rem;font-family:'DM Sans',sans-serif;
-  outline:none;transition:border-color .15s,background .15s;
-  appearance:auto;
-}
-.form-group select:focus,.form-group input:focus{
-  border-color:var(--accent);background:var(--surface);
-}
-
-/* Tables */
-.twrap{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden;
-  box-shadow:var(--shadow-sm);
-}
-table{width:100%;border-collapse:collapse}
-thead{background:var(--surface2)}
-th{
-  padding:11px 16px;text-align:left;
-  font-size:.65rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.07em;color:var(--muted);
-  border-bottom:1px solid var(--border);
-}
-td{
-  padding:12px 16px;font-size:.85rem;
-  border-bottom:1px solid var(--border);color:var(--text);
-}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover{background:var(--surface2)}
-
-/* Badges */
-.badge{
-  display:inline-flex;padding:3px 10px;border-radius:20px;
-  font-size:.67rem;font-weight:600;white-space:nowrap;letter-spacing:.02em;
-}
-.b-green{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-b)}
-.b-gold{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-b)}
-.b-red{background:var(--err-bg);color:var(--err);border:1px solid var(--err-b)}
-.b-blue{background:var(--accent-light);color:var(--accent);border:1px solid var(--accent-mid)}
-
-/* Buttons */
-.btn{
-  padding:7px 14px;border-radius:var(--radius-sm);border:none;
-  font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:600;
-  cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s;
-  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
-}
-.btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.btn:active{transform:scale(.98)}
-.btn-p{background:var(--accent);color:#fff;box-shadow:0 1px 4px rgba(13,31,60,.25)}
-.btn-p:hover{background:#162e52;box-shadow:0 2px 8px rgba(13,31,60,.32)}
-.btn-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-b)}
-.btn-ok:hover{background:#dcfce7}
-.btn-edit{background:var(--surface2);color:var(--navy2);border:1px solid var(--border)}
-.btn-edit:hover{background:var(--accent-light);border-color:var(--accent-mid);color:var(--accent)}
-.btn-sm{padding:5px 11px;font-size:.73rem}
-.btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;transform:none}
-
-/* Empty / placeholder states */
-.empty{text-align:center;padding:48px 20px;color:var(--muted)}
-.empty svg{width:36px;height:36px;stroke:var(--faint);opacity:.7;fill:none;stroke-width:1.5;margin-bottom:10px}
-.empty p{font-size:.86rem;margin-top:6px}
-.placeholder-box{
-  background:var(--surface);border:1.5px dashed var(--border);
-  border-radius:var(--radius);padding:60px 20px;
-  text-align:center;color:var(--muted);
-}
-.placeholder-box svg{width:38px;height:38px;stroke:var(--faint);opacity:.55;fill:none;stroke-width:1.5;margin-bottom:12px}
-.placeholder-box h3{font-size:.95rem;color:var(--ink);font-weight:700;margin-bottom:4px}
-.placeholder-box p{font-size:.82rem;line-height:1.5}
-
-/* ── Modal ── */
-.mo{
-  position:fixed;inset:0;
-  background:rgba(13,31,60,.5);backdrop-filter:blur(5px);
-  z-index:200;display:none;
-  align-items:center;justify-content:center;padding:20px;
-}
-.mo.open{display:flex}
-.mbox{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:18px;padding:30px;
-  width:460px;max-width:94vw;max-height:90vh;
-  overflow-y:auto;animation:slideUp .22s cubic-bezier(.22,.68,0,1.1);
-  box-shadow:var(--shadow-lg);
-}
-@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.mbox h3{font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:4px}
-.mbox>.mdesc{font-size:.79rem;color:var(--muted);margin-bottom:20px}
-.mactions{display:flex;gap:10px;margin-top:22px}
-.mactions .btn{flex:1;justify-content:center;padding:12px}
-.btn-cancel{
-  background:transparent;border:1.5px solid var(--border);
-  color:var(--muted);font-family:'DM Sans',sans-serif;
-  font-size:.83rem;font-weight:600;border-radius:var(--radius-sm);
-  padding:12px;cursor:pointer;transition:border-color .15s,color .15s;flex:1;
-}
-.btn-cancel:hover{border-color:var(--navy2);color:var(--navy2)}
-
-/* ── Toast ── */
-.toast{
-  position:fixed;bottom:20px;right:20px;z-index:800;
-  padding:11px 15px;border-radius:10px;font-size:.82rem;font-weight:500;
-  display:none;align-items:center;gap:8px;
-  box-shadow:var(--shadow);animation:slideUp .2s ease;
-}
-.toast.show{display:flex}
-.toast svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
-.toast.success{background:var(--ok-bg);border:1px solid var(--ok-b);color:var(--ok)}
-.toast.error{background:var(--err-bg);border:1px solid var(--err-b);color:var(--err)}
-
-/* Spinner */
-.spinner{
-  display:inline-block;width:13px;height:13px;
-  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
-  border-radius:50%;animation:spin .7s linear infinite;
-  vertical-align:middle;margin-right:5px;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Mobile hamburger */
-.hamburger{
-  display:none;flex-direction:column;gap:4px;
-  cursor:pointer;padding:6px;border-radius:var(--radius-sm);
-  background:var(--bg);border:1px solid var(--border);
-}
-.hamburger span{display:block;width:17px;height:2px;background:var(--ink);border-radius:2px}
-.sb-ov{display:none;position:fixed;inset:0;background:rgba(13,31,60,.45);z-index:9}
-.sb-ov.open{display:block}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(13,31,60,.13);border-radius:10px}
-
-/* ── Info grid (profile & receipt) ── */
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px}
-.info-item label{
-  display:block;font-size:.63rem;font-weight:700;
-  color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;
-}
-.info-item span{font-size:.87rem;color:var(--text);font-weight:500}
-.info-divider{grid-column:1/-1;border:none;border-top:1px solid var(--border);margin:4px 0}
-.section-sub{
-  font-size:.68rem;font-weight:700;color:var(--accent);
-  text-transform:uppercase;letter-spacing:.1em;margin:16px 0 10px;
-}
-
-/* ═══════════════════════════════
-   RESULTS
-═══════════════════════════════ */
-.res-sel-bar{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;align-items:flex-end;
-}
-.result-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:24px;margin-top:16px;
-  box-shadow:var(--shadow-sm);
-}
-.rc-hdr{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  flex-wrap:wrap;gap:14px;
-  border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:16px;
-}
-.rc-hdr h2{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--ink)}
-.rc-hdr p{font-size:.78rem;color:var(--muted);margin-top:2px}
-.rc-meta{text-align:right}
-.rc-meta div{font-size:.8rem;color:var(--text);font-weight:600}
-.rc-meta .rc-tag{font-size:.63rem;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;font-weight:400}
-.grade-pill{
-  display:inline-flex;padding:2px 9px;border-radius:14px;
-  font-size:.72rem;font-weight:700;letter-spacing:.02em;
-}
-.gp-a{background:var(--ok-bg);color:var(--ok)}
-.gp-b{background:var(--accent-light);color:var(--accent)}
-.gp-c{background:var(--warn-bg);color:var(--warn)}
-.gp-f{background:var(--err-bg);color:var(--err)}
-.res-footer{
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:12px;margin-top:16px;
-  padding:14px 18px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
-}
-.res-footer div span{
-  display:block;font-size:.62rem;color:var(--faint);
-  text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;
-}
-.res-footer div strong{font-size:.9rem;color:var(--ink);font-weight:600}
-
-/* ═══════════════════════════════
-   PAYMENTS
-═══════════════════════════════ */
-.term-block{margin-bottom:16px}
-.term-block-hdr{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
-}
-.term-block-hdr h3{font-size:.9rem;font-weight:700;color:var(--ink)}
-.fee-item{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;
-}
-.fee-item:last-child{border-bottom:none}
-.fee-item-l strong{font-size:.86rem;color:var(--text);display:block;font-weight:600}
-.fee-item-l span{font-size:.75rem;color:var(--muted);margin-top:2px;display:block}
-.fee-item-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-
-/* ═══════════════════════════════
-   PROFILE
-═══════════════════════════════ */
-.profile-hdr{
-  display:flex;align-items:center;gap:18px;
-  margin-bottom:20px;flex-wrap:wrap;
-  padding-bottom:20px;border-bottom:1px solid var(--border);
-}
-.avatar-lg{
-  width:72px;height:72px;border-radius:50%;
-  background:var(--accent-gold);
-  color:#fff;display:flex;align-items:center;justify-content:center;
-  font-size:1.5rem;font-weight:700;flex-shrink:0;overflow:hidden;
-  box-shadow:none;
-}
-.avatar-lg img{width:100%;height:100%;object-fit:cover}
-.profile-hdr h2{font-size:1.1rem;color:var(--ink);font-weight:700}
-.profile-hdr p{font-size:.8rem;color:var(--muted);margin-top:3px}
-
-/* ═══════════════════════════════
-   RESPONSIVE — MOBILE
-═══════════════════════════════ */
-@media(max-width:768px){
-  body{overflow:auto}
-  .sidebar{position:fixed;left:-252px;top:0;bottom:0;z-index:10;transition:left .28s ease}
-  .sidebar.open{left:0}
-  .main{width:100%;min-height:100vh;overflow:auto}
-  .topbar{padding:0 14px}
-  .hamburger{display:flex}
-  .content{padding:14px 14px}
-  table{min-width:460px}
-  .twrap{overflow-x:auto}
-  #portalScreen.open{flex-direction:column}
-  .info-grid{grid-template-columns:1fr}
-  .rc-hdr{flex-direction:column}
-  .rc-meta{text-align:left}
-  .res-footer{flex-direction:column;align-items:flex-start;gap:10px}
-  .fee-item{flex-direction:column;align-items:flex-start;gap:10px}
-}
-
-/* ═══════════════════════════════
-   PRINT
-═══════════════════════════════ */
-.no-print{}
-@media print{
-  .sidebar,.topbar,.hamburger,.sb-ov,.toast,.no-print{display:none!important}
-  body{background:#fff}
-  .content{padding:0!important;overflow:visible!important}
-  body.printing-modal .content,body.printing-modal .sidebar,body.printing-modal .topbar{display:none!important}
-  body.printing-modal .mo.open{position:static!important;background:#fff!important;backdrop-filter:none!important;display:block!important;padding:0!important;inset:auto!important}
-  body.printing-modal .mo.open .mbox{box-shadow:none!important;border:none!important;width:100%!important;max-width:100%!important;margin:0 auto!important}
-  .result-card{border:none!important;box-shadow:none!important}
-}
-</style>
+<link rel="stylesheet" href="student.css"/>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="lw">
-    <div class="ll">
-      <div>
-        <div class="ll-brand">
-          <div class="ll-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
-          <div><h1>Student Portal</h1><p class="sub">School Management System</p></div>
-        </div>
-        <div class="ll-feats">
-          <div class="lf"><div class="lf-dot"></div><p>View your published academic results and grades</p></div>
-          <div class="lf"><div class="lf-dot"></div><p>Track and pay school fees and levies securely</p></div>
-          <div class="lf"><div class="lf-dot"></div><p>Keep your profile and parent information up to date</p></div>
-        </div>
-      </div>
-      <div class="ll-note">Use the registration number and password issued by your school.</div>
-    </div>
-    <div class="lr">
-      <div class="lr-badge"><span></span>Student Access</div>
-      <h2>Welcome back</h2>
-      <p class="desc">Sign in with your registration number.</p>
-      <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
-      <div class="fg"><label>Registration Number</label><input type="text" id="regIn" placeholder="e.g. BHS/2025/JSS1/001" autocomplete="off"/></div>
-      <div class="fg"><label>Password</label><input type="password" id="pwIn" placeholder="Enter password"/></div>
-      <button class="btn-login" id="loginBtn">Sign In</button>
-      <div class="sec-note"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>For enrolled students only</div>
-    </div>
+  <div class="login-card">
+    <div class="login-mark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy"/></div>
+    <h1 class="login-title">Newtown Academy</h1>
+    <p class="login-tagline">Student Portal — log in to your student account with your valid details.</p>
+    <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
+    <div class="fg"><input type="text" id="regIn" placeholder="Registration number" autocomplete="off"/></div>
+    <div class="fg"><input type="password" id="pwIn" placeholder="Password" autocomplete="off"/></div>
+    <button class="btn-login" id="loginBtn">Log In</button>
   </div>
 </div>
 
@@ -593,18 +27,18 @@ tbody tr:hover{background:var(--surface2)}
 <div id="portalScreen">
   <div class="sidebar" id="sidebar">
     <div class="sb-brand">
-      <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
-      <div class="sb-brand-text"><h2>Student Portal</h2><span>Dashboard</span></div>
+      <div class="sb-mark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest"/></div>
+      <div class="sb-brand-text"><h2>Newtown Academy</h2><span>Student Dashboard</span></div>
     </div>
     <nav class="sb-nav">
       <div class="nav-label">Academics</div>
-      <div class="nav-item active" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
+      <div class="nav-item" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
+      <div class="nav-label">Updates</div>
+      <div class="nav-item" data-sec="announcements"><svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a2 2 0 1 1-3.2 2.4"/></svg>Announcements</div>
       <div class="nav-label">Finance</div>
       <div class="nav-item" data-sec="payments"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</div>
       <div class="nav-label">Account</div>
-      <div class="nav-item" data-sec="profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
-      <div class="nav-label">Exams</div>
-      <div class="nav-item" id="cbtNav" onclick="openCBT()"><span style="width:17px;text-align:center;font-size:.95rem;flex-shrink:0">📝</span>CBT Exam Hall</div>
+      <div class="nav-item active" data-sec="profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
     </nav>
     <div class="sb-footer">
       <div class="ucard">
@@ -632,7 +66,7 @@ tbody tr:hover{background:var(--surface2)}
     <div class="content">
 
       <!-- RESULTS -->
-      <div class="section active" id="sec-results">
+      <div class="section" id="sec-results">
         <div class="card no-print">
           <div class="res-sel-bar">
             <div class="form-group">
@@ -667,28 +101,85 @@ tbody tr:hover{background:var(--surface2)}
         </div>
 
         <div id="resultCard" class="result-card" style="display:none">
-          <div class="rc-hdr">
-            <div>
-              <h2 id="rcName">—</h2>
-              <p id="rcClassLine">—</p>
-            </div>
-            <div class="rc-meta">
-              <div class="rc-tag">Session / Term</div>
-              <div id="rcTerm" style="font-weight:600">—</div>
+
+          <!-- SCHOOL HEADER -->
+          <div class="rc-school-hdr">
+            <img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest" class="rc-school-logo"/>
+            <div class="rc-school-info">
+              <h1>Newtown Academy</h1>
+              <p>Lokoja, Kogi State, Nigeria</p>
+              <span class="rc-report-label">Termly Report Sheet</span>
             </div>
           </div>
+
+          <!-- STUDENT DETAILS -->
+          <div class="rc-student-grid">
+            <div><span>Student Name</span><strong id="rcName">—</strong></div>
+            <div><span>Registration No.</span><strong id="rcReg">—</strong></div>
+            <div><span>Class</span><strong id="rcClass">—</strong></div>
+            <div><span>No. in Class</span><strong id="rcNumInClass">—</strong></div>
+            <div><span>Session / Term</span><strong id="rcTerm">—</strong></div>
+            <div><span>Overall Position</span><strong id="rcPosition">—</strong></div>
+            <div><span>Closing Date</span><strong id="rcClosingDate">—</strong></div>
+            <div><span>Next Term Begins</span><strong id="rcNextTerm">—</strong></div>
+          </div>
+
+          <!-- COGNITIVE DOMAIN -->
+          <div class="rc-section-title">Cognitive Domain — Academic Performance</div>
           <div class="twrap">
-            <table>
-              <thead><tr><th>Subject</th><th>Score</th><th>Grade</th><th>Remark</th></tr></thead>
+            <table class="rc-subj-table">
+              <thead>
+                <tr id="rcSubjHead">
+                  <th>Subject</th><th>Test 1</th><th>Test 2</th><th>Test 3</th><th>Exam</th><th>Total</th><th>Grade</th><th class="rc-pos-col">Position</th>
+                </tr>
+              </thead>
               <tbody id="rcTbody"></tbody>
             </table>
           </div>
-          <div class="res-footer">
-            <div><span>Position in Class</span><strong id="rcPosition">—</strong></div>
-            <div style="flex:1;min-width:200px"><span>Class Teacher's Remark</span><strong id="rcRemark">—</strong></div>
+
+          <!-- SUMMARY -->
+          <div class="rc-summary-grid" id="rcSummaryGrid">
+            <div><span>Overall Total</span><strong id="rcOverallTotal">—</strong></div>
+            <div><span>Average</span><strong id="rcAverage">—</strong></div>
+            <div><span>Percentage</span><strong id="rcPercentage">—</strong></div>
+            <div><span>Overall Grade</span><strong id="rcOverallGrade">—</strong></div>
+          </div>
+
+          <!-- GRADING KEY -->
+          <div id="rcGradingKeyBox">
+            <div class="rc-section-title">Grading Key</div>
+            <div class="rc-grading-key" id="rcGradingKey"></div>
+          </div>
+
+          <!-- DOMAINS -->
+          <div class="rc-domains-wrap" id="rcDomainsWrap">
+            <div id="rcAffectiveBox">
+              <div class="rc-section-title">Affective Domain</div>
+              <div class="twrap"><table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcAffectiveTbody"></tbody></table></div>
+            </div>
+            <div id="rcPsychomotorBox">
+              <div class="rc-section-title">Psychomotor Domain</div>
+              <div class="twrap"><table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcPsychomotorTbody"></tbody></table></div>
+            </div>
+          </div>
+          <p class="rc-scale-note">Key: 5 = Excellent &nbsp;·&nbsp; 4 = Very Good &nbsp;·&nbsp; 3 = Good &nbsp;·&nbsp; 2 = Fair &nbsp;·&nbsp; 1 = Poor</p>
+
+          <!-- REMARKS -->
+          <div class="rc-remarks-wrap" id="rcRemarksWrap">
+            <div id="rcTeacherRemarkBox"><span>Class Teacher's Remark</span><p id="rcTeacherRemark">—</p></div>
+            <div id="rcPrincipalRemarkBox"><span>Principal's Remark</span><p id="rcPrincipalRemark">—</p></div>
+          </div>
+
+          <!-- SIGNATURES -->
+          <div class="rc-sign-row" id="rcSignRow">
+            <div class="rc-sign-block"><div class="rc-sign-line" id="rcIctSigLine"></div><span>ICT Officer's Signature</span></div>
+            <div class="rc-sign-block"><div class="rc-sign-line" id="rcPrincipalSigLine"></div><span>Principal's Signature</span></div>
+          </div>
+
+          <div class="res-footer no-print">
             <button class="btn btn-edit no-print" id="printResultBtn">
               <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Print
+              Print Result
             </button>
           </div>
         </div>
@@ -701,8 +192,15 @@ tbody tr:hover{background:var(--surface2)}
         </div>
       </div>
 
+      <!-- ANNOUNCEMENTS -->
+      <div class="section" id="sec-announcements">
+        <div id="annContainer">
+          <div class="empty"><p>Loading announcements…</p></div>
+        </div>
+      </div>
+
       <!-- PROFILE -->
-      <div class="section" id="sec-profile">
+      <div class="section active" id="sec-profile">
         <div class="card">
           <div class="profile-hdr">
             <div class="avatar-lg" id="profAvatar">—</div>
@@ -711,23 +209,78 @@ tbody tr:hover{background:var(--surface2)}
               <p id="profSub">—</p>
             </div>
           </div>
-          <div class="section-sub" style="margin-top:0">Personal Information</div>
-          <div class="info-grid">
-            <div class="info-item"><label>Full Name</label><span id="pfFullName">—</span></div>
-            <div class="info-item"><label>Registration Number</label><span id="pfReg">—</span></div>
-            <div class="info-item"><label>Class</label><span id="pfClass">—</span></div>
-            <div class="info-item"><label>Date of Birth</label><span id="pfDob">—</span></div>
-            <div class="info-item"><label>Gender</label><span id="pfGender">—</span></div>
-            <div class="info-item"><label>Blood Group</label><span id="pfBloodGroup">—</span></div>
-            <div class="info-item"><label>Genotype</label><span id="pfGenotype">—</span></div>
+
+          <div class="stage-nav">
+            <div class="stage-dot active" id="stageDot1" onclick="showProfileStage(1)"><span>1</span>Personal</div>
+            <div class="stage-dot" id="stageDot2" onclick="showProfileStage(2)"><span>2</span>Guardian</div>
+            <div class="stage-dot" id="stageDot3" onclick="showProfileStage(3)"><span>3</span>Health &amp; Interests</div>
           </div>
-          <hr class="info-divider"/>
-          <div class="section-sub">Parent / Guardian</div>
-          <div class="info-grid">
-            <div class="info-item"><label>Parent / Guardian Name</label><span id="pfParentName">—</span></div>
-            <div class="info-item"><label>Phone</label><span id="pfParentPhone">—</span></div>
-            <div class="info-item"><label>Email</label><span id="pfParentEmail">—</span></div>
-            <div class="info-item"><label>Home Address</label><span id="pfAddress">—</span></div>
+
+          <!-- STAGE 1: PERSONAL -->
+          <div class="profile-stage active" id="profStage1">
+            <div class="section-sub" style="margin-top:0">Personal Information</div>
+            <div class="info-grid">
+              <div class="info-item"><label>Full Name</label><span id="pfFullName">—</span></div>
+              <div class="info-item"><label>Registration Number</label><span id="pfReg">—</span></div>
+              <div class="info-item"><label>Class</label><span id="pfClass">—</span></div>
+              <div class="info-item"><label>Date of Birth</label><span id="pfDob">—</span></div>
+              <div class="info-item"><label>Gender</label><span id="pfGender">—</span></div>
+              <div class="info-item"><label>State of Origin</label><span id="pfState">—</span></div>
+              <div class="info-item"><label>Blood Group</label><span id="pfBloodGroup">—</span></div>
+              <div class="info-item"><label>Genotype</label><span id="pfGenotype">—</span></div>
+              <div class="info-item"><label>Religion</label><span id="pfReligion">—</span></div>
+            </div>
+            <div class="stage-btn-row">
+              <button class="btn btn-p" onclick="showProfileStage(2)">Next: Guardian Info
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STAGE 2: GUARDIAN -->
+          <div class="profile-stage" id="profStage2">
+            <div class="section-sub" style="margin-top:0">Parent / Guardian</div>
+            <div class="info-grid">
+              <div class="info-item"><label>Parent / Guardian Name</label><span id="pfParentName">—</span></div>
+              <div class="info-item"><label>Phone</label><span id="pfParentPhone">—</span></div>
+              <div class="info-item"><label>Email</label><span id="pfParentEmail">—</span></div>
+              <div class="info-item"><label>Home Address</label><span id="pfAddress">—</span></div>
+            </div>
+            <div class="stage-btn-row">
+              <button class="btn btn-edit" onclick="showProfileStage(1)">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+              <button class="btn btn-p" onclick="showProfileStage(3)">Next: Health &amp; Interests
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STAGE 3: HEALTH & INTERESTS -->
+          <div class="profile-stage" id="profStage3">
+            <div class="section-sub" style="margin-top:0">Hobbies &amp; Favourite Sports</div>
+            <div class="info-item" style="margin-bottom:14px">
+              <label>Hobbies</label>
+              <div class="chip-wrap" id="pfHobbies"><span class="chip-empty">—</span></div>
+            </div>
+            <div class="info-item" style="margin-bottom:14px">
+              <label>Favourite Sports</label>
+              <div class="chip-wrap" id="pfSports"><span class="chip-empty">—</span></div>
+            </div>
+            <hr class="info-divider"/>
+            <div class="section-sub">Health Report</div>
+            <div class="info-grid">
+              <div class="info-item"><label>Allergies</label><span id="pfAllergies">—</span></div>
+              <div class="info-item"><label>Health Challenges</label><span id="pfHealthConditions">—</span></div>
+              <div class="info-item"><label>Current Medication</label><span id="pfMedication">—</span></div>
+            </div>
+            <div class="stage-btn-row">
+              <button class="btn btn-edit" onclick="showProfileStage(2)">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -738,20 +291,47 @@ tbody tr:hover{background:var(--surface2)}
 
 <!-- RECEIPT MODAL -->
 <div class="mo" id="moReceipt">
-  <div class="mbox">
-    <h3>Payment Receipt</h3>
-    <p class="mdesc" id="recSchoolName">School Management System</p>
-    <div class="info-grid">
-      <div class="info-item"><label>Receipt No.</label><span id="recId">—</span></div>
-      <div class="info-item"><label>Date</label><span id="recDate">—</span></div>
-      <div class="info-item"><label>Student Name</label><span id="recName">—</span></div>
-      <div class="info-item"><label>Reg Number</label><span id="recReg">—</span></div>
-      <div class="info-item"><label>Class</label><span id="recClass">—</span></div>
-      <div class="info-item"><label>Term</label><span id="recTerm">—</span></div>
-      <div class="info-item"><label>Item</label><span id="recItem">—</span></div>
-      <div class="info-item"><label>Amount Paid</label><span id="recAmount">—</span></div>
+  <div class="mbox mbox-lg" id="receiptCard">
+    <!-- LETTERHEAD -->
+    <div class="rc-school-hdr">
+      <img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest" class="rc-school-logo"/>
+      <div class="rc-school-info">
+        <h1 id="recSchoolName">School Management System</h1>
+        <p>Lokoja, Kogi State, Nigeria</p>
+        <span class="rc-report-label">Official Fee Payment Receipt</span>
+      </div>
     </div>
-    <div class="mactions">
+
+    <!-- RECEIPT / STUDENT META -->
+    <div class="rc-student-grid">
+      <div><span>Receipt No.</span><strong id="recId">—</strong></div>
+      <div><span>Date</span><strong id="recDate">—</strong></div>
+      <div><span>Student Name</span><strong id="recName">—</strong></div>
+      <div><span>Reg Number</span><strong id="recReg">—</strong></div>
+      <div><span>Class</span><strong id="recClass">—</strong></div>
+      <div><span>Term / Session</span><strong id="recTerm">—</strong></div>
+      <div><span>Reference</span><strong id="recRef">—</strong></div>
+      <div><span>Status</span><strong id="recStatusText">—</strong></div>
+    </div>
+
+    <!-- BREAKDOWN -->
+    <div class="rc-section-title">Payment Breakdown</div>
+    <div class="twrap">
+      <table class="rc-subj-table fee-table">
+        <thead><tr><th class="fee-num-col">#</th><th>Fee Item</th><th class="fee-amt-col">Amount</th></tr></thead>
+        <tbody id="recBreakdownBody"></tbody>
+        <tfoot><tr class="fee-total-row"><td colspan="2">Total Paid</td><td class="fee-amt-col" id="recTotal">—</td></tr></tfoot>
+      </table>
+    </div>
+
+    <p id="recStatusNote" style="display:none;margin:14px 0 0;font-size:.82rem;color:var(--warn);font-weight:600"></p>
+
+    <!-- SIGNATURE -->
+    <div class="rc-sign-row" style="margin-top:30px">
+      <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Date &amp; Stamp (For: Bursar)</span></div>
+    </div>
+
+    <div class="mactions no-print">
       <button class="btn-cancel" id="closeReceiptBtn">Close</button>
       <button class="btn btn-p" id="printReceiptBtn">
         <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -763,14 +343,40 @@ tbody tr:hover{background:var(--surface2)}
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg"></span></div>
 
+<!-- CONFIRM DIALOG -->
+<div class="dlg-ov" id="dlgOv">
+  <div class="dlg">
+    <div class="dlg-ic"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <h3 id="dlgTitle">Are you sure?</h3>
+    <p id="dlgMsg">This action cannot be undone.</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-danger" id="dlgConfirmBtn">Confirm</button>
+      <button class="dlg-btn dlg-btn-secondary" onclick="closeDlg()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NO CONNECTION DIALOG -->
+<div class="dlg-ov" id="netErrOv">
+  <div class="dlg">
+    <div class="dlg-ic warn-ic"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9z"/><path d="M5 13l2 2a8 8 0 0 1 10 0l2-2a11 11 0 0 0-14 0z"/><path d="M9 17l2 2a2.83 2.83 0 0 1 2 0l2-2a5 5 0 0 0-6 0z"/><line x1="2" y1="2" x2="22" y2="22"/></svg></div>
+    <h3>No internet connection</h3>
+    <p>We couldn't reach the school server. Please check your internet connection and try again.</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-primary" id="netErrRetryBtn">Try Again</button>
+      <button class="dlg-btn dlg-btn-secondary" onclick="closeNetErrDlg()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, getDoc, doc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { verifyPassword } from "./pwhash.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============ CONFIG ============ */
-// Same Firebase project used by admin.html (veil-1-bd7b5)
+// Same Firebase project used by admin.html (school-8b30a)
 const cfg = {
   apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",
   authDomain:"veil-1-bd7b5.firebaseapp.com",
@@ -780,17 +386,47 @@ const cfg = {
   appId:"1:526021682048:web:a52dae5b2650ca951ad765"
 };
 const app = initializeApp(cfg);
-const db = getFirestore(app);
+// Persistent local cache (IndexedDB) — repeat visits and flaky mobile data
+// read from device storage first instead of waiting on the network.
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  // Without this, setDoc/addDoc THROWS if any field being written is
+  // undefined (e.g. student.class missing on some records) instead of
+  // just omitting that field. That silent throw is what was causing
+  // "payment made but could not be saved" on an otherwise-successful
+  // payment — the write never even reached Firestore.
+  ignoreUndefinedProperties: true
+});
+
 
 // ⚠️ NOT FOUND IN paystack-verify.zip — that zip contains no Paystack key or
 // verify endpoint (it's an unrelated e-commerce project). Replace these two
 // values with your real Paystack TEST public key and your Vercel verify URL.
-const PAYSTACK_PUBLIC_KEY = "pk_test_18ca2741786aa5eb29938cac8334563f20dd0e4b";
-const VERIFY_ENDPOINT = "https://paystacktest.vercel.app/api/verify";
+const PAYSTACK_PUBLIC_KEY = "pk_test_0f95979409d37c80f73fa3f8502da39ea04fea58";
+const VERIFY_ENDPOINT = "https://school-payment-server.vercel.app/api/verify";
 
-const CURRENT_SESSION = "2025/2026";
+// These mirror the admin dashboard's Overview → "Change" term control.
+// Both files read the SAME settings/academic Firestore document, so
+// whatever the admin sets there becomes the default term/session shown
+// here (Results tab picker, open payment term fallback) without the
+// student needing to do anything.
+let CURRENT_SESSION = "2025/2026";
+let CURRENT_TERM = "Second";
+async function loadAcademicSettings(){
+  try{
+    const snap = await getDoc(doc(db,'settings','academic'));
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.session) CURRENT_SESSION = d.session;
+      if(d.term) CURRENT_TERM = d.term;
+    }
+  } catch(e){ console.warn('Could not load academic settings, using defaults:', e.message); }
+  const rs=document.getElementById('resSession'); if(rs) rs.value = CURRENT_SESSION;
+  const rt=document.getElementById('resTerm'); if(rt) rt.value = CURRENT_TERM;
+}
 const TERMS = ["First","Second","Third"];
-const SCHOOL_NAME = "School Management System";
+const SCHOOL_NAME = "Newtown Academy";
+const SCHOOL_EMAIL_DOMAIN = "newtownacademy.edu.ng"; // fallback email domain if student has no parent email
 
 /* ============ SESSION ============ */
 let student = null; // { id, regNumber, name, class, subjects, parentName, parentPhone, parentEmail, address, dob, gender, bloodGroup, genotype }
@@ -809,7 +445,7 @@ function showLogin(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('portalScreen').classList.remove('open');
 }
-function showPortal(){
+async function showPortal(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('portalScreen').classList.add('open');
   document.getElementById('sbAv').textContent = (student.name||'S').charAt(0).toUpperCase();
@@ -817,7 +453,8 @@ function showPortal(){
   document.getElementById('sbReg').textContent = student.regNumber||'';
   document.getElementById('tbName').textContent = student.name||'Student';
   document.getElementById('tbReg').textContent = student.regNumber||'';
-  switchTab('results');
+  await loadAcademicSettings();
+  switchTab('profile');
 }
 
 (function init(){
@@ -828,7 +465,8 @@ function showPortal(){
       regNumber: existing.regNumber,
       name: existing.name,
       class: existing.class,
-      subjects: existing.subjects||[]
+      subjects: existing.subjects||[],
+      parentEmail: existing.parentEmail||''
     };
     showPortal();
   } else {
@@ -837,16 +475,6 @@ function showPortal(){
 })();
 
 /* ============ LOGIN ============ */
-window.openCBT = function(){
-  if(!student){ return; }
-  sessionStorage.setItem('mf_cbt_uid', student.id);
-  sessionStorage.setItem('mf_cbt_name', student.name||'');
-  sessionStorage.setItem('mf_cbt_classId', student.class||'');
-  sessionStorage.setItem('mf_cbt_className', student.class||'');
-  sessionStorage.setItem('mf_cbt_reg', student.regNumber||'');
-  window.location.href = 'cbt.html';
-};
-
 window.doLogin = async function(){
   const reg = document.getElementById('regIn').value.trim();
   const pw = document.getElementById('pwIn').value;
@@ -856,22 +484,26 @@ window.doLogin = async function(){
 
   if(!reg || !pw){ showLAlert('Please enter your registration number and password.'); return; }
 
+  if(!navigator.onLine){ showNetErrDlg(); return; }
+
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
   try{
-    const snap = await getDocs(query(collection(db,'students'), where('regNumber','==',reg)));
+    const snap = await getDocs(query(collection(db,'students'), where('regNumber','==',reg), limit(1)));
     if(snap.empty){
-      showLAlert('Registration number not found.');
+      showLAlert('Incorrect registration number or password.');
       return;
     }
     const docSnap = snap.docs[0];
     const data = docSnap.data();
 
     if(!(await verifyPassword(pw, data))){
-      showLAlert('Incorrect password.');
+      showLAlert('Incorrect registration number or password.');
       return;
     }
     if((data.status||'active') !== 'active'){
-      showLAlert('Your account is not active. Please contact the school office.');
+      showLAlert(data.status==='graduated'
+        ? 'This account has graduated and no longer has portal access.'
+        : 'Your account is not active. Please contact the school office.');
       return;
     }
 
@@ -881,30 +513,47 @@ window.doLogin = async function(){
       regNumber: data.regNumber||reg,
       name,
       class: data.class||'',
-      subjects: data.subjects||[]
+      subjects: data.subjects||[],
+      parentEmail: data.parentEmail||''
     };
     saveSession(sessionData);
-    student = { id: sessionData.studentId, regNumber: sessionData.regNumber, name: sessionData.name, class: sessionData.class, subjects: sessionData.subjects };
+    student = { id: sessionData.studentId, regNumber: sessionData.regNumber, name: sessionData.name, class: sessionData.class, subjects: sessionData.subjects, parentEmail: sessionData.parentEmail||'' };
     showPortal();
   } catch(e){
-    showLAlert('Login failed: '+e.message);
+    console.error('Login error:', e);
+    const isNetworkIssue = !navigator.onLine || e.code === 'unavailable' || /network|failed to fetch/i.test(e.message||'');
+    if(isNetworkIssue){ showNetErrDlg(); }
+    else{ showLAlert('Something went wrong. Please try again.'); }
   } finally{
     btn.disabled = false; btn.textContent = 'Sign In';
   }
 };
 function showLAlert(msg){ document.getElementById('lMsg').textContent = msg; document.getElementById('lAlert').classList.add('show'); }
+function showNetErrDlg(){ document.getElementById('netErrOv').classList.add('show'); }
+window.closeNetErrDlg = ()=> document.getElementById('netErrOv').classList.remove('show');
+document.getElementById('netErrRetryBtn').addEventListener('click', ()=>{ closeNetErrDlg(); doLogin(); });
 
 document.getElementById('loginBtn').addEventListener('click', doLogin);
 document.getElementById('pwIn').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 document.getElementById('regIn').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
 window.doLogout = function(){
-  if(confirm('Sign out of the student portal?')){
+  showDlg('Sign out?', 'You will need your registration number and password to sign in again.', ()=>{
+    closeDlg();
     clearSession();
     student = null;
     showLogin();
-  }
+  });
 };
+
+function showDlg(title, msg, onConfirm){
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgMsg').textContent = msg;
+  const btn = document.getElementById('dlgConfirmBtn');
+  btn.onclick = onConfirm;
+  document.getElementById('dlgOv').classList.add('show');
+}
+window.closeDlg = ()=> document.getElementById('dlgOv').classList.remove('show');
 document.getElementById('logoutBtn').addEventListener('click', doLogout);
 
 /* ============ NAV ============ */
@@ -916,42 +565,77 @@ window.switchTab = (sec)=>{
   document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+sec)?.classList.add('active');
-  const titles={results:'Results',payments:'Payments',profile:'Profile'};
-  const subs={results:'Your published academic results',payments:'View and pay your school fees',profile:'Your personal and parent information'};
+  const titles={results:'Results',announcements:'Announcements',payments:'Payments',profile:'Profile'};
+  const subs={results:'Your published academic results',announcements:'Latest news and notices from the school',payments:'View and pay your school fees',profile:'Your personal and parent information'};
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
 
   if(sec==='payments') loadPayments();
   if(sec==='profile') loadProfile();
+  if(sec==='announcements') loadAnnouncements();
 };
 window.openSidebar = ()=>{ document.getElementById('sidebar').classList.add('open'); document.getElementById('sbOv').classList.add('open'); };
 window.closeSidebar = ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); };
 document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
 document.getElementById('sbOv').addEventListener('click', closeSidebar);
 
-/* ============ RESULTS ============ */
-function getGrade(score){
-  if(score>=75) return 'A1';
-  if(score>=70) return 'B2';
-  if(score>=65) return 'B3';
-  if(score>=60) return 'C4';
-  if(score>=55) return 'C5';
-  if(score>=50) return 'C6';
-  if(score>=45) return 'D7';
-  if(score>=40) return 'E8';
-  return 'F9';
+/* ============ RESULT SETTINGS ============ */
+const DEFAULT_RESULT_SETTINGS = {
+  assessment: { test1Max:20, test2Max:20, test3Max:20, examMax:60 },
+  gradingBands: [
+    { grade:'A1', min:80, max:100, remark:'Excellent' },
+    { grade:'B2', min:70, max:79,  remark:'Very Good' },
+    { grade:'B3', min:65, max:69,  remark:'Good' },
+    { grade:'C4', min:60, max:64,  remark:'Credit' },
+    { grade:'C5', min:55, max:59,  remark:'Credit' },
+    { grade:'C6', min:50, max:54,  remark:'Credit' },
+    { grade:'D7', min:45, max:49,  remark:'Pass' },
+    { grade:'E8', min:40, max:44,  remark:'Pass' },
+    { grade:'F9', min:0,  max:39,  remark:'Fail' }
+  ],
+  affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
+  psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
+  sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true },
+  signatures: { ict:'', principal:'' }
+};
+let resultSettings = JSON.parse(JSON.stringify(DEFAULT_RESULT_SETTINGS));
+
+async function loadResultSettings(){
+  try{
+    const snap = await getDoc(doc(db,'settings','resultSettings'));
+    if(snap.exists()){
+      const data = snap.data();
+      resultSettings = {
+        assessment: { ...DEFAULT_RESULT_SETTINGS.assessment, ...(data.assessment||{}) },
+        gradingBands: Array.isArray(data.gradingBands) && data.gradingBands.length ? data.gradingBands : DEFAULT_RESULT_SETTINGS.gradingBands,
+        affectiveTraits: Array.isArray(data.affectiveTraits) && data.affectiveTraits.length ? data.affectiveTraits : DEFAULT_RESULT_SETTINGS.affectiveTraits,
+        psychomotorTraits: Array.isArray(data.psychomotorTraits) && data.psychomotorTraits.length ? data.psychomotorTraits : DEFAULT_RESULT_SETTINGS.psychomotorTraits,
+        sections: { ...DEFAULT_RESULT_SETTINGS.sections, ...(data.sections||{}) },
+        signatures: { ...DEFAULT_RESULT_SETTINGS.signatures, ...(data.signatures||{}) }
+      };
+    }
+  } catch(e){
+    console.warn('Could not load result settings, using defaults:', e.message);
+  }
 }
-function gradeRemark(grade){
-  const map = { A1:'Excellent', B2:'Very Good', B3:'Good', C4:'Credit', C5:'Credit', C6:'Credit', D7:'Pass', E8:'Pass', F9:'Fail' };
-  return map[grade]||'';
+
+function subjectMaxTotal(){
+  const a = resultSettings.assessment;
+  return (Number(a.test1Max)||0)+(Number(a.test2Max)||0)+(Number(a.test3Max)||0)+(Number(a.examMax)||0);
+}
+function gradeFromPercentage(pct){
+  const bands = resultSettings.gradingBands;
+  for(const b of bands){ if(pct >= Number(b.min) && pct <= Number(b.max)) return b; }
+  return bands[bands.length-1] || { grade:'—', remark:'' };
 }
 function gradePillClass(grade){
   if(grade==='A1') return 'gp-a';
   if(grade==='B2'||grade==='B3') return 'gp-b';
-  if(grade==='C4'||grade==='C5'||grade==='C6'||grade==='D7'||grade==='E8') return 'gp-c';
-  return 'gp-f';
+  if(grade==='F9') return 'gp-f';
+  return 'gp-c';
 }
 
+/* ============ RESULTS ============ */
 window.loadResult = async function(){
   const btn = document.getElementById('resLoadBtn');
   const session = document.getElementById('resSession').value;
@@ -962,6 +646,8 @@ window.loadResult = async function(){
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Loading...';
 
   try{
+    await loadResultSettings();
+
     let docs = [];
     try{
       const snap = await getDocs(query(
@@ -973,11 +659,17 @@ window.loadResult = async function(){
       ));
       docs = snap.docs;
     } catch(e){
-      // Fallback: fetch all results for this student and filter client-side
-      const snap2 = await getDocs(query(collection(db,'results'), where('studentId','==',student.id), where('published','==',true)));
+      // Fallback if the composite index above isn't built yet. This still
+      // keeps the published:true filter (required by security rules) and
+      // just filters session/term client-side instead of server-side.
+      const snap2 = await getDocs(query(
+        collection(db,'results'),
+        where('studentId','==',student.id),
+        where('published','==',true)
+      ));
       docs = snap2.docs.filter(d=>{
         const v = d.data();
-        return v.session===session && v.term===term && v.published===true;
+        return v.session===session && v.term===term;
       });
     }
 
@@ -990,7 +682,8 @@ window.loadResult = async function(){
     renderResultCard(result, session, term);
     document.getElementById('resultCard').style.display='block';
   } catch(e){
-    showToast('Failed to load result: '+e.message, 'error');
+    console.error('Failed to load result:', e);
+    showToast('Could not load result. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>View Result';
@@ -999,31 +692,91 @@ window.loadResult = async function(){
 document.getElementById('resLoadBtn').addEventListener('click', loadResult);
 
 function renderResultCard(result, session, term){
+  const s = resultSettings.sections;
+  const subjectMax = subjectMaxTotal() || 100;
+
   document.getElementById('rcName').textContent = result.studentName || student.name;
-  document.getElementById('rcClassLine').textContent = `Class: ${result.class||student.class||'—'}`;
+  document.getElementById('rcReg').textContent = result.regNumber || student.regNumber || '—';
+  document.getElementById('rcClass').textContent = result.class || student.class || '—';
+  document.getElementById('rcNumInClass').textContent = result.numInClass || '—';
   document.getElementById('rcTerm').textContent = `${session} · ${term} Term`;
+  document.getElementById('rcPosition').textContent = result.overallPosition ? ordinal(result.overallPosition) : '—';
+  document.getElementById('rcClosingDate').textContent = result.closingDate || '—';
+  document.getElementById('rcNextTerm').textContent = result.nextTermBegins || '—';
 
   const scores = result.scores || {};
   const subjects = Object.keys(scores);
   const tbody = document.getElementById('rcTbody');
+  document.querySelector('.rc-pos-col').style.display = s.showSubjectPosition ? '' : 'none';
+  document.querySelectorAll('#rcTbody .rc-pos-cell').forEach(td=>{ td.style.display = s.showSubjectPosition ? '' : 'none'; });
 
   if(subjects.length === 0){
-    tbody.innerHTML = `<tr><td colspan="4" class="empty"><p>No subject scores recorded.</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty"><p>No subject scores recorded.</p></td></tr>`;
   } else {
     tbody.innerHTML = subjects.map(sub=>{
-      const score = Number(scores[sub]);
-      const grade = getGrade(score);
+      const sc = scores[sub] || {};
+      const grade = sc.grade || gradeFromPercentage(subjectMax>0?(sc.total||0)/subjectMax*100:0).grade;
       return `<tr>
         <td>${escapeHtml(sub)}</td>
-        <td>${escapeHtml(String(score))}</td>
+        <td>${sc.test1!==undefined?sc.test1:'—'}</td>
+        <td>${sc.test2!==undefined?sc.test2:'—'}</td>
+        <td>${sc.test3!==undefined?sc.test3:'—'}</td>
+        <td>${sc.exam!==undefined?sc.exam:'—'}</td>
+        <td><strong>${sc.total!==undefined?sc.total:'—'}</strong></td>
         <td><span class="grade-pill ${gradePillClass(grade)}">${grade}</span></td>
-        <td>${gradeRemark(grade)}</td>
+        <td class="rc-pos-cell" style="${s.showSubjectPosition?'':'display:none'}">${sc.position?ordinal(sc.position):'—'}</td>
       </tr>`;
     }).join('');
   }
 
-  document.getElementById('rcPosition').textContent = result.position || '—';
-  document.getElementById('rcRemark').textContent = result.classTeacherRemark || '—';
+  document.getElementById('rcOverallTotal').textContent = result.overallTotal!==undefined ? result.overallTotal : '—';
+  document.getElementById('rcAverage').textContent = result.average!==undefined ? result.average : '—';
+  document.getElementById('rcPercentage').textContent = result.percentage!==undefined ? result.percentage+'%' : '—';
+  const ogEl = document.getElementById('rcOverallGrade');
+  if(result.overallGrade){ ogEl.innerHTML = `<span class="grade-pill ${gradePillClass(result.overallGrade)}">${result.overallGrade}</span>`; }
+  else { ogEl.textContent = '—'; }
+
+  // Grading key
+  document.getElementById('rcGradingKeyBox').style.display = s.showGradingKey ? '' : 'none';
+  document.getElementById('rcGradingKey').innerHTML = resultSettings.gradingBands.map(b=>
+    `<div class="rc-key-item"><span class="grade-pill ${gradePillClass(b.grade)}">${b.grade}</span><span>${b.min}–${b.max}</span><span>${escapeHtml(b.remark||'')}</span></div>`
+  ).join('');
+
+  // Domains
+  document.getElementById('rcDomainsWrap').style.display = (s.showAffective || s.showPsychomotor) ? 'grid' : 'none';
+  document.getElementById('rcAffectiveBox').style.display = s.showAffective ? '' : 'none';
+  document.getElementById('rcPsychomotorBox').style.display = s.showPsychomotor ? '' : 'none';
+
+  const affective = result.affective || {};
+  document.getElementById('rcAffectiveTbody').innerHTML = resultSettings.affectiveTraits.map(t=>domainRow(t, affective[t])).join('');
+  const psychomotor = result.psychomotor || {};
+  document.getElementById('rcPsychomotorTbody').innerHTML = resultSettings.psychomotorTraits.map(t=>domainRow(t, psychomotor[t])).join('');
+
+  // Remarks
+  document.getElementById('rcRemarksWrap').style.display = (s.showTeacherRemark || s.showPrincipalRemark) ? 'grid' : 'none';
+  document.getElementById('rcTeacherRemarkBox').style.display = s.showTeacherRemark ? '' : 'none';
+  document.getElementById('rcPrincipalRemarkBox').style.display = s.showPrincipalRemark ? '' : 'none';
+  document.getElementById('rcTeacherRemark').textContent = result.classTeacherRemark || '—';
+  document.getElementById('rcPrincipalRemark').textContent = result.principalRemark || '—';
+
+  // Signatures
+  document.getElementById('rcSignRow').style.display = s.showSignatures ? 'flex' : 'none';
+  const ictSig = resultSettings.signatures.ict;
+  const principalSig = resultSettings.signatures.principal;
+  document.getElementById('rcIctSigLine').innerHTML = ictSig ? `<img src="${escapeAttr(ictSig)}" alt="ICT Officer's Signature"/>` : '';
+  document.getElementById('rcPrincipalSigLine').innerHTML = principalSig ? `<img src="${escapeAttr(principalSig)}" alt="Principal's Signature"/>` : '';
+}
+
+function domainRow(trait, val){
+  const v = Number(val)||0;
+  return `<tr><td>${escapeHtml(trait)}</td>${[5,4,3,2,1].map(n=>`<td>${v===n?'&#10003;':''}</td>`).join('')}</tr>`;
+}
+
+function ordinal(n){
+  n = Number(n);
+  if(!n) return '—';
+  const s=['th','st','nd','rd'], v=n%100;
+  return n+(s[(v-20)%10]||s[v]||s[0]);
 }
 
 window.printResult = function(){
@@ -1034,6 +787,44 @@ document.getElementById('printResultBtn').addEventListener('click', printResult)
 
 /* ============ PAYMENTS ============ */
 let studentPayments = [];
+let currentOpenSession = null; // set from admin's Term Payment Access setting each time payments load
+
+window.loadAnnouncements = async function(){
+  const box = document.getElementById('annContainer');
+  const cacheKey = 'na_stu_announcements';
+  try{ const cached = localStorage.getItem(cacheKey); if(cached) box.innerHTML = cached; } catch(e){}
+  try{
+    const snap = await getDocs(query(collection(db,'announcements'), orderBy('date','desc')));
+    let items = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    items.sort((a,b)=> (b.pinned?1:0) - (a.pinned?1:0));
+
+    if(!items.length){
+      box.innerHTML = `
+        <div class="placeholder-box">
+          <svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a2 2 0 1 1-3.2 2.4"/></svg>
+          <h3>No announcements yet</h3>
+          <p>Check back later for news and notices from the school.</p>
+        </div>`;
+      try{ localStorage.removeItem(cacheKey); } catch(e){}
+      return;
+    }
+
+    box.innerHTML = items.map(a=>`
+      <div class="ann-card${a.pinned ? ' pinned':''}">
+        ${a.pinned ? '<div class="ann-pin">Pinned</div>' : ''}
+        <div class="ann-hdr">
+          <h3>${escapeHtml(a.title||'Untitled')}</h3>
+          <span class="ann-date">${formatDate(a.date)||''}</span>
+        </div>
+        <p class="ann-body">${escapeHtml(a.body||'')}</p>
+      </div>
+    `).join('');
+    try{ localStorage.setItem(cacheKey, box.innerHTML); } catch(e){ /* storage full/blocked */ }
+  } catch(e){
+    console.error('Could not load announcements:', e);
+    if(!box.innerHTML) box.innerHTML = `<div class="empty"><p>Couldn't load announcements. Please refresh the page.</p></div>`;
+  }
+};
 
 window.loadPayments = async function(){
   const container = document.getElementById('payContainer');
@@ -1042,90 +833,201 @@ window.loadPayments = async function(){
   try{
     // Load this student's payment history
     try{
-      const paySnap = await getDocs(query(collection(db,'payments'), where('studentId','==',student.id)));
+      const paySnap = await getDocs(query(collection(db,'payments'), where('studentId','==',student.id), limit(50)));
       studentPayments = paySnap.docs.map(d=>({id:d.id, ...d.data()}));
     } catch(e){
       studentPayments = [];
     }
 
-    // Load fee settings for each term of the current session
-    const feeBlocks = [];
-    for(const term of TERMS){
-      const feeId = `${CURRENT_SESSION.replace('/', '-')}_${term}`;
-      let feeData = null;
-      try{
-        const feeSnap = await getDoc(doc(db,'feeSettings',feeId));
-        if(feeSnap.exists()) feeData = feeSnap.data();
-      } catch(e){ /* leave null */ }
-      feeBlocks.push({ term, feeData });
+    // Load global payment access settings — controls which single term (if any)
+    // is currently open for students to view/pay. Set by the admin under
+    // Fee Settings > Term Payment Access.
+    let access = null;
+    try{
+      const accSnap = await getDoc(doc(db,'settings','paymentAccess'));
+      if(accSnap.exists()) access = accSnap.data();
+    } catch(e){ /* leave null */ }
+
+    if(!access || !access.enabled || !access.term){
+      container.innerHTML = `<div class="empty"><p>Payments are not currently open. Please check back later or contact the school office.</p></div>${renderPaymentHistory(studentPayments)}`;
+      return;
     }
 
-    renderPayments(feeBlocks);
+    const openSession = access.session || CURRENT_SESSION;
+    const openTerm = access.term;
+    currentOpenSession = openSession;
+
+    // Load fee settings for just the currently-open term, scoped to this student's class
+    const feeId = `${openSession.replace('/', '-')}_${openTerm}_${student.class}`;
+    let feeData = null;
+    try{
+      const feeSnap = await getDoc(doc(db,'feeSettings',feeId));
+      if(feeSnap.exists()) feeData = feeSnap.data();
+    } catch(e){ /* leave null */ }
+
+    renderPayments([{ term: openTerm, session: openSession, feeData }]);
   } catch(e){
-    container.innerHTML = `<div class="empty"><p>Failed to load payment info: ${escapeHtml(e.message)}</p></div>`;
+    console.error('Could not load payment info:', e);
+    container.innerHTML = `<div class="empty"><p>Couldn't load payment info. Please refresh the page.</p></div>`;
   }
 };
 
-function findPayment(term, itemName){
+function findPayment(term){
+  // One bundled payment per student per term now (replaces old per-item lookup).
+  // Match any payment that isn't explicitly failed — this includes 'success',
+  // 'pending' (verify endpoint didn't confirm yet) and 'needs_review' (amount
+  // mismatch). This prevents a student from being shown "UNPAID" and paying
+  // twice while a payment is still awaiting confirmation.
   return studentPayments.find(p =>
     p.term === term &&
-    p.itemName === itemName &&
-    (p.status||'').toLowerCase() === 'success'
+    ['success','pending','needs_review'].includes((p.status||'').toLowerCase())
   );
 }
 
 function renderPayments(feeBlocks){
   const container = document.getElementById('payContainer');
-  const cls = student.class;
 
-  container.innerHTML = feeBlocks.map(({term, feeData})=>{
+  // Track which term/session combos are already shown above (the currently
+  // open one), so the history table below doesn't repeat the same row.
+  const openKeys = new Set(feeBlocks.map(b => `${b.term}|${b.session || CURRENT_SESSION}`));
+  const pastPayments = studentPayments.filter(p => !openKeys.has(`${p.term}|${p.session || CURRENT_SESSION}`));
+
+  const feeHtml = feeBlocks.map(({term, feeData, session})=>{
+    const displaySession = session || CURRENT_SESSION;
     if(!feeData){
       return `<div class="term-block">
-        <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3></div>
+        <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3></div>
         <div class="twrap"><div class="empty"><p>Fee settings have not been published for this term yet.</p></div></div>
       </div>`;
     }
 
-    const items = [];
-    const schoolFeeAmount = Number(feeData[cls] || 0);
-    items.push({ itemName: 'School Fee', amount: schoolFeeAmount, type: 'schoolFee' });
-    (feeData.levies||[]).forEach(lv=>{
-      items.push({ itemName: lv.name, amount: Number(lv.amount||0), type: 'levy' });
+    // Build the itemized breakdown for this term from the class's fee items
+    const breakdown = [];
+    (feeData.items||[]).forEach(it=>{
+      const amt = Number(it.amount||0);
+      if(amt > 0) breakdown.push({ name: it.name, amount: amt });
     });
+    const total = breakdown.reduce((sum,i)=> sum + i.amount, 0);
 
-    const rows = items.map(item=>{
-      const payment = findPayment(term, item.itemName);
-      const isPaid = !!payment;
-      const amountStr = '₦' + (item.amount||0).toLocaleString();
-      const actionHtml = isPaid
-        ? `<span class="badge b-green">PAID</span>
-           <button class="btn btn-edit btn-sm" onclick="openReceipt('${payment.id}')">View Receipt</button>`
-        : `<span class="badge b-red">UNPAID</span>
-           <button class="btn btn-p btn-sm" onclick="payNow('${term}', ${JSON.stringify(item.itemName)}, ${item.amount}, '${item.type}')">Pay Now</button>`;
-      return `<div class="fee-item">
-        <div class="fee-item-l"><strong>${escapeHtml(item.itemName)}</strong><span>${amountStr}</span></div>
-        <div class="fee-item-r">${actionHtml}</div>
+    if(!breakdown.length){
+      return `<div class="term-block">
+        <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3></div>
+        <div class="twrap"><div class="empty"><p>No fees have been set for this term yet.</p></div></div>
       </div>`;
-    }).join('');
+    }
+
+    const rows = breakdown.map(item=>`
+      <div class="fee-list-row"><span class="fee-item-name">${escapeHtml(item.name)}</span><span class="fee-item-amt">₦${item.amount.toLocaleString()}</span></div>
+    `).join('');
+
+    const payment = findPayment(term);
+    const pStatus = (payment?.status||'').toLowerCase();
+    let badgeHtml, actionHtml;
+    if(pStatus === 'success'){
+      badgeHtml = `<span class="badge b-green">PAID</span>`;
+      actionHtml = `<button class="btn btn-edit pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
+    } else if(payment){
+      // pending or needs_review — awaiting office confirmation, but a
+      // receipt/proof-of-payment is still available to the student.
+      badgeHtml = `<span class="badge b-gold">PROCESSING</span>`;
+      actionHtml = `<button class="btn btn-edit pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
+    } else {
+      badgeHtml = `<span class="badge b-red">UNPAID</span>`;
+      actionHtml = `<button class="btn btn-p pay-now-btn"
+           data-term="${escapeAttr(term)}"
+           data-breakdown='${escapeAttr(JSON.stringify(breakdown))}'
+           data-amount="${total}">Pay ₦${total.toLocaleString()}</button>`;
+    }
 
     return `<div class="term-block">
-      <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3></div>
-      <div class="twrap">${rows}</div>
+      <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3>${badgeHtml}</div>
+      <div class="fee-list">
+        <div class="fee-list-hdr"><span>Fee Item</span><span>Amount</span></div>
+        ${rows}
+        <div class="fee-list-row fee-list-total"><span>Total</span><span>₦${total.toLocaleString()}</span></div>
+      </div>
+      <div class="term-pay-row">${actionHtml}</div>
     </div>`;
   }).join('');
+
+  container.innerHTML = feeHtml + renderPaymentHistory(pastPayments);
 }
 
-window.payNow = function(term, itemName, amount, type){
+function renderPaymentHistory(payments){
+  if(!payments || !payments.length) return '';
+
+  // Most recent first
+  const sorted = [...payments].sort((a,b)=>{
+    const ta = a.date?.toDate ? a.date.toDate().getTime() : 0;
+    const tb = b.date?.toDate ? b.date.toDate().getTime() : 0;
+    return tb - ta;
+  });
+
+  const rows = sorted.map((p,i)=>{
+    const status = (p.status||'').toLowerCase();
+    let badge;
+    if(status === 'success') badge = `<span class="badge b-green">PAID</span>`;
+    else if(status === 'failed') badge = `<span class="badge b-red">FAILED</span>`;
+    else badge = `<span class="badge b-gold">PROCESSING</span>`;
+
+    const ts = p.date?.toDate ? p.date.toDate() : null;
+    const dateStr = ts ? ts.toLocaleDateString() : '—';
+
+    return `<tr>
+      <td class="fee-num-col">${i+1}</td>
+      <td>${escapeHtml(p.term||'—')} Term</td>
+      <td>${escapeHtml(p.session || CURRENT_SESSION)}</td>
+      <td class="fee-amt-col">₦${(Number(p.amount)||0).toLocaleString()}</td>
+      <td>${badge}</td>
+      <td>${dateStr}</td>
+      <td><button class="btn btn-edit pay-receipt-btn" data-id="${p.id}">View Receipt</button></td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="term-block">
+    <div class="term-block-hdr"><h3>Payment History</h3></div>
+    <div class="twrap">
+      <table class="rc-subj-table fee-table">
+        <thead><tr>
+          <th class="fee-num-col">#</th><th>Term</th><th>Session</th>
+          <th class="fee-amt-col">Amount</th><th>Status</th><th>Date</th><th>Receipt</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+let _paymentInProgress = false; // guard against double-tap
+
+window.payNow = function(term, breakdown, amount){
   if(PAYSTACK_PUBLIC_KEY.includes('REPLACE')){
     showToast('Payments are not configured yet — set PAYSTACK_PUBLIC_KEY first.', 'error');
     return;
   }
   if(!window.PaystackPop){
-    showToast('Payment service failed to load. Check your connection.', 'error');
+    // Paystack CDN may still be loading — retry once after a short delay
+    showToast('Payment service loading, please wait…', 'error');
+    setTimeout(function(){
+      if(window.PaystackPop){ payNow(term, breakdown, amount); }
+      else { showToast('Payment service failed to load. Check your internet connection and refresh.', 'error'); }
+    }, 2000);
+    return;
+  }
+  if(_paymentInProgress){
+    showToast('A payment is already in progress. Please complete or close it first.', 'error');
+    return;
+  }
+  if(!amount || amount <= 0){
+    showToast('This term has no fees set. Contact the school office.', 'error');
     return;
   }
 
-  const email = student.parentEmail || `${(student.regNumber||'student').replace(/[^a-zA-Z0-9]/g,'').toLowerCase()}@studentportal.local`;
+  // Build a valid fallback email Paystack will accept
+  const rawReg = (student.regNumber||'student').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+  const email = (student.parentEmail && student.parentEmail.includes('@'))
+    ? student.parentEmail
+    : `${rawReg}@${SCHOOL_EMAIL_DOMAIN}`;
 
   const handler = window.PaystackPop.setup({
     key: PAYSTACK_PUBLIC_KEY,
@@ -1136,22 +1038,34 @@ window.payNow = function(term, itemName, amount, type){
       studentId: student.id,
       regNumber: student.regNumber,
       term,
-      session: CURRENT_SESSION,
-      itemName,
-      type
+      session: currentOpenSession || CURRENT_SESSION,
+      itemCount: breakdown.length
     },
     callback: function(response){
-      verifyAndRecordPayment(response.reference, term, itemName, amount, type);
+      _paymentInProgress = false;
+      verifyAndRecordPayment(response.reference, term, breakdown, amount);
     },
     onClose: function(){
+      _paymentInProgress = false;
       showToast('Payment window closed.', 'error');
     }
   });
+  _paymentInProgress = true;
   handler.openIframe();
 };
 
-async function verifyAndRecordPayment(reference, term, itemName, amount, type){
+async function verifyAndRecordPayment(reference, term, breakdown, amount){
+  // Guard: reference already recorded? (network retry safety)
+  if(studentPayments.some(p => p.reference === reference)){
+    showToast('This payment was already recorded. Refreshing…', 'success');
+    loadPayments();
+    return;
+  }
   showToast('Verifying payment…', 'success');
+
+  let confirmedAmount = amount; // default to what was charged
+  let verifyStatus = 'pending'; // will upgrade to 'success' if verify passes
+
   try{
     const verifyRes = await fetch(VERIFY_ENDPOINT, {
       method: 'POST',
@@ -1160,30 +1074,84 @@ async function verifyAndRecordPayment(reference, term, itemName, amount, type){
     });
     const verifyData = await verifyRes.json();
 
-    if(!verifyRes.ok || !verifyData.status){
-      showToast('Payment verification failed. Contact the school office with reference: '+reference, 'error');
-      return;
+    if(verifyRes.ok && verifyData.status){
+      const verifiedAmountKobo = verifyData.data?.amount;
+      const expectedKobo = Math.round(amount * 100);
+      if(!verifiedAmountKobo || verifiedAmountKobo === expectedKobo){
+        // Amount matches (or server didn't return amount) — treat as confirmed
+        confirmedAmount = verifiedAmountKobo ? verifiedAmountKobo / 100 : amount;
+        verifyStatus = 'success';
+      } else {
+        // Amount mismatch — record as needs_review for admin
+        verifyStatus = 'needs_review';
+      }
+    }
+    // If verifyRes not ok, we still record with pending status below
+  } catch(verifyErr){
+    // Verify endpoint unreachable — record payment as pending for admin to confirm
+    console.warn('Verify endpoint failed:', verifyErr.message);
+  }
+
+  // ── Step 1: the actual database write. This is the ONLY step that, if
+  // it fails, means the payment genuinely wasn't recorded — so this is the
+  // only step allowed to show the "contact the office with this reference"
+  // message. Everything after this point (toast, receipt, refresh) is just
+  // UI convenience and must never claim the payment was lost if it wasn't.
+  const newDocRef = doc(db, 'payments', reference);
+  try{
+    // Always record the payment so the student is not left without a record.
+    // Use the Paystack reference as the doc ID (instead of addDoc's random ID)
+    // so that if this function ever runs twice for the same reference
+    // (double-click, retry, duplicate callback), the second call overwrites
+    // the same document instead of creating a second payment record.
+    await setDoc(newDocRef, {
+      studentId: student.id,
+      regNumber: student.regNumber || '',
+      studentName: student.name || '',
+      class: student.class || '',
+      term,
+      session: currentOpenSession || CURRENT_SESSION,
+      breakdown,
+      amount: confirmedAmount,
+      reference,
+      status: verifyStatus,
+      date: serverTimestamp()
+    }, { merge: true });
+  } catch(writeErr){
+    console.error('Payment record write failed:', writeErr);
+    showToast('Payment made but could not be saved (' + (writeErr.code || writeErr.message || 'unknown error') + '). Please give this reference to the school office: ' + reference, 'error', 9000);
+    return;
+  }
+
+  // ── Step 2: display only. The payment is already safely in Firestore at
+  // this point — if anything below throws, tell the student their payment
+  // is fine and just refresh, instead of alarming them with a false
+  // "couldn't be saved" message.
+  try{
+    if(verifyStatus === 'success'){
+      showToast('Payment successful!', 'success');
+    } else if(verifyStatus === 'needs_review'){
+      showToast('Payment recorded — amount will be confirmed by the school office (Ref: '+reference+')', 'success');
+    } else {
+      showToast('Payment recorded and pending confirmation. Reference: '+reference, 'success');
     }
 
-    await addDoc(collection(db,'payments'), {
-      studentId: student.id,
-      regNumber: student.regNumber,
-      studentName: student.name,
-      class: student.class,
-      term,
-      session: CURRENT_SESSION,
-      type,
-      itemName,
-      amount,
-      reference,
-      status: 'success',
-      date: serverTimestamp()
+    // Add the freshly-created payment to local state immediately so the
+    // receipt can be opened without waiting on a fresh Firestore read
+    // (avoids a race where loadPayments() re-queries before the write is
+    // visible, which is what made the receipt/status appear to "not load").
+    studentPayments.push({
+      id: newDocRef.id,
+      studentId: student.id, regNumber: student.regNumber, studentName: student.name,
+      class: student.class, term, session: currentOpenSession || CURRENT_SESSION, breakdown,
+      amount: confirmedAmount, reference, status: verifyStatus, date: new Date()
     });
 
-    showToast('Payment successful!', 'success');
+    openReceipt(newDocRef.id);
     loadPayments();
-  } catch(e){
-    showToast('Verification request failed: '+e.message, 'error');
+  } catch(displayErr){
+    console.error('Payment saved, but the receipt view failed to open:', displayErr);
+    showToast('Payment saved successfully (Ref: '+reference+'). Refresh the page to view your receipt.', 'success');
   }
 }
 
@@ -1199,11 +1167,48 @@ window.openReceipt = function(paymentId){
   document.getElementById('recReg').textContent = payment.regNumber || student.regNumber;
   document.getElementById('recClass').textContent = payment.class || student.class;
   document.getElementById('recTerm').textContent = `${payment.term||''} Term, ${payment.session||CURRENT_SESSION}`;
-  document.getElementById('recItem').textContent = payment.itemName || '—';
-  document.getElementById('recAmount').textContent = '₦' + (Number(payment.amount)||0).toLocaleString();
+  document.getElementById('recRef').textContent = payment.reference || '—';
+
+  // Breakdown — falls back to a single legacy row for payments recorded
+  // before this feature (which stored one itemName/amount per document).
+  const breakdown = (payment.breakdown && payment.breakdown.length)
+    ? payment.breakdown
+    : [{ name: payment.itemName || 'Payment', amount: Number(payment.amount)||0 }];
+  document.getElementById('recBreakdownBody').innerHTML = breakdown.map((item,i)=>`
+    <tr><td class="fee-num-col">${i+1}</td><td>${escapeHtml(item.name)}</td><td class="fee-amt-col">₦${Number(item.amount||0).toLocaleString()}</td></tr>
+  `).join('');
+  document.getElementById('recTotal').textContent = '₦' + (Number(payment.amount)||0).toLocaleString();
+
+  const pStatus = (payment.status||'').toLowerCase();
+  const statusNote = document.getElementById('recStatusNote');
+  const statusLabel = pStatus === 'success' ? 'Paid' : pStatus === 'needs_review' ? 'Under Review' : 'Pending Confirmation';
+  document.getElementById('recStatusText').textContent = statusLabel;
+  if(pStatus === 'success'){
+    statusNote.style.display = 'none';
+  } else if(pStatus === 'needs_review'){
+    statusNote.textContent = 'Amount could not be auto-verified — this payment is being reviewed by the school office. Keep this receipt as proof of payment.';
+    statusNote.style.display = 'block';
+  } else {
+    statusNote.textContent = 'Pending confirmation — keep this receipt as proof of payment (Ref: ' + (payment.reference||'—') + ').';
+    statusNote.style.display = 'block';
+  }
 
   document.getElementById('moReceipt').classList.add('open');
 };
+/* Event delegation for dynamically-rendered payment buttons */
+document.getElementById('payContainer').addEventListener('click', function(e){
+  const payBtn = e.target.closest('.pay-now-btn');
+  const rcptBtn = e.target.closest('.pay-receipt-btn');
+  if(payBtn){
+    const term = payBtn.dataset.term;
+    const breakdown = JSON.parse(payBtn.dataset.breakdown);
+    const amount = Number(payBtn.dataset.amount);
+    payNow(term, breakdown, amount);
+  } else if(rcptBtn){
+    openReceipt(rcptBtn.dataset.id);
+  }
+});
+
 document.getElementById('closeReceiptBtn').addEventListener('click', ()=> document.getElementById('moReceipt').classList.remove('open'));
 document.getElementById('printReceiptBtn').addEventListener('click', ()=>{
   document.body.classList.add('printing-modal');
@@ -1212,7 +1217,67 @@ document.getElementById('printReceiptBtn').addEventListener('click', ()=>{
 window.addEventListener('afterprint', ()=> document.body.classList.remove('printing-modal'));
 
 /* ============ PROFILE ============ */
+function renderProfileData(data){
+  const fullName = `${data.firstName||''} ${data.lastName||''}`.trim() || student.name;
+
+  document.getElementById('profName').textContent = fullName;
+  document.getElementById('profSub').textContent = `${data.regNumber||student.regNumber} · ${data.class||student.class}`;
+
+  const photoUrl = data.photo;
+  const avatar = document.getElementById('profAvatar');
+  if(photoUrl){
+    avatar.innerHTML = `<img src="${escapeAttr(photoUrl)}" alt="${escapeAttr(fullName)}"/>`;
+  } else {
+    avatar.textContent = fullName.charAt(0).toUpperCase();
+  }
+
+  document.getElementById('pfFullName').textContent = fullName || '—';
+  document.getElementById('pfReg').textContent = data.regNumber || '—';
+  document.getElementById('pfClass').textContent = data.class || '—';
+  document.getElementById('pfDob').textContent = formatDate(data.dob) || '—';
+  document.getElementById('pfGender').textContent = data.gender || '—';
+  const stateEl = document.getElementById('pfState');
+  if(stateEl) stateEl.textContent = data.stateOfOrigin || '—';
+  document.getElementById('pfBloodGroup').textContent = data.bloodGroup || '—';
+  document.getElementById('pfGenotype').textContent = data.genotype || '—';
+  document.getElementById('pfReligion').textContent = data.religion || '—';
+
+  const parentDisplay = data.parentName ||
+    [data.fatherName, data.motherName].filter(Boolean).join(' / ') || '—';
+  document.getElementById('pfParentName').textContent = parentDisplay;
+  document.getElementById('pfParentPhone').textContent = data.parentPhone || data.primaryPhone || '—';
+  document.getElementById('pfParentEmail').textContent = data.parentEmail || '—';
+  document.getElementById('pfAddress').textContent = data.address || data.homeAddress || '—';
+
+  const hobbiesEl = document.getElementById('pfHobbies');
+  const hobbies = Array.isArray(data.hobbies) ? data.hobbies : [];
+  hobbiesEl.innerHTML = hobbies.length
+    ? hobbies.map(h=>`<span class="chip">${escapeHtml(h)}</span>`).join('')
+    : '<span class="chip-empty">Not provided</span>';
+
+  const sportsEl = document.getElementById('pfSports');
+  const sports = Array.isArray(data.favoriteSports) ? data.favoriteSports : [];
+  sportsEl.innerHTML = sports.length
+    ? sports.map(s=>`<span class="chip">${escapeHtml(s)}</span>`).join('')
+    : '<span class="chip-empty">Not provided</span>';
+
+  document.getElementById('pfAllergies').textContent = data.allergies || 'None reported';
+  document.getElementById('pfHealthConditions').textContent = data.healthConditions || 'None reported';
+  document.getElementById('pfMedication').textContent = data.medication || 'None';
+
+  student.parentEmail = data.parentEmail || '';
+}
+
+function profileCacheKey(){ return 'na_stu_profile_'+(student?.regNumber||''); }
+
 window.loadProfile = async function(){
+  // Cache-first: repaint instantly from the last-saved snapshot (if any)
+  // so the profile tab never sits blank while Firestore responds.
+  try{
+    const cached = localStorage.getItem(profileCacheKey());
+    if(cached) renderProfileData(JSON.parse(cached));
+  } catch(e){ /* ignore bad/blocked cache */ }
+
   try{
     const snap = await getDoc(doc(db,'students',student.id));
     if(!snap.exists()){
@@ -1220,45 +1285,32 @@ window.loadProfile = async function(){
       return;
     }
     const data = snap.data();
-    const fullName = `${data.firstName||''} ${data.lastName||''}`.trim() || student.name;
-
-    document.getElementById('profName').textContent = fullName;
-    document.getElementById('profSub').textContent = `${data.regNumber||student.regNumber} · ${data.class||student.class}`;
-
-    const photoUrl = data.photo;
-    const avatar = document.getElementById('profAvatar');
-    if(photoUrl){
-      avatar.innerHTML = `<img src="${escapeAttr(photoUrl)}" alt="${escapeAttr(fullName)}"/>`;
-    } else {
-      avatar.textContent = fullName.charAt(0).toUpperCase();
-    }
-
-    document.getElementById('pfFullName').textContent = fullName || '—';
-    document.getElementById('pfReg').textContent = data.regNumber || '—';
-    document.getElementById('pfClass').textContent = data.class || '—';
-    document.getElementById('pfDob').textContent = formatDate(data.dob) || '—';
-    document.getElementById('pfGender').textContent = data.gender || '—';
-    document.getElementById('pfBloodGroup').textContent = data.bloodGroup || '—';
-    document.getElementById('pfGenotype').textContent = data.genotype || '—';
-
-    document.getElementById('pfParentName').textContent = data.parentName || '—';
-    document.getElementById('pfParentPhone').textContent = data.parentPhone || '—';
-    document.getElementById('pfParentEmail').textContent = data.parentEmail || '—';
-    document.getElementById('pfAddress').textContent = data.address || '—';
-
-    // Cache parent email for Paystack checkout
-    student.parentEmail = data.parentEmail || '';
+    renderProfileData(data);
+    showProfileStage(1); // reset to first stage each time the tab opens
+    try{ localStorage.setItem(profileCacheKey(), JSON.stringify(data)); } catch(e){ /* storage full/blocked */ }
   } catch(e){
-    showToast('Failed to load profile: '+e.message, 'error');
+    console.error('Failed to load profile:', e);
+    showToast('Could not load profile. Please try again.', 'error');
   }
 };
 
+window.showProfileStage = function(n){
+  document.querySelectorAll('.profile-stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('profStage'+n)?.classList.add('active');
+  document.querySelectorAll('.stage-dot').forEach(d=>d.classList.remove('active'));
+  document.getElementById('stageDot'+n)?.classList.add('active');
+};
+
 /* ============ HELPERS ============ */
-function showToast(msg, type='success'){
+function showToast(msg, type='success', duration){
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
   t.className = 'toast '+type+' show';
-  setTimeout(()=> t.classList.remove('show'), 3200);
+  clearTimeout(t._timer);
+  // Errors default to staying up much longer than success messages, since
+  // they often contain a reference number the user needs time to read/copy.
+  const ms = duration || (type === 'error' ? 8000 : 3200);
+  t._timer = setTimeout(()=> t.classList.remove('show'), ms);
 }
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));

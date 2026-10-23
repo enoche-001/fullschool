@@ -2,7 +2,7 @@
    CBT ADMIN — merged into the school admin portal
    Sections: Teachers, Subjects, AI Exam Generator, Manual Exam,
    Manage Exams, CBT Results, Leaderboard
-   Data lives in the school Firebase project (veil-1-bd7b5):
+   Data lives in the school Firebase project:
    teachers, cbtSubjects, cbtExams, cbtQuestions, cbtResults
    ============================================================ */
 import { getApp, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -16,7 +16,18 @@ const db = getFirestore(app);
 const secApp = initializeApp(app.options, "cbt-secondary");
 const secAuth = getAuth(secApp);
 
-const CLASSES = ['JSS1','JSS2','JSS3','SS1','SS2','SS3'];
+const FALLBACK_CLASSES = ['JSS 1','JSS 2','JSS 3','SS 1','SS 2','SS 3'];
+let classCache = null;
+// Classes come from the portal's own `classes` collection (Admin > Classes), so CBT always matches the school's real class names.
+async function getClasses(){
+  if(classCache) return classCache;
+  try{
+    const snap = await getDocs(collection(db,"classes"));
+    const names = snap.docs.map(d=>d.id).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    classCache = names.length ? names : FALLBACK_CLASSES;
+  }catch(e){ classCache = FALLBACK_CLASSES; }
+  return classCache;
+}
 // The AI key is NOT stored in the code. The admin pastes it once; it is kept only in this browser.
 function getAIKey(){
   let k=""; try{k=localStorage.getItem("cbt_ai_key")||"";}catch(_){}
@@ -46,7 +57,7 @@ async function populateClassSel(selId){
   const sel=$(selId); if(!sel) return;
   const first=sel.options[0]?.text||"All Classes";
   sel.innerHTML=`<option value="">${first}</option>`;
-  CLASSES.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});
+  (await getClasses()).forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});
 }
 async function populateTeacherSel(selId){
   const sel=$(selId);
@@ -85,7 +96,7 @@ const LOADERS={
   cbtAI:()=>populateClassSel("pubClass"),
   cbtManual:()=>populateClassSel("meClass"),
   cbtExams:()=>{populateClassSel("exClassFilter");loadExams();},
-  cbtResults:()=>loadResults(),
+  cbtResults:()=>{populateClassSel("cbResClass");loadResults();},
   cbtBoard:()=>{populateClassSel("lbClass");loadLeaderboard();},
 };
 document.querySelectorAll(".nav-item[data-sec]").forEach(n=>n.addEventListener("click",()=>{
@@ -265,7 +276,7 @@ $("cbResClass").addEventListener("change",loadResults);
 $("cbResPrint").addEventListener("click",()=>{
   const w=window.open("","_blank");
   const rows=[...$("cbResBody").querySelectorAll("tr")].map(tr=>[...tr.cells].slice(0,5).map(c=>`<td style="border:1px solid #ccc;padding:6px 8px">${c.innerText}</td>`).join("")).map(r=>`<tr>${r}</tr>`).join("");
-  w.document.write(`<html><head><title>CBT Results</title></head><body style="font-family:Arial,sans-serif"><h2>Brighton Heights School — CBT Results</h2><p>${new Date().toDateString()}</p><table style="border-collapse:collapse;width:100%;font-size:13px"><tr><th style="border:1px solid #ccc;padding:6px">Student</th><th style="border:1px solid #ccc;padding:6px">Exam</th><th style="border:1px solid #ccc;padding:6px">Subject</th><th style="border:1px solid #ccc;padding:6px">Score</th><th style="border:1px solid #ccc;padding:6px">Date</th></tr>${rows}</table></body></html>`);
+  w.document.write(`<html><head><title>CBT Results</title></head><body style="font-family:Arial,sans-serif"><h2>Newtown Academy — CBT Results</h2><p>${new Date().toDateString()}</p><table style="border-collapse:collapse;width:100%;font-size:13px"><tr><th style="border:1px solid #ccc;padding:6px">Student</th><th style="border:1px solid #ccc;padding:6px">Exam</th><th style="border:1px solid #ccc;padding:6px">Subject</th><th style="border:1px solid #ccc;padding:6px">Score</th><th style="border:1px solid #ccc;padding:6px">Date</th></tr>${rows}</table></body></html>`);
   w.document.close(); w.focus(); w.print();
 });
 
