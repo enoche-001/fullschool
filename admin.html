@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>try{if(sessionStorage.getItem('nt_admin_hint'))document.documentElement.classList.add('restoring');}catch(e){}
+setTimeout(function(){document.documentElement.classList.remove('restoring');},8000);</script>
+<style>.restoring #loginScreen{display:none!important}.restoring body::before{content:"Restoring your session\2026";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font:600 .9rem system-ui,sans-serif;color:#64748b;background:#f8fafc;z-index:99999}
+.rl-spin{display:inline-block;animation:rlspin .8s linear infinite}@keyframes rlspin{to{transform:rotate(360deg)}}</style>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="robots" content="noindex,nofollow"/>
@@ -83,6 +87,7 @@
         <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
         <div class="topbar-l"><h1 id="topTitle">Overview</h1><p id="topSub">School dashboard summary</p></div>
       </div>
+      <button type="button" class="btn btn-edit btn-sm" id="reloadBtn" onclick="reloadPortal()" title="Refresh all data without signing out" style="margin-left:auto"><span id="reloadIc">&#8635;</span> Reload</button>
     </div>
 
     <div class="content">
@@ -1374,7 +1379,7 @@ window.AF=(function(){
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, initializeAuth, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { hashPassword } from "./pwhash.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -1387,7 +1392,11 @@ const cfg = {
   appId:"1:526021682048:web:a52dae5b2650ca951ad765"
 };
 const app = initializeApp(cfg);
-const auth = getAuth(app);
+// Session persistence is set up BEFORE auth restores, so a page reload silently restores the login
+// (and a teacher login in another tab can no longer log the admin out).
+let auth;
+try{ auth = initializeAuth(app, { persistence: [browserSessionPersistence, inMemoryPersistence] }); }
+catch(e){ auth = getAuth(app); }
 // Persistent local cache (IndexedDB) — reads are served from device storage
 // first when available, so the dashboard survives flaky connections and
 // repeat visits load noticeably faster.
@@ -1540,19 +1549,31 @@ window.saveTermSettings = async function(){
   const el = document.getElementById(id);
   if(el) el.addEventListener('change', ()=>{ el.dataset.touched = '1'; });
 });
+const lsGet = k => { try{ return sessionStorage.getItem(k); }catch(e){ return null; } };
+const lsSet = (k,v) => { try{ sessionStorage.setItem(k,v); }catch(e){} };
+const lsDel = k => { try{ sessionStorage.removeItem(k); }catch(e){} };
 onAuthStateChanged(auth, async user=>{
+  const done = ()=> document.documentElement.classList.remove('restoring');
   if(user){
     // Only accounts with an /admins/{uid} document may use this portal (teachers also have Firebase logins).
-    let isAdminUser = false;
-    try{ isAdminUser = (await getDoc(doc(db,'admins',user.uid))).exists(); }catch(e){ isAdminUser = false; }
-    if(!isAdminUser){
+    // null = could not check (network blip) -> stay signed in; only a confirmed "no admin doc" signs out.
+    let isAdminUser = null;
+    for(let i=0; i<3 && isAdminUser===null; i++){
+      try{ isAdminUser = (await getDoc(doc(db,'admins',user.uid))).exists(); }
+      catch(e){ await new Promise(r=>setTimeout(r, 600*(i+1))); }
+    }
+    if(isAdminUser === false){
+      lsDel('nt_admin_hint'); lsDel('nt_admin_sec');
       await signOut(auth);
+      done();
       const lb = document.getElementById('loginBtn'); lb.disabled=false; lb.textContent='Sign In';
       showLAlert('This account does not have admin access.');
       return;
     }
+    lsSet('nt_admin_hint','1');
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('portalScreen').classList.add('open');
+    done();
     document.getElementById('sbAv').textContent = user.email.charAt(0).toUpperCase();
     document.getElementById('sbName').textContent = user.email.split('@')[0];
     const welcomeName = document.getElementById('ovWelcomeName');
@@ -1560,7 +1581,13 @@ onAuthStateChanged(auth, async user=>{
     const welcomeDate = document.getElementById('ovWelcomeDate');
     if(welcomeDate) welcomeDate.textContent = "Here's what's happening at Newtown Academy — " + new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
     loadAll();
+    if(isAdminUser === null) setTimeout(()=>showToast('Could not reach the server. Showing saved data — use Reload when you are back online.','error'), 900);
+    // after a page reload, go back to the section the admin was on
+    const saved = lsGet('nt_admin_sec');
+    if(saved && saved !== 'overview') document.querySelector(`.nav-item[data-sec="${saved}"]`)?.click();
   } else {
+    lsDel('nt_admin_hint'); lsDel('nt_admin_sec');
+    done();
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('portalScreen').classList.remove('open');
   }
@@ -1603,6 +1630,7 @@ document.querySelectorAll('.nav-item[data-sec]').forEach(el=>{
   el.addEventListener('click', ()=>{ switchTab(el.dataset.sec); closeSidebar(); });
 });
 window.switchTab = (sec)=>{
+  lsSet('nt_admin_sec', sec);
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1686,6 +1714,24 @@ async function loadAll(){
   renderRecentActivity();
   persistCache();
 }
+
+/* Reload button: re-reads everything from Firestore without reloading the page or signing out */
+window.reloadPortal = async function(){
+  const btn = document.getElementById('reloadBtn'), ic = document.getElementById('reloadIc');
+  if(!btn || btn.disabled) return;
+  if(!navigator.onLine){ showToast('You appear to be offline.', 'error'); return; }
+  btn.disabled = true; ic.classList.add('rl-spin');
+  try{
+    await loadAll();
+    resCache = { students:null, results:null }; resLoadedKey = '';
+    if(window.cbtReload) await window.cbtReload();
+    const sec = (document.querySelector('.section.active')?.id || '').replace('sec-','');
+    if(sec) AF.activate(sec);
+    showToast('Data reloaded.', 'success');
+  }catch(e){
+    console.error('Reload failed:', e); showToast('Reload failed. Check your connection and try again.', 'error');
+  }finally{ btn.disabled = false; ic.classList.remove('rl-spin'); }
+};
 
 /* Combines the latest applications + payments into a single feed for the
    Overview "Recent Activity" panel. Purely a read of already-loaded

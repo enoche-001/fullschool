@@ -180,6 +180,12 @@ const LOADERS={
 document.querySelectorAll(".nav-item[data-sec]").forEach(n=>n.addEventListener("click",()=>{
   const f=LOADERS[n.dataset.sec]; if(f) f();
 }));
+// used by the admin "Reload" button: drop cached reads and re-run the open section's loader
+window.cbtReload=async()=>{
+  classCache=null;cbResAll=null;exAll=null;exQ={};
+  const id=((document.querySelector(".section.active")||{}).id||"").replace("sec-","");
+  if(["cbtTeachers","cbtSubjects","cbtExams","cbtResults","cbtBoard"].includes(id)){const f=LOADERS[id];if(f)await f();}
+};
 
 /* ============================================================
    TEACHERS  (collection: teachers — doc id = Firebase Auth uid)

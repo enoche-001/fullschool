@@ -46,3 +46,10 @@ Firebase project: **veil-1-bd7b5** (config is already in every page).
 - **Part E** – shared filter bar (`window.AF`, defined in admin.html): Session/Term/Class are shared and persist while you move between sections; Subject/Status/Search belong to each list. Applied to Results, CBT Results, Manage Exams, Leaderboard, Payments, Students, Applications; compact version on teacher.html My Exams / Results.
 - Question importer (admin Manual Exam) now previews first and flags unparsable blocks by line number; teacher importer shows line numbers.
 - firestore.rules: unchanged.
+
+## Round 2 – reload / session fix (admin.html, teacher.html, cbt-admin.js)
+- Admin and teacher logins now restore silently after a page reload (session-only storage, set up before auth starts). Closing the browser/tab still signs out, as before.
+- A failed server lookup on reload no longer signs the admin out; only a confirmed "not an admin / not a teacher" account is signed out.
+- The last open section is restored after a reload.
+- New "Reload" button in both top bars: re-reads data from Firestore without reloading the page or signing out.
+- student portal / cbt.html: untouched.

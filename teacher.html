@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>try{if(sessionStorage.getItem('nt_teacher_hint'))document.documentElement.classList.add('restoring');}catch(e){}
+setTimeout(function(){document.documentElement.classList.remove('restoring');},8000);</script>
+<style>.restoring #loginScreen{display:none!important}.restoring body::before{content:"Restoring your session\2026";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font:600 .9rem system-ui,sans-serif;color:#64748b;background:#f8fafc;z-index:99999}
+.rl-spin{display:inline-block;animation:rlspin .8s linear infinite}@keyframes rlspin{to{transform:rotate(360deg)}}</style>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Newtown Academy — Teacher Portal</title>
@@ -304,7 +308,7 @@ tr:hover td{background:#f8fafc}
   <div class="main">
     <div class="topbar">
       <div><h1 id="tbTitle">Dashboard</h1><p id="tbSub">Here's your teaching overview</p></div>
-      <div class="tb-right"><span style="font-size:.8rem;color:var(--muted)" id="dateDisp"></span><div class="hamburger" id="hamBtn"><span></span><span></span><span></span></div></div>
+      <div class="tb-right"><span style="font-size:.8rem;color:var(--muted)" id="dateDisp"></span><button type="button" id="reloadBtn" title="Refresh data without signing out" style="padding:7px 12px;border:1px solid var(--bdr);border-radius:8px;background:#fff;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:8px"><span id="reloadIc">&#8635;</span> Reload</button><div class="hamburger" id="hamBtn"><span></span><span></span><span></span></div></div>
     </div>
     <div class="content">
 
@@ -613,12 +617,13 @@ tr:hover td{background:#f8fafc}
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getAuth,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getAuth,initializeAuth,inMemoryPersistence,browserSessionPersistence,onAuthStateChanged,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import{getFirestore,collection,doc,addDoc,getDoc,getDocs,deleteDoc,updateDoc,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const FC={apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",authDomain:"veil-1-bd7b5.firebaseapp.com",projectId:"veil-1-bd7b5",storageBucket:"veil-1-bd7b5.firebasestorage.app",messagingSenderId:"526021682048",appId:"1:526021682048:web:a52dae5b2650ca951ad765"};
 const app=initializeApp(FC);
-const auth=getAuth(app);
+let auth;   // session persistence set up before auth restores -> a page reload silently restores the login
+try{auth=initializeAuth(app,{persistence:[browserSessionPersistence,inMemoryPersistence]});}catch(e){auth=getAuth(app);}
 const db=getFirestore(app);
 
 /* STATE */
@@ -678,6 +683,7 @@ document.getElementById("loginBtn").addEventListener("click",async()=>{
   document.getElementById("lAlert").classList.remove("show");
   if(!email||!pw){showLA("Please fill in all fields.");return;}
   spin(btn,"Signing in...");
+  loggingIn=true;
   try{
     try{await signOut(auth);}catch(e){}
     const uc=await signInWithEmailAndPassword(auth,email,pw);
@@ -685,21 +691,46 @@ document.getElementById("loginBtn").addEventListener("click",async()=>{
     if(!ud.exists()){
       await signOut(auth);showLA("Teacher account not found.");unspin(btn,"Sign In");return;
     }
-    const d=ud.data();
-    userId=uc.user.uid;userName=d.name||"Teacher";teacherEmail=email;
-    document.getElementById("loginScreen").style.display="none";
-    document.getElementById("portalScreen").classList.add("open");
-    document.getElementById("uAv").textContent=userName.charAt(0).toUpperCase();
-    document.getElementById("uName").textContent=userName;
-    document.getElementById("dateDisp").textContent=new Date().toDateString();
-    showSection("home"); // always start at dashboard
-    history.replaceState({sec:"home"},"","");
+    enterPortal(uc.user.uid,ud.data(),email,"home"); // a fresh sign-in starts at the dashboard
   }catch(err){
     let m="Login failed.";
     if(err.code==="auth/wrong-password"||err.code==="auth/invalid-credential")m="Incorrect email or password.";
     if(err.code==="auth/too-many-requests")m="Too many attempts. Wait a moment.";
     showLA(m);unspin(btn,"Sign In");
+  }finally{loggingIn=false;}
+});
+
+let loggingIn=false,curSec="home";
+function enterPortal(uid,d,email,section){
+  userId=uid;userName=d.name||"Teacher";teacherEmail=email;
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("portalScreen").classList.add("open");
+  document.getElementById("uAv").textContent=userName.charAt(0).toUpperCase();
+  document.getElementById("uName").textContent=userName;
+  document.getElementById("dateDisp").textContent=new Date().toDateString();
+  try{sessionStorage.setItem("nt_teacher_hint","1");}catch(e){}
+  showSection(section||"home");
+  history.replaceState({sec:section||"home"},"","");
+}
+/* Silent restore after a page reload (and clean-up when signed out) */
+onAuthStateChanged(auth,async user=>{
+  const done=()=>document.documentElement.classList.remove("restoring");
+  if(loggingIn){done();return;}
+  if(!user){try{sessionStorage.removeItem("nt_teacher_hint");sessionStorage.removeItem("nt_teacher_sec");}catch(e){}done();return;}
+  if(userId===user.uid){done();return;}
+  let snap=null;
+  for(let i=0;i<3&&!snap;i++){try{snap=await getDoc(doc(db,"teachers",user.uid));}catch(e){await new Promise(r=>setTimeout(r,600*(i+1)));}}
+  if(snap&&!snap.exists()){
+    try{sessionStorage.removeItem("nt_teacher_hint");sessionStorage.removeItem("nt_teacher_sec");}catch(e){}
+    try{await signOut(auth);}catch(e){}
+    done();showLA("Teacher account not found.");return;
   }
+  let sec="home";try{sec=sessionStorage.getItem("nt_teacher_sec")||"home";}catch(e){}
+  if(!TITLES[sec])sec="home";
+  // snap null = could not reach the server: stay signed in with a fallback name instead of logging out
+  enterPortal(user.uid,snap?snap.data():{name:(user.email||"Teacher").split("@")[0]},user.email,sec);
+  done();
+  if(!snap)setTimeout(()=>toast("Could not reach the server. Use Reload when you are back online.","error"),900);
 });
 document.getElementById("emailIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("loginBtn").click();});
 document.getElementById("pwIn").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("loginBtn").click();});
@@ -731,12 +762,26 @@ function showSection(name){
   document.getElementById("tbSub").textContent=s;
   if(window.innerWidth<=768){document.getElementById("sidebar").classList.remove("open");document.getElementById("sbOv").classList.remove("open");}
   history.pushState({sec:name},"","");
-  if(name==="home")loadHome();
-  if(name==="exams")loadExams();
-  if(name==="questions")populateExamSelQ();
-  if(name==="monitor")populateMonSel();
-  if(name==="results"){populateResultsFilter();loadResults();}
+  curSec=name;try{sessionStorage.setItem("nt_teacher_sec",name);}catch(e){}
+  loadSection(name);
 }
+function loadSection(name){
+  if(name==="home")return loadHome();
+  if(name==="exams")return loadExams();
+  if(name==="questions")return populateExamSelQ();
+  if(name==="monitor")return populateMonSel();
+  if(name==="results"){populateResultsFilter();return loadResults();}
+}
+/* Reload button: re-reads the open section from Firestore without signing out */
+document.getElementById("reloadBtn").addEventListener("click",async()=>{
+  const btn=document.getElementById("reloadBtn"),ic=document.getElementById("reloadIc");
+  if(btn.disabled)return;
+  if(!navigator.onLine){toast("You appear to be offline.","error");return;}
+  btn.disabled=true;ic.classList.add("rl-spin");
+  try{await loadSection(curSec);toast("Data reloaded.");}
+  catch(e){console.error(e);toast("Reload failed. Check your connection.","error");}
+  finally{btn.disabled=false;ic.classList.remove("rl-spin");}
+});
 window.addEventListener("popstate",e=>{const s=e.state?.sec||"home";showSection(s);history.pushState({sec:s},"","");});
 
 /* HOME */
@@ -860,7 +905,7 @@ const tf=(function(){
     addSessions:l=>{(l||[]).forEach(x=>{if(x)sessions.add(x);});},
     addClasses:l=>{(l||[]).forEach(x=>{if(x)classes.add(x);});}};
 })();
-(function(){const c=document.createElement("style");c.textContent=".tf-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px}.tf-bar select,.tf-bar input{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:.82rem;background:#fff}.tf-reset{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.tf-info{font-size:.76rem;color:var(--muted);margin-bottom:10px}.tf-link{background:none;border:none;color:var(--navy2,#1d4ed8);text-decoration:underline;cursor:pointer;font:inherit}@media(max-width:520px){.tf-bar{grid-template-columns:1fr 1fr}.tf-bar input,.tf-reset{grid-column:1/-1}}";document.head.appendChild(c);})();
+(function(){const c=document.createElement("style");c.textContent=".tf-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px}.tf-bar select,.tf-bar input{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--bdr);border-radius:8px;font:inherit;font-size:.82rem;background:#fff}.tf-reset{padding:9px 12px;border:1px solid var(--bdr);border-radius:8px;background:#fff;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.tf-info{font-size:.76rem;color:var(--muted);margin-bottom:10px}.tf-link{background:none;border:none;color:var(--navy2,#1d4ed8);text-decoration:underline;cursor:pointer;font:inherit}@media(max-width:520px){.tf-bar{grid-template-columns:1fr 1fr}.tf-bar input,.tf-reset{grid-column:1/-1}}";document.head.appendChild(c);})();
 
 /* SESSION / TERM helpers */
 const SESSION_LIST=["2024/2025","2025/2026","2026/2027"];
