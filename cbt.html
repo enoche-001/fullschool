@@ -220,6 +220,10 @@ const app=initializeApp(FC);
 const db=getFirestore(app);
 
 let userId="",userName="",classId="",className="",regNumber="";
+// Subjects: a student only sees exams for elective subjects they actually take.
+const norm=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+let mySubj=new Set(),electiveSet=new Set();
+function allowedExam(e){const n=norm(e.subjectName);if(!n)return true;return !(electiveSet.has(n)&&!mySubj.has(n));}
 
 function toast(m,t="success"){const el=document.getElementById("toast");el.textContent=(t==="success"?"✓ ":"✗ ")+m;el.className=`toast show ${t}`;setTimeout(()=>el.classList.remove("show"),3500);}
 function showAlert(m){document.getElementById("lMsg").textContent=m;document.getElementById("lAlert").classList.add("show");}
@@ -240,6 +244,8 @@ document.getElementById("loginBtn").addEventListener("click",async()=>{
     if(!(await verifyPassword(pw,d))){showAlert("Incorrect reg number or password.");btn.disabled=false;btn.innerHTML="Sign In";return;}
     if((d.status||"active")!=="active"){showAlert("Your account is not active. Please contact the school office.");btn.disabled=false;btn.innerHTML="Sign In";return;}
     userId=ds.id;userName=`${d.firstName||""} ${d.lastName||""}`.trim()||d.regNumber||"Student";classId=d.class||"";className=d.class||"";regNumber=d.regNumber||reg;
+    mySubj=new Set((Array.isArray(d.subjects)?d.subjects:[]).map(norm));electiveSet=new Set();
+    try{const cs=await getDoc(doc(db,"classes",classId));if(cs.exists())(cs.data().elective||[]).forEach(n=>electiveSet.add(norm(n)));}catch(_){}
     openHall();
   }catch(err){
     let m="Login failed.";
@@ -268,6 +274,7 @@ window.loadExams=async function(){
   snap.forEach(d=>{
     const e=d.data();
     if(e.isActive!==true)return;
+    if(!allowedExam(e))return;
     const isDone=done.has(d.id);
     const isAI=e.source==="ai";
     cards.push(`<div class="exam-card">
@@ -300,6 +307,7 @@ window.startExam=async function(eid){
   if(!ed.exists()){toast("Exam not found.","error");return;}
   const e=ed.data();
   if(e.isActive!==true){toast("This exam is no longer available.","error");loadExams();return;}
+  if(!allowedExam(e)){toast("This exam is for students who take this elective subject.","error");loadExams();return;}
   const qs=await getDocs(query(collection(db,"cbtQuestions"),where("examId","==",eid)));
   if(qs.empty){toast("No questions in this exam yet.","error");return;}
   _pendingExamId=eid;_pendingSubject=e.subjectName||"";
@@ -312,7 +320,10 @@ async function _launchExam(eid){
   const ed=await getDoc(doc(db,"cbtExams",eid));const e=ed.data();
   const qs=await getDocs(query(collection(db,"cbtQuestions"),where("examId","==",eid)));
   const raw=[];qs.forEach(d=>raw.push({id:d.id,...d.data()}));
-  examQ=shuffle(raw).map(shuffleOpts);answers={};curQ=0;tabWarn=0;submitted=false;examId_=eid;examData=e;examStart=Date.now();
+  const sortKey=q=>q.order??(q.createdAt?.toMillis?.()??0);
+  let ordered=[...raw].sort((a,b)=>sortKey(a)-sortKey(b));
+  if(e.shuffleQuestions!==false)ordered=shuffle(ordered);
+  examQ=e.shuffleOptions!==false?ordered.map(shuffleOpts):ordered;answers={};curQ=0;tabWarn=0;submitted=false;examId_=eid;examData=e;examStart=Date.now();
   document.getElementById("eTitle").textContent=e.title;
   document.getElementById("eSub").textContent=`${e.subjectName} — ${e.className}`;
   document.getElementById("pTot").textContent=examQ.length;
@@ -372,7 +383,7 @@ async function doSubmit(cheat=false,timeup=false){
   const total=examQ.length,tt=Math.floor((Date.now()-examStart)/1000),pct=Math.round((score/total)*100);
   try{
     await addDoc(collection(db,"cbtResults"),{
-      examId:examId_,examTitle:examData.title,subjectName:examData.subjectName,
+      examId:examId_,examTitle:examData.title,subjectName:examData.subjectName||"",session:examData.session||"",term:examData.term||"",
       classId,className,teacherId:examData.teacherId||"",studentId:userId,studentName:userName,regNumber,
       score,totalMarks:total,percentage:pct,timeTaken:tt,
       answers:log,autoSubmitted:cheat||timeup,submittedAt:serverTimestamp()

@@ -215,15 +215,7 @@
         <div class="sec-hdr">
           <div class="sec-hdr-l"><h2>Applications</h2><p>Review and process admission applications</p></div>
         </div>
-        <div class="s-bar">
-          <select id="appFilterStatus" onchange="renderApplications()">
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <select id="appFilterClass" onchange="renderApplications()"><option value="">All Classes</option></select>
-        </div>
+        <div id="afApps"></div>
         <div class="twrap">
           <table>
             <thead><tr><th>Applicant</th><th>Class</th><th>Parent Phone</th><th>Date Submitted</th><th>Status</th><th>Actions</th></tr></thead>
@@ -241,10 +233,7 @@
             Create Student
           </button>
         </div>
-        <div class="s-bar">
-          <input type="text" id="stuSearch" placeholder="Search by name or reg number…" oninput="renderStudents()"/>
-          <select id="stuFilterClass" onchange="renderStudents()"><option value="">All Classes</option></select>
-        </div>
+        <div id="afStu"></div>
         <div class="twrap">
           <table>
             <thead><tr><th>Reg Number</th><th>Name</th><th>Class</th><th>Subjects</th><th>Status</th><th>Actions</th></tr></thead>
@@ -297,34 +286,16 @@
 
         <!-- Selection bar -->
         <div class="card" style="margin-bottom:14px">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;align-items:flex-end">
-            <div class="form-group" style="margin-bottom:0">
-              <label>Session</label>
-              <select id="resSession">
-                <option value="2024/2025">2024/2025</option>
-                <option value="2025/2026" selected>2025/2026</option>
-                <option value="2026/2027">2026/2027</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0">
-              <label>Term</label>
-              <select id="resTerm">
-                <option value="First">First Term</option>
-                <option value="Second">Second Term</option>
-                <option value="Third">Third Term</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0">
-              <label>Class</label>
-              <select id="resClass"><!-- populated by JS --></select>
-            </div>
-            <div style="margin-bottom:0">
-              <button class="btn btn-p" id="resLoadBtn" onclick="loadResultsStudents()" style="width:100%;justify-content:center;padding:10px 14px">
-                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                Load Students
-              </button>
-            </div>
+          <div id="afResults"></div>
+          <div style="display:none">
+            <select id="resSession"><option value="2024/2025">2024/2025</option><option value="2025/2026" selected>2025/2026</option><option value="2026/2027">2026/2027</option></select>
+            <select id="resTerm"><option value="First">First Term</option><option value="Second">Second Term</option><option value="Third">Third Term</option></select>
+            <select id="resClass"><!-- populated by JS --></select>
           </div>
+          <button class="btn btn-p" id="resLoadBtn" onclick="loadResultsStudents(true)" style="width:100%;justify-content:center;padding:10px 14px">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Reload from database
+          </button>
           <div class="form-row" style="margin-top:12px">
             <div class="form-group" style="margin-bottom:0"><label>Term Closing Date</label><input type="date" id="resClosingDate"/></div>
             <div class="form-group" style="margin-bottom:0"><label>Next Term Begins</label><input type="date" id="resNextTermDate"/></div>
@@ -572,18 +543,7 @@
           </div>
         </div>
 
-        <div class="s-bar" style="margin-bottom:14px">
-          <input type="text" id="paySearch" placeholder="Search by name or reg number&#8230;" oninput="renderPayments()"/>
-          <select id="payFilterTerm" onchange="renderPayments()">
-            <option value="">All Terms</option>
-            <option value="First">First Term</option>
-            <option value="Second">Second Term</option>
-            <option value="Third">Third Term</option>
-          </select>
-          <select id="payFilterClass" onchange="renderPayments()">
-            <option value="">All Classes</option>
-          </select>
-        </div>
+        <div id="afPay"></div>
 
         <div class="twrap">
           <table>
@@ -602,7 +562,7 @@
       <!-- ANNOUNCEMENTS -->
       <!-- ============ CBT & EXAMS ============ -->
       <div class="section" id="sec-cbtTeachers">
-        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Teachers</h2><p>Create teacher accounts — teachers sign in at teacher.html</p></div><button class="btn btn-primary btn-sm" id="cbOpenTeacher">+ Create Teacher</button></div>
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Teachers</h2><p>Create teacher accounts — teachers sign in at teacher.html</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-edit btn-sm" id="cbOpenTeacherCsv">⬆ Import CSV</button><button class="btn btn-primary btn-sm" id="cbOpenTeacher">+ Create Teacher</button></div></div>
         <div class="twrap"><table>
           <thead><tr><th>Name</th><th>Email (login)</th><th>Subjects</th><th>Created</th><th>Actions</th></tr></thead>
           <tbody id="cbTeachersBody"><tr><td colspan="5" class="empty"><p>Loading...</p></td></tr></tbody>
@@ -611,9 +571,12 @@
 
       <!-- ===== CBT: SUBJECTS ===== -->
       <div class="section" id="sec-cbtSubjects">
-        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Subjects &amp; Teachers</h2><p>Assign a subject in a class to a teacher — they can then set exams for it</p></div><button class="btn btn-primary btn-sm" id="cbOpenSubject">+ Create Subject</button></div>
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Subjects &amp; Teachers</h2><p>Every subject in your Classes is listed here. Pick a teacher for each, or assign a whole class at once</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-edit btn-sm" id="cbOpenClassAssign">🏫 Assign whole class</button><button class="btn btn-edit btn-sm" id="cbOpenBulkAssign">📚 Bulk assign</button><button class="btn btn-primary btn-sm" id="cbOpenSubject">+ Create Subject</button></div></div>
+        <div class="fs-summary show" id="cbSubSummary" style="margin-top:0;margin-bottom:14px">Loading…</div>
+        <div class="s-bar"><input id="cbSubFSearch" placeholder="Search subject or teacher..."><select id="cbSubFClass"><option value="">All Classes</option></select><select id="cbSubFStatus"><option value="">All subjects</option><option value="un">Unassigned only</option><option value="as">Assigned only</option></select></div>
         <div class="twrap"><table>
-          <thead><tr><th>Subject</th><th>Class</th><th>Teacher</th><th>Created</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Subject</th><th>Class</th><th>Type</th><th>Teacher</th><th>Actions</th></tr></thead>
           <tbody id="cbSubjectsBody"><tr><td colspan="5" class="empty"><p>Loading...</p></td></tr></tbody>
         </table></div>
       </div>
@@ -657,6 +620,10 @@
               <div class="form-group"><label>Assign to Class</label><select id="pubClass"><option value="">Select Class</option></select></div></div>
             <div class="form-row"><div class="form-group"><label>Duration (minutes)</label><input type="number" id="pubDuration" value="60" min="5" max="180"></div>
               <div class="form-group"><label>Activate Immediately?</label><select id="pubActive"><option value="true">Yes — students can start now</option><option value="false">No — save as draft</option></select></div></div>
+            <div class="form-row"><div class="form-group"><label>Session</label><select id="pubSession"></select></div>
+              <div class="form-group"><label>Term</label><select id="pubTerm"></select></div></div>
+            <div class="form-row"><label class="toggle-wrap" style="margin-bottom:14px"><input type="checkbox" id="pubShuffleQ" checked><span>Shuffle question order</span></label>
+              <label class="toggle-wrap" style="margin-bottom:14px"><input type="checkbox" id="pubShuffleO" checked><span>Shuffle option order (A-D)</span></label></div>
             <button class="btn btn-p" id="publishBtn" onclick="publishExam()">Publish Exam to CBT Hall</button>
           </div>
         </div>
@@ -671,14 +638,22 @@
             <div class="form-group"><label>Assign to Class</label><select id="meClass"><option value="">— Select Class —</option></select></div></div>
           <div class="form-row"><div class="form-group"><label>Duration (minutes)</label><input type="number" id="meDuration" value="60" min="5" max="180"></div>
             <div class="form-group"><label>Status</label><select id="meStatus"><option value="true">Active — students can start now</option><option value="false">Draft</option></select></div></div>
+          <div class="form-row"><div class="form-group"><label>Subject <span style="color:var(--soft);font-weight:400">(from the chosen class)</span></label><select id="meSubject"><option value="">— Not tied to a subject —</option></select></div>
+            <div class="form-group"><label>Session</label><select id="meSession"></select></div></div>
+          <div class="form-row"><div class="form-group"><label>Term</label><select id="meTerm"></select></div>
+            <div class="form-group"><label>Shuffling</label>
+              <label class="toggle-wrap" style="margin-bottom:8px"><input type="checkbox" id="meShuffleQ" checked><span>Shuffle question order</span></label>
+              <label class="toggle-wrap"><input type="checkbox" id="meShuffleO" checked><span>Shuffle option order (A-D)</span></label></div></div>
         </div>
         <div class="csv-import-card">
-          <h4>Bulk Import Questions from CSV</h4>
-          <p>Import many questions at once. Each row = one question.</p>
+          <h4>Bulk Import Questions</h4>
+          <p>Import many questions at once. Paste either the <strong>numbered format</strong> or <strong>CSV</strong> — the app detects which one it is.</p>
+          <div class="csv-format-box"><strong>Numbered format:</strong><br><code>1. What is the capital of Nigeria?</code><br><code>A. Lagos &nbsp; B. Abuja &nbsp; C. Kano &nbsp; D. Ibadan</code><br><code>Answer: B</code><br><em>Options can be on one line or separate lines. Answer line: <strong>Answer: B</strong> or <strong>Ans: B</strong>. Numbers: 1. &nbsp;1) &nbsp;1 — all accepted.</em></div>
           <div class="csv-format-box"><strong>CSV Format:</strong><br><code>question, optionA, optionB, optionC, optionD, correctAnswer</code><br><em>correctAnswer</em> must be: <strong>a, b, c, d</strong><br><strong>Example:</strong> <code>What is H2O?, Oxygen, Water, Salt, Acid, b</code></div>
-          <div style="margin-bottom:12px"><label style="display:block;font-size:.72rem;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Upload .csv file</label><input type="file" id="meCSVFile" accept=".csv" onchange="handleMeCSVFile()" style="font-size:.82rem"></div>
-          <div class="form-group" style="margin-bottom:10px"><label>Or paste CSV text directly</label><textarea id="meCSVPaste" rows="5" placeholder="question, optionA, optionB, optionC, optionD, correctAnswer" style="font-family:monospace;font-size:.8rem;resize:vertical"></textarea></div>
-          <button class="btn btn-p" onclick="parseMeCSV()">Import Questions from CSV</button>
+          <div style="margin-bottom:12px"><label style="display:block;font-size:.72rem;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Upload .csv or .txt file</label><input type="file" id="meCSVFile" accept=".csv,.txt" onchange="handleMeCSVFile()" style="font-size:.82rem"></div>
+          <div class="form-group" style="margin-bottom:10px"><label>Or paste questions directly</label><textarea id="meCSVPaste" rows="8" placeholder="1. Question text&#10;A. Option   B. Option   C. Option   D. Option&#10;Answer: B" style="font-family:monospace;font-size:.8rem;resize:vertical"></textarea></div>
+          <button class="btn btn-p" onclick="parseMeCSV()">Preview Import</button>
+          <div id="meImportMsg" class="fs-summary" style="display:none;margin-top:12px"></div>
         </div>
         <div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
           <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
@@ -686,7 +661,7 @@
             <button class="btn btn-p btn-sm" onclick="addMeQuestion()">+ Add Question</button>
           </div>
           <div id="meQuestionsList" style="padding:4px 0"></div>
-          <div id="meQEmpty" style="padding:28px;text-align:center;color:var(--muted);font-size:.85rem">No questions yet. Add one above or import from CSV.</div>
+          <div id="meQEmpty" style="padding:28px;text-align:center;color:var(--muted);font-size:.85rem">No questions yet. Add one above or import them.</div>
         </div>
         <button class="btn btn-p" style="padding:14px 30px;font-size:.92rem" id="mePublishBtn" onclick="publishManualExam()">Publish Manual Exam</button>
       </div>
@@ -694,7 +669,7 @@
       <!-- ===== CBT: MANAGE EXAMS ===== -->
       <div class="section" id="sec-cbtExams">
         <div class="sec-hdr"><div class="sec-hdr-l"><h2>Manage Exams</h2><p>All exams in the CBT hall — including exams set by teachers</p></div></div>
-        <div class="s-bar"><input id="exSearch" placeholder="Search exams..."><select id="exClassFilter"><option value="">All Classes</option></select></div>
+        <div id="afEx"></div>
         <div class="twrap"><table>
           <thead><tr><th>Exam</th><th>Subject</th><th>Class</th><th>Questions</th><th>Duration</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead>
           <tbody id="exBody"><tr><td colspan="8" class="empty"><p>No exams yet</p></td></tr></tbody>
@@ -703,8 +678,8 @@
 
       <!-- ===== CBT: RESULTS ===== -->
       <div class="section" id="sec-cbtResults">
-        <div class="sec-hdr"><div class="sec-hdr-l"><h2>CBT Results</h2><p>All CBT exam submissions across the school (term report sheets are under Results)</p></div><button class="btn btn-primary btn-sm" id="cbResPrint">🖨 Print</button></div>
-        <div class="s-bar"><input id="cbResSearch" placeholder="Search by student name or reg number..."><select id="cbResClass"><option value="">All Classes</option></select></div>
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>CBT Results</h2><p>All CBT exam submissions across the school (term report sheets are under Results)</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-edit btn-sm" id="cbResSend">📤 Send to Results</button><button class="btn btn-primary btn-sm" id="cbResPrint">🖨 Print</button></div></div>
+        <div id="afCbRes"></div>
         <div class="twrap"><table>
           <thead><tr><th>Student</th><th>Exam</th><th>Subject</th><th>Score</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody id="cbResBody"><tr><td colspan="6" class="empty"><p>Loading...</p></td></tr></tbody>
@@ -713,7 +688,8 @@
 
       <!-- ===== CBT: LEADERBOARD ===== -->
       <div class="section" id="sec-cbtBoard">
-        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Leaderboard</h2><p>Student rankings by CBT performance</p></div><div style="display:flex;gap:8px"><select id="lbPeriod" class="cb-sel"><option value="week">This Week</option><option value="month">This Month</option><option value="all">All Time</option></select><select id="lbClass" class="cb-sel"><option value="">All Classes</option></select></div></div>
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Leaderboard</h2><p>Student rankings by CBT performance</p></div><div style="display:flex;gap:8px"><select id="lbPeriod" class="cb-sel"><option value="week">This Week</option><option value="month">This Month</option><option value="all">All Time</option></select></div></div>
+        <div id="afBoard"></div>
         <div id="lbContent"><div class="empty"><p>Loading leaderboard...</p></div></div>
       </div>
 
@@ -1197,13 +1173,210 @@
   <div class="mactions"><button class="btn-cancel" id="cbESubCancel">Cancel</button><button class="btn btn-p" id="cbESubSave">Save Changes</button></div>
 </div></div>
 
+<div class="mo" id="moCbClassAssign"><div class="mbox">
+  <h3>Assign whole class to a teacher</h3><p class="mdesc">Gives one teacher every subject of the class. Subjects come from Admin &gt; Classes.</p>
+  <div class="form-group"><label>Class</label><select id="cacClass"><option value="">— Select Class —</option></select></div>
+  <div class="form-group"><label>Teacher</label><select id="cacTeacher"><option value="">— Select Teacher —</option></select></div>
+  <div id="cacNewT"></div>
+  <label class="toggle-wrap" style="margin:10px 0"><input type="checkbox" id="cacElec" checked><span>Include elective subjects</span></label>
+  <label class="toggle-wrap" style="margin-bottom:6px"><input type="checkbox" id="cacRepl"><span>Replace teachers already assigned</span></label>
+  <div class="fs-summary show" id="cacPreview">Choose a class and a teacher.</div>
+  <div class="mactions"><button class="btn-cancel" id="cacCancel">Cancel</button><button class="btn btn-p" id="cacApply">Assign</button></div>
+</div></div>
+
+<div class="mo" id="moCbBulk"><div class="mbox">
+  <h3>Bulk assign one subject</h3><p class="mdesc">Pick a teacher and a subject, then tick every class that should use them.</p>
+  <div class="form-group"><label>Teacher</label><select id="cbkTeacher"><option value="">— Select Teacher —</option></select></div>
+  <div id="cbkNewT"></div>
+  <div class="form-group" style="margin-top:12px"><label>Subject</label><select id="cbkSubject"><option value="">— Select Subject —</option></select></div>
+  <div class="form-group"><label>Classes <a href="#" id="cbkAll" style="font-weight:400;margin-left:8px;font-size:.75rem">select all</a></label><div id="cbkClasses" style="display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px"><span class="empty-inline">Choose a subject first</span></div></div>
+  <label class="toggle-wrap" style="margin-bottom:6px"><input type="checkbox" id="cbkRepl"><span>Replace teachers already assigned</span></label>
+  <div class="fs-summary show" id="cbkPreview">Choose a teacher, a subject and classes.</div>
+  <div class="mactions"><button class="btn-cancel" id="cbkCancel">Cancel</button><button class="btn btn-p" id="cbkApply">Assign</button></div>
+</div></div>
+
+<div class="mo" id="moCbTeacherCsv"><div class="mbox mbox-lg">
+  <h3>Import teachers from CSV</h3><p class="mdesc">One teacher per line: <code>name, email, password</code>. Leave the password blank and a random one is generated. Passwords are shown once at the end, so download or copy them.</p>
+  <div class="form-group"><label>Upload .csv file</label><input type="file" id="tcsvFile" accept=".csv,.txt" style="font-size:.82rem"></div>
+  <div class="form-group"><label>Or paste text</label><textarea id="tcsvText" rows="6" style="font-family:monospace;font-size:.8rem;width:100%" placeholder="Mrs Ada Okoro, ada@school.com, Pass1234&#10;Mr Musa Bello, musa@school.com,"></textarea></div>
+  <div class="fs-summary show" id="tcsvInfo" style="margin-top:0">Paste or upload, then press Check.</div>
+  <div id="tcsvList" style="max-height:230px;overflow:auto;margin-top:12px"></div>
+  <div class="mactions"><button class="btn-cancel" id="tcsvClose">Close</button><button class="btn btn-edit" id="tcsvCheck">Check</button><button class="btn btn-p" id="tcsvRun" disabled>Create teachers</button></div>
+  <div id="tcsvDone" style="display:none;margin-top:12px;display:none;gap:8px"><button class="btn btn-edit btn-sm" id="tcsvDl">⬇ Download credentials</button><button class="btn btn-edit btn-sm" id="tcsvCopy">Copy credentials</button></div>
+</div></div>
+
+<div class="mo" id="moCbExamSet"><div class="mbox">
+  <h3>Exam settings</h3><p class="mdesc" id="cesTitle">Update subject, session, term and shuffling</p>
+  <input type="hidden" id="cesId"/><input type="hidden" id="cesClass"/>
+  <div class="form-group"><label>Subject</label><select id="cesSubject"><option value="">— Not tied to a subject —</option></select></div>
+  <div class="form-row"><div class="form-group"><label>Session</label><select id="cesSession"></select></div>
+    <div class="form-group"><label>Term</label><select id="cesTerm"></select></div></div>
+  <label class="toggle-wrap" style="margin-bottom:10px"><input type="checkbox" id="cesShuffleQ"><span>Shuffle question order</span></label>
+  <label class="toggle-wrap"><input type="checkbox" id="cesShuffleO"><span>Shuffle option order (A-D)</span></label>
+  <div class="mactions"><button class="btn-cancel" id="cesCancel">Cancel</button><button class="btn btn-p" id="cesSave">Save</button></div>
+</div></div>
+
+<div class="mo" id="moSendRes"><div class="mbox" style="max-width:600px">
+  <h3>Send CBT scores to Results</h3><p class="mdesc">Converts each student's CBT score to the chosen column's maximum and writes it into their report card. Nothing is published.</p>
+  <div class="form-row"><div class="form-group"><label>Session</label><select id="srSession"></select></div><div class="form-group"><label>Term</label><select id="srTerm"></select></div></div>
+  <div class="form-group"><label>Class</label><select id="srClass"></select></div>
+  <div class="form-group"><label>CBT exam</label><select id="srExam"></select></div>
+  <div class="form-group"><label>Report-card subject</label><select id="srSubject"></select></div>
+  <div class="form-row"><div class="form-group"><label>Target column</label><select id="srCol"></select></div>
+    <div class="form-group"><label>If several attempts</label><select id="srAttempt"><option value="best">Use best attempt</option><option value="latest">Use latest attempt</option></select></div></div>
+  <label class="toggle-wrap" style="margin-bottom:10px"><input type="checkbox" id="srWhole" checked><span>Round to whole marks</span></label>
+  <div id="srPreview" style="margin-top:6px"></div>
+  <div class="mactions"><button class="btn-cancel" id="srCancel">Close</button><button class="btn btn-edit" id="srPreviewBtn">Preview</button><button class="btn btn-p" id="srApply" disabled>Write scores</button></div>
+</div></div>
+
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg"></span></div>
+
+<script>
+/* ===== Shared filter bar (window.AF) — used by admin.html and cbt-admin.js =====
+   Session / Term / Class are shared by every bar and persist while the admin moves
+   between sections. Subject / Status / Search belong to one list each.
+   Everything is filtered in the browser from data already loaded. */
+window.AF=(function(){
+  var NONE='__none';
+  var DEF_SESSIONS=['2024/2025','2025/2026','2026/2027'];
+  var TERMS=[['First','First Term'],['Second','Second Term'],['Third','Third Term']];
+  var cur={session:'2025/2026',term:'Second'};
+  var sh={session:null,term:null,cls:''};
+  var touched=false, extra={sessions:[],classes:[]}, own={}, mounts={};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function tk(v){return String(v==null?'':v).toLowerCase().replace(/term/g,'').replace(/[^a-z0-9]/g,'');}
+  function ensure(){ if(sh.session===null)sh.session=cur.session; if(sh.term===null)sh.term=cur.term; }
+  function sessionList(){
+    ensure(); var seen={}; DEF_SESSIONS.concat([cur.session,sh.session],extra.sessions).forEach(function(x){ if(x&&x!==NONE)seen[x]=1; });
+    return Object.keys(seen).sort().reverse();
+  }
+  function statusList(m){ var s=m.cfg.statuses; if(typeof s==='function')s=s(); return s||[]; }
+  function subjectList(m){ var s=m.cfg.subjects?m.cfg.subjects():[]; var seen={},out=[]; (s||[]).forEach(function(x){var k=String(x||'').toLowerCase().replace(/[^a-z0-9]/g,''); if(k&&!seen[k]){seen[k]=1;out.push(x);}}); return out.sort(); }
+  function opt(v,l,sel){ return '<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(l)+'</option>'; }
+  function buildOptions(key,f){
+    var m=mounts[key], v=getRaw(key,f), pairs=[], all='';
+    if(f==='session'){ all='All sessions'; pairs=sessionList().map(function(x){return [x,x];}); }
+    else if(f==='term'){ all='All terms'; pairs=TERMS.slice(); }
+    else if(f==='class'){ all='All classes'; pairs=extra.classes.map(function(x){return [x,x];}); }
+    else if(f==='subject'){ all='All subjects'; pairs=subjectList(m).map(function(x){return [x,x];}); }
+    else if(f==='status'){ all='All statuses'; pairs=statusList(m); }
+    if((f==='session'||f==='term')&&m.cfg.untagged) pairs.push([NONE,'Untagged']);
+    if(v&&!pairs.some(function(p){return p[0]===v;})) pairs.push([v,v]);
+    return opt('',all,v==='')+pairs.map(function(p){return opt(p[0],p[1],p[0]===v);}).join('');
+  }
+  function getRaw(key,f){
+    ensure();
+    if(f==='session')return sh.session; if(f==='term')return sh.term; if(f==='class')return sh.cls;
+    return own[key][f];
+  }
+  function setRaw(key,f,v){
+    if(f==='session'){sh.session=v;touched=true;} else if(f==='term'){sh.term=v;touched=true;} else if(f==='class'){sh.cls=v;}
+    else own[key][f]=v;
+  }
+  var LBL={session:'Session',term:'Term',class:'Class',subject:'Subject',status:'Status',search:'Search'};
+  function fill(key){
+    var m=mounts[key]; if(!m||!m.el)return;
+    m.fields.forEach(function(f){
+      var n=m.el.querySelector('[data-af="'+f+'"]'); if(!n)return;
+      if(f==='search'){ if(document.activeElement!==n)n.value=own[key].search; return; }
+      n.innerHTML=buildOptions(key,f);
+    });
+  }
+  function secActive(m){ var s=m.cfg.section&&document.getElementById('sec-'+m.cfg.section); return !s||s.classList.contains('active'); }
+  function fire(onlyKey){
+    Object.keys(mounts).forEach(function(k){
+      if(onlyKey&&k!==onlyKey)return;
+      var m=mounts[k]; if(!m.cfg.onChange||!secActive(m))return;
+      try{m.cfg.onChange();}catch(e){console.error('AF onChange',k,e);}
+    });
+  }
+  function fillAll(){ Object.keys(mounts).forEach(fill); }
+  function handle(key,f,v){
+    setRaw(key,f,v);
+    if(f==='session'||f==='term'||f==='class'){ fillAll(); fire(); } else fire(key);
+  }
+  function mount(key,elId,cfg){
+    var el=document.getElementById(elId); if(!el)return;
+    own[key]=own[key]||{subject:'',status:'',search:''};
+    var fields=cfg.fields||[]; mounts[key]={el:el,fields:fields,cfg:cfg};
+    var h='<div class="af-bar">';
+    fields.forEach(function(f){
+      if(f==='search') h+='<label class="af-f af-wide"><span>Search</span><input type="search" data-af="search" placeholder="'+esc(cfg.searchPlaceholder||'Search…')+'" autocomplete="off"></label>';
+      else h+='<label class="af-f"><span>'+LBL[f]+'</span><select data-af="'+f+'"></select></label>';
+    });
+    h+='<button type="button" class="af-reset">Reset filters</button></div><div class="af-info" id="af-info-'+key+'"></div>';
+    el.innerHTML=h; fill(key);
+    var tmr=null;
+    el.addEventListener('change',function(e){var f=e.target.getAttribute('data-af'); if(f&&f!=='search')handle(key,f,e.target.value);});
+    el.addEventListener('input',function(e){var f=e.target.getAttribute('data-af'); if(f==='search'){clearTimeout(tmr);var v=e.target.value;tmr=setTimeout(function(){handle(key,'search',v.trim().toLowerCase());},120);}});
+    el.querySelector('.af-reset').addEventListener('click',function(){reset(key);});
+  }
+  function get(key){
+    var m=mounts[key]; ensure(); var o={session:'',term:'',cls:'',subject:'',status:'',search:''};
+    if(!m)return o;
+    m.fields.forEach(function(f){ if(f==='class')o.cls=sh.cls; else o[f]=getRaw(key,f); });
+    return o;
+  }
+  function reset(key){
+    sh.session=cur.session; sh.term=cur.term; sh.cls=''; touched=false;
+    if(own[key])own[key]={subject:'',status:'',search:''};
+    var m=mounts[key]; if(m&&m.el){var s=m.el.querySelector('[data-af="search"]'); if(s)s.value='';}
+    fillAll(); fire();
+  }
+  function mSession(val,f){ if(!f)return true; if(f===NONE)return !val; return String(val||'').trim()===f; }
+  function mTerm(val,f){ if(!f)return true; if(f===NONE)return !val; return tk(val)===tk(f); }
+  function describe(key){
+    var m=mounts[key], f=get(key), p=[]; if(!m)return 'these filters';
+    if(m.fields.indexOf('session')>-1&&f.session)p.push('Session '+(f.session===NONE?'Untagged':f.session));
+    if(m.fields.indexOf('term')>-1&&f.term)p.push('Term '+(f.term===NONE?'Untagged':f.term));
+    if(m.fields.indexOf('class')>-1&&f.cls)p.push('Class '+f.cls);
+    if(m.fields.indexOf('subject')>-1&&f.subject)p.push('Subject '+f.subject);
+    if(m.fields.indexOf('status')>-1&&f.status){ var st=statusList(m).filter(function(x){return x[0]===f.status;})[0]; p.push('Status '+(st?st[1]:f.status)); }
+    if(m.fields.indexOf('search')>-1&&f.search)p.push('search “'+f.search+'”');
+    return p.length?p.join(' · '):'no filters';
+  }
+  function emptyHtml(key,what){
+    return '<p>No '+esc(what)+' for: <strong>'+esc(describe(key))+'</strong></p><p style="margin-top:8px"><button type="button" class="af-link" onclick="AF.reset(\''+key+'\')">Reset filters</button></p>';
+  }
+  function chips(items){ return '<div class="af-chips">'+items.map(function(i){return '<span class="af-chip"><em>'+esc(i[0])+'</em><b>'+esc(i[1])+'</b></span>';}).join('')+'</div>'; }
+  /* summary of the rows shown — only when one class is chosen (class-only view) */
+  function classSummary(key,nums,o){
+    o=o||{}; if(!get(key).cls)return '';
+    nums=(nums||[]).filter(function(x){return isFinite(x);}); var u=o.unit||'',d=o.dec==null?1:o.dec;
+    var items=[[o.countLabel||'Count',o.count!=null?o.count:nums.length]];
+    if(nums.length){ var sum=0,hi=-Infinity,lo=Infinity; nums.forEach(function(x){sum+=x;if(x>hi)hi=x;if(x<lo)lo=x;});
+      items.push(['Average',(sum/nums.length).toFixed(d)+u],['Highest',hi.toFixed(d)+u],['Lowest',lo.toFixed(d)+u]); }
+    return chips(items);
+  }
+  function info(key,text,extraHtml){ var el=document.getElementById('af-info-'+key); if(el)el.innerHTML='<div>'+text+'</div>'+(extraHtml||''); }
+  var st=document.createElement('style');
+  st.textContent='.af-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin-bottom:8px;align-items:end}'+
+  '.af-f{display:flex;flex-direction:column;gap:3px;min-width:0}.af-f span{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}'+
+  '.af-f select,.af-f input{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:.82rem;background:#fff;color:inherit}'+
+  '.af-reset{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap}'+
+  '.af-info{margin-bottom:12px;font-size:.78rem;color:var(--muted)}.af-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}'+
+  '.af-chip{display:inline-flex;gap:6px;align-items:baseline;padding:4px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:.76rem}.af-chip em{font-style:normal;color:var(--muted)}.af-chip b{color:var(--navy2,#1e3a8a)}'+
+  '.af-link{background:none;border:none;color:var(--navy2,#1d4ed8);text-decoration:underline;cursor:pointer;font:inherit;padding:0}'+
+  '@media(max-width:520px){.af-bar{grid-template-columns:1fr 1fr}.af-wide,.af-reset{grid-column:1/-1}}';
+  document.head.appendChild(st);
+  return {
+    NONE:NONE, mount:mount, get:get, reset:reset, describe:describe, emptyHtml:emptyHtml, classSummary:classSummary, info:info,
+    mSession:mSession, mTerm:mTerm, tk:tk,
+    setCurrent:function(s,t){ if(s)cur.session=s; if(t)cur.term=t; if(!touched){sh.session=cur.session;sh.term=cur.term;} fillAll(); },
+    setClasses:function(list){ extra.classes=(list||[]).slice(); fillAll(); },
+    addSessions:function(list){ (list||[]).forEach(function(x){ if(x&&x!==NONE&&extra.sessions.indexOf(x)<0)extra.sessions.push(x); }); },
+    refresh:function(){ fillAll(); },
+    activate:function(sec){ Object.keys(mounts).forEach(function(k){ if(mounts[k].cfg.section===sec){fill(k);try{mounts[k].cfg.onChange&&mounts[k].cfg.onChange();}catch(e){console.error(e);}} }); },
+    current:function(){ return {session:cur.session,term:cur.term}; }
+  };
+})();
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { hashPassword } from "./pwhash.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
   apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",
@@ -1327,6 +1500,7 @@ async function loadAcademicSettings(){
   renderCurrentTermUI();
 }
 function renderCurrentTermUI(){
+  if(window.AF) AF.setCurrent(CURRENT_SESSION, CURRENT_TERM);
   const chip = document.getElementById('ovTermChip');
   if(chip) chip.textContent = `${CURRENT_TERM} Term · ${CURRENT_SESSION}`;
   // Pre-fill the term/session pickers used elsewhere so admin actions
@@ -1436,6 +1610,7 @@ window.switchTab = (sec)=>{
   const titles={overview:'Overview',cbtTeachers:'Teachers',cbtSubjects:'Subjects & Teachers',cbtAI:'AI Exam Generator',cbtManual:'Manual Exam',cbtExams:'Manage Exams',cbtResults:'CBT Results',cbtBoard:'Leaderboard',applications:'Applications',students:'Students',classes:'Classes',promotions:'Promotions',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
   const subs={overview:'School dashboard summary',cbtTeachers:'Create and manage teacher accounts',cbtSubjects:'Assign subjects and classes to teachers',cbtAI:'Generate exam questions with AI',cbtManual:'Build an exam with your own questions',cbtExams:'All exams in the CBT hall',cbtResults:'CBT exam submissions across the school',cbtBoard:'Student rankings by CBT performance',applications:'Review and process admission applications',students:'Manage student records and enrollment',classes:'Create classes and set their compulsory and elective subjects',promotions:'Move students up to their next class at the end of a session',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fee items and due dates, class by class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
   if(sec==='resultSettings') loadResultSettingsForm();
+  if(window.AF) AF.activate(sec);
   if(sec==='promotions') renderPromotionsTable();
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
@@ -1584,13 +1759,7 @@ function populateClassDropdowns(){
   const withAll = `<option value="">All Classes</option>` + opts;
   const withSelect = `<option value="">Select class</option>` + opts;
 
-  ['appFilterClass','stuFilterClass','payFilterClass'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(!el) return;
-    const prev = el.value;
-    el.innerHTML = withAll;
-    if(CLASS_NAMES.includes(prev)) el.value = prev;
-  });
+  if(window.AF) AF.setClasses(CLASS_NAMES);
   ['csClass','stuClass','apvClass','resClass','fsClass'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -2095,13 +2264,14 @@ async function loadApplications(){
 
 function renderApplications(){
   const tbody = document.getElementById('appTbody');
-  const fStatus = document.getElementById('appFilterStatus').value;
-  const fClass  = document.getElementById('appFilterClass').value;
+  const F = AF.get('apps');
   let list = allApplications;
-  if(fStatus) list = list.filter(a=>(a.status||'pending')===fStatus);
-  if(fClass)  list = list.filter(a=>a.classApplied===fClass);
+  if(F.status) list = list.filter(a=>(a.status||'pending')===F.status);
+  if(F.cls)    list = list.filter(a=>a.classApplied===F.cls);
+  if(F.search) list = list.filter(a=>(`${a.firstName||''} ${a.middleName||''} ${a.lastName||''}`).toLowerCase().includes(F.search) || String(a.primaryPhone||a.parentPhone||'').toLowerCase().includes(F.search));
+  AF.info('apps', `Showing <strong>${list.length}</strong> of ${allApplications.length} applications`, AF.classSummary('apps', [], {countLabel:'Applications', count:list.length}));
   if(!list.length){
-    tbody.innerHTML=`<tr><td colspan="6" class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>No applications found.</p></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="6" class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${AF.emptyHtml('apps','applications')}</td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(a=>{
@@ -2521,6 +2691,7 @@ async function loadStudents(){
     const snap = await getDocs(collection(db,'students'));
     allStudents = snap.docs.map(d=>({_docId:d.id,...d.data()}));
     allStudents.sort((a,b)=>(a.regNumber||'').localeCompare(b.regNumber||''));
+    AF.refresh();
     renderStudents();
   } catch(e){
     console.error('Could not load students:', e);
@@ -2530,16 +2701,18 @@ async function loadStudents(){
 
 function renderStudents(){
   const tbody = document.getElementById('stuTbody');
-  const search = (document.getElementById('stuSearch').value||'').toLowerCase();
-  const fClass  = document.getElementById('stuFilterClass').value;
+  const F = AF.get('stu');
+  const search = F.search;
   let list = allStudents;
-  if(fClass)  list = list.filter(s=>s.class===fClass);
+  if(F.cls)    list = list.filter(s=>s.class===F.cls);
+  if(F.status) list = list.filter(s=>(s.status||'active')===F.status);
   if(search)  list = list.filter(s=>
     (`${s.firstName||''} ${s.lastName||''}`).toLowerCase().includes(search) ||
     (s.regNumber||'').toLowerCase().includes(search)
   );
+  AF.info('stu', `Showing <strong>${list.length}</strong> of ${allStudents.length} students`, AF.classSummary('stu', [], {countLabel:'Students', count:list.length}));
   if(!list.length){
-    tbody.innerHTML=`<tr><td colspan="6" class="empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>No students found.</p></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="6" class="empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${AF.emptyHtml('stu','students')}</td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(s=>{
@@ -3503,12 +3676,44 @@ function computeOverall(scores){
   return { overallTotal, average: Math.round(average*100)/100, percentage: Math.round(percentage*100)/100, overallGrade: band.grade };
 }
 
-window.loadResultsStudents = async function(){
+let resCache = { students:null, results:null };   // read once per visit; "Reload from database" refreshes
+let resLoadedKey = '';
+function resCachePut(id, data){
+  if(!resCache.results) return;
+  const i = resCache.results.findIndex(x=>x.id===id);
+  if(i>=0) resCache.results[i] = { id, data }; else resCache.results.push({ id, data });
+}
+// the three old selects are kept (hidden) because saveStudentResult reads them; the filter bar drives them
+function syncResSelects(){
+  const F = AF.get('res');
+  [['resSession',F.session],['resTerm',F.term],['resClass',F.cls]].forEach(([id,v])=>{
+    const el = document.getElementById(id);
+    if(!el || !v || v===AF.NONE) return;
+    if(![...el.options].some(o=>o.value===v)){ const o=document.createElement('option'); o.value=v; o.textContent=v; el.appendChild(o); }
+    el.value = v;
+  });
+}
+function resOnFilter(){
+  const F = AF.get('res');
+  if(!F.session || !F.term || !F.cls){
+    document.getElementById('resTableArea').style.display = 'none';
+    document.getElementById('resEmptyBox').style.display = 'none';
+    AF.info('res', 'Pick a <strong>session</strong>, <strong>term</strong> and <strong>class</strong> to load that class&rsquo;s report-card rows.');
+    return;
+  }
+  if(F.session+'|'+F.term+'|'+F.cls === resLoadedKey){ buildResultsTable(); return; }
+  loadResultsStudents(false);
+}
+
+window.loadResultsStudents = async function(force){
+  syncResSelects();
   const btn = document.getElementById('resLoadBtn');
   const cls = document.getElementById('resClass').value;
   const session = document.getElementById('resSession').value;
   const term = document.getElementById('resTerm').value;
-
+  const F = AF.get('res');
+  if(!F.cls){ showToast('Choose a class first.', 'error'); return; }
+  const btnHtml = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Loading...';
   document.getElementById('resTableArea').style.display = 'none';
@@ -3516,25 +3721,30 @@ window.loadResultsStudents = async function(){
 
   try {
     await loadResultSettings();
-
-    const snap = await getDocs(collection(db, 'students'));
-    resStudents = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(s => s.class === cls && s.status === 'active');
+    if(force === true || !resCache.students){
+      const snap = await getDocs(collection(db, 'students'));
+      resCache.students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    if(force === true || !resCache.results){
+      const resSnap = await getDocs(collection(db, 'results'));
+      resCache.results = resSnap.docs.map(d => ({ id: d.id, data: d.data() }));
+      AF.addSessions(resCache.results.map(r => r.data.session));
+      AF.refresh();
+    }
+    resStudents = resCache.students.filter(s => s.class === cls && s.status === 'active');
 
     if (resStudents.length === 0) {
+      resLoadedKey = '';
       document.getElementById('resEmptyBox').style.display = 'block';
-      btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Load Students';
+      AF.info('res', 'No active students in ' + escapeHtml(cls) + '.');
       return;
     }
 
-    const resSnap = await getDocs(collection(db, 'results'));
     resExistingMap = {};
-    resSnap.docs.forEach(d => {
-      const data = d.data();
+    resCache.results.forEach(r => {
+      const data = r.data;
       if (data.session === session && data.term === term && data.class === cls) {
-        resExistingMap[data.studentId] = { id: d.id, data };
+        resExistingMap[data.studentId] = { id: r.id, data };
       }
     });
 
@@ -3545,21 +3755,38 @@ window.loadResultsStudents = async function(){
     document.getElementById('resClosingDate').value = existingMeta?.closingDate || '';
     document.getElementById('resNextTermDate').value = existingMeta?.nextTermBegins || '';
 
+    resLoadedKey = session + '|' + term + '|' + cls;
     buildResultsTable();
     document.getElementById('resTableArea').style.display = 'block';
   } catch(e) {
     console.error('Load failed:', e); showToast('Could not load data. Please refresh the page.', 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Load Students';
+    btn.innerHTML = btnHtml;
   }
 };
 
 function buildResultsTable() {
+  const F = AF.get('res');
   const tbody = document.getElementById('resTbody');
-  tbody.innerHTML = resStudents.map(stu => {
-    const existing = resExistingMap[stu.id];
-    const data = existing ? existing.data : null;
+  const all = resStudents.map(stu => ({ stu, data: resExistingMap[stu.id] ? resExistingMap[stu.id].data : null }));
+  const st = r => r.data ? (r.data.published ? 'published' : 'draft') : 'none';
+  const rows = all.filter(r => {
+    if (F.status && st(r) !== F.status) return false;
+    if (F.search) {
+      const nm = ((r.stu.firstName||'') + ' ' + (r.stu.lastName||'')).toLowerCase();
+      if (!nm.includes(F.search) && !(r.stu.regNumber||'').toLowerCase().includes(F.search)) return false;
+    }
+    return true;
+  });
+  const avgs = rows.filter(r => r.data && r.data.average !== undefined).map(r => Number(r.data.average));
+  AF.info('res', `Showing <strong>${rows.length}</strong> of ${all.length} students in ${escapeHtml(F.cls)} &middot; ${escapeHtml(F.session)} ${escapeHtml(F.term)} Term`,
+    AF.classSummary('res', avgs, { countLabel:'With results', count: avgs.length, dec:1 }));
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty">${AF.emptyHtml('res','students')}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(({ stu, data }) => {
     const scores = data?.scores || {};
     const numScored = Object.keys(scores).length;
     const average = data?.average!==undefined ? data.average : '—';
@@ -3737,6 +3964,7 @@ window.saveStudentResult = async function(){
       const newRef = await addDoc(collection(db,'results'), docData);
       resExistingMap[stu.id] = { id: newRef.id, data: docData };
     }
+    resCachePut(resExistingMap[stu.id].id, resExistingMap[stu.id].data);
 
     showToast('Result saved for ' + docData.studentName, 'success');
     closeMo('moResultEntry');
@@ -3797,6 +4025,7 @@ window.recalcClassPositions = async function(){
       };
       await updateDoc(doc(db,'results', r.id), payload);
       resExistingMap[r.data.studentId] = { id: r.id, data: { ...r.data, ...payload } };
+      resCachePut(r.id, resExistingMap[r.data.studentId].data);
     });
 
     await Promise.all(updates);
@@ -3810,6 +4039,212 @@ window.recalcClassPositions = async function(){
     btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Recalculate Positions &amp; Publish State';
   }
 };
+
+/* ============ SEND CBT SCORES TO RESULTS ============ */
+const SR_COLS = [['test1','Test 1','test1Max'],['test2','Test 2','test2Max'],['test3','Test 3','test3Max'],['exam','Exam','examMax']];
+const srNorm = x => String(x||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const srEl = id => document.getElementById(id);
+let srExams = [], srPlan = null;
+
+function srClassSubjects(cls){
+  const c = CLASS_DATA[cls]; if(!c) return [];
+  const seen = new Set(), out = [];
+  [...(c.compulsory||[]), ...(c.elective||[])].forEach(n=>{ const k = srNorm(n); if(k && !seen.has(k)){ seen.add(k); out.push(String(n)); } });
+  return out;
+}
+function srFillExams(selectedId){
+  const cls = srEl('srClass').value;
+  const list = srExams.filter(e => e.classId === cls || e.className === cls)
+    .sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+  srEl('srExam').innerHTML = '<option value="">— choose an exam —</option>' + list.map(e =>
+    `<option value="${escapeAttr(e.id)}">${escapeHtml(e.title||'Exam')} · ${escapeHtml(e.subjectName||'no subject')} · ${e.session ? escapeHtml(e.session+' '+(e.term||'')) : 'Untagged'}</option>`).join('');
+  if(selectedId && list.some(e=>e.id===selectedId)) srEl('srExam').value = selectedId;
+}
+function srFillSubjects(wanted){
+  const list = srClassSubjects(srEl('srClass').value);
+  srEl('srSubject').innerHTML = '<option value="">— choose subject —</option>' + list.map(n=>`<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`).join('');
+  const hit = list.find(n => srNorm(n) === srNorm(wanted));
+  if(hit) srEl('srSubject').value = hit;
+}
+function srClear(){ srPlan = null; srEl('srPreview').innerHTML = ''; srEl('srApply').disabled = true; srEl('srApply').textContent = 'Write scores'; }
+
+window.openSendToResults = async function(pre){
+  pre = pre || {};
+  const clean = v => (v && !String(v).startsWith('__')) ? v : '';
+  try{ await loadResultSettings(); }catch(_){}
+  try{
+    srExams = (await getDocs(collection(db,'cbtExams'))).docs.map(d => ({ ...d.data(), id: d.id }));
+  }catch(e){ console.error(e); showToast('Could not load exams.', 'error'); return; }
+
+  const exam = pre.examId ? srExams.find(e => e.id === pre.examId) : null;
+  const F = AF.get('res');
+  const session = clean(exam?.session) || clean(pre.session) || F.session || CURRENT_SESSION;
+  const term = clean(exam?.term) || clean(pre.term) || F.term || CURRENT_TERM;
+  const cls = (exam && (exam.classId || exam.className)) || clean(pre.cls) || F.cls || CLASS_NAMES[0] || '';
+  const sessions = [...new Set(['2024/2025','2025/2026','2026/2027', CURRENT_SESSION, session])];
+  srEl('srSession').innerHTML = sessions.map(x=>`<option value="${escapeAttr(x)}">${escapeHtml(x)}</option>`).join('');
+  srEl('srSession').value = session;
+  srEl('srTerm').innerHTML = [['First','First Term'],['Second','Second Term'],['Third','Third Term']].map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  srEl('srTerm').value = term;
+  const cl = CLASS_NAMES.includes(cls) ? CLASS_NAMES : [...CLASS_NAMES, cls].filter(Boolean);
+  srEl('srClass').innerHTML = cl.map(c=>`<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+  srEl('srClass').value = cls;
+  srFillExams(exam ? exam.id : '');
+  srFillSubjects(exam?.subjectName || clean(pre.subject) || '');
+  srEl('srCol').innerHTML = SR_COLS.map(([k,l,mx])=>`<option value="${k}">${l} (max ${resultSettings.assessment[mx]})</option>`).join('');
+  srClear();
+  openMo('moSendRes');
+};
+
+async function buildSrPlan(){
+  const session = srEl('srSession').value, term = srEl('srTerm').value, cls = srEl('srClass').value;
+  const examId = srEl('srExam').value, subject = srEl('srSubject').value, col = srEl('srCol').value;
+  const attempt = srEl('srAttempt').value, whole = srEl('srWhole').checked;
+  if(!cls){ showToast('Choose a class.', 'error'); return; }
+  if(!examId){ showToast('Choose the CBT exam to take scores from.', 'error'); return; }
+  if(!subject){ showToast('Choose the report-card subject.', 'error'); return; }
+  const colDef = SR_COLS.find(c=>c[0]===col);
+  const max = Number(resultSettings.assessment[colDef[2]]) || 0;
+  if(!max){ showToast('That column has no maximum in Result Settings.', 'error'); return; }
+
+  const btn = srEl('srPreviewBtn'); const old = btn.textContent; btn.disabled = true; btn.textContent = 'Checking...';
+  try{
+    const [cbSnap, resSnap] = await Promise.all([
+      getDocs(query(collection(db,'cbtResults'), where('examId','==',examId))),
+      getDocs(query(collection(db,'results'), where('session','==',session), where('term','==',term), where('class','==',cls)))
+    ]);
+    const stus = (allStudents && allStudents.length
+        ? allStudents.map(s => ({ ...s, id: s._docId }))
+        : (await getDocs(collection(db,'students'))).docs.map(d => ({ ...d.data(), id: d.id })))
+      .filter(s => s.class === cls && s.status === 'active')
+      .sort((a,b)=>(a.regNumber||'').localeCompare(b.regNumber||''));
+    const inClass = new Set(stus.map(s=>s.id));
+
+    const best = {}, tries = {};
+    cbSnap.docs.forEach(d => {
+      const r = d.data();
+      if(!r.studentId || !(Number(r.totalMarks) > 0)) return;
+      tries[r.studentId] = (tries[r.studentId]||0) + 1;
+      const pct = Number(r.score) / Number(r.totalMarks) * 100;
+      const t = r.submittedAt?.toMillis ? r.submittedAt.toMillis() : 0;
+      const c = best[r.studentId];
+      if(!c || (attempt === 'best' ? pct > c.pct : t >= c.t)) best[r.studentId] = { pct, t, score:r.score, total:r.totalMarks };
+    });
+    const exMap = {};
+    resSnap.docs.forEach(d => { exMap[d.data().studentId] = { id: d.id, data: d.data() }; });
+
+    const c = CLASS_DATA[cls] || { compulsory:[], elective:[] };
+    const isElective = c.elective.some(n=>srNorm(n)===srNorm(subject)) && !c.compulsory.some(n=>srNorm(n)===srNorm(subject));
+
+    const rows = stus.map(stu => {
+      const row = { stu, ex: exMap[stu.id] || null, key: subject, pct: null, val: null, old: 0, action: 'skip', why: '' };
+      if(isElective && !(stu.subjects||[]).some(n=>srNorm(n)===srNorm(subject))){ row.why = 'Does not take this elective'; return row; }
+      const b = best[stu.id];
+      if(!b){ row.why = 'No CBT attempt'; return row; }
+      row.pct = b.pct; row.score = b.score; row.total = b.total; row.n = tries[stu.id];
+      let v = b.pct / 100 * max;
+      v = whole ? Math.round(v) : Math.round(v*10)/10;
+      row.val = Math.min(max, Math.max(0, v));
+      if(row.ex){
+        const k = Object.keys(row.ex.data.scores||{}).find(k => srNorm(k) === srNorm(subject));
+        if(k){ row.key = k; row.old = Number(row.ex.data.scores[k]?.[col]) || 0; }
+      }
+      row.action = row.old > 0 ? (row.old === row.val ? 'same' : 'overwrite') : 'write';
+      return row;
+    });
+    const ignored = Object.keys(best).filter(id => !inClass.has(id)).length;
+    srPlan = { session, term, cls, subject, col, colName: colDef[1], max, rows, ignored, total: stus.length };
+    srRenderPlan();
+  }catch(e){
+    console.error('Send-to-results preview failed:', e); showToast('Could not build the preview. Please try again.', 'error');
+  }finally{ btn.disabled = false; btn.textContent = old; }
+}
+
+function srRenderPlan(){
+  const P = srPlan; if(!P) return;
+  const c = { write:0, overwrite:0, same:0, skip:0 };
+  P.rows.forEach(r => c[r.action]++);
+  let h = `<div class="fs-summary show" style="margin-bottom:8px">${escapeHtml(P.cls)} · ${escapeHtml(P.subject)} → <strong>${P.colName}</strong> (max ${P.max}) · ${escapeHtml(P.session)} ${escapeHtml(P.term)} Term<br><strong>${c.write}</strong> new · <strong>${c.overwrite}</strong> to overwrite · ${c.same} unchanged · ${c.skip} skipped</div>`;
+  if(c.overwrite){
+    h += `<div style="background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:10px;margin-bottom:8px;font-size:.8rem"><strong>${c.overwrite} student${c.overwrite===1?' already has':'s already have'} a ${P.colName} score for ${escapeHtml(P.subject)}.</strong> Writing will replace ${c.overwrite===1?'it':'them'}.<label class="toggle-wrap" style="margin-top:8px"><input type="checkbox" id="srOverOk"><span>Yes, replace the existing scores</span></label></div>`;
+  }
+  if(P.ignored) h += `<div style="font-size:.76rem;color:var(--muted);margin-bottom:8px">${P.ignored} CBT attempt${P.ignored===1?'':'s'} from students who are not active in ${escapeHtml(P.cls)} will be ignored.</div>`;
+  h += `<div class="twrap" style="max-height:260px;overflow:auto"><table style="font-size:.76rem"><thead><tr><th>Student</th><th>CBT</th><th>New</th><th>Now</th><th>Action</th></tr></thead><tbody>` +
+    P.rows.map(r => {
+      const nm = escapeHtml(((r.stu.firstName||'')+' '+(r.stu.lastName||'')).trim() || r.stu.regNumber || '—');
+      const cbt = r.pct===null ? '—' : `${r.pct.toFixed(0)}% <span style="color:var(--muted)">(${r.score}/${r.total}${r.n>1?', '+r.n+' tries':''})</span>`;
+      const act = r.action==='write' ? '<span class="badge b-green">New</span>' : r.action==='overwrite' ? '<span class="badge b-gold">Overwrite</span>' : r.action==='same' ? '<span class="badge b-blue">Same</span>' : `<span class="badge b-red">${escapeHtml(r.why)}</span>`;
+      return `<tr><td>${nm}<br><span style="color:var(--muted)">${escapeHtml(r.stu.regNumber||'')}</span></td><td>${cbt}</td><td>${r.val===null?'—':r.val+' / '+P.max}</td><td>${r.old>0?r.old:'—'}</td><td>${act}</td></tr>`;
+    }).join('') + `</tbody></table></div>`;
+  srEl('srPreview').innerHTML = h;
+  const ok = srEl('srOverOk'); if(ok) ok.addEventListener('change', srUpdateApply);
+  srUpdateApply();
+}
+function srUpdateApply(){
+  const P = srPlan, btn = srEl('srApply'); if(!P){ btn.disabled = true; return; }
+  const w = P.rows.filter(r=>r.action==='write').length, o = P.rows.filter(r=>r.action==='overwrite').length;
+  const okOver = !!(srEl('srOverOk') && srEl('srOverOk').checked);
+  const n = w + (okOver ? o : 0);
+  btn.disabled = n === 0;
+  btn.textContent = n ? `Write ${n} score${n===1?'':'s'}${o && !okOver ? ' (skip overwrites)' : ''}` : 'Nothing to write';
+}
+
+async function applySrPlan(){
+  const P = srPlan; if(!P) return;
+  const okOver = !!(srEl('srOverOk') && srEl('srOverOk').checked);
+  const todo = P.rows.filter(r => r.action==='write' || (r.action==='overwrite' && okOver));
+  if(!todo.length) return;
+  const btn = srEl('srApply'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Writing...';
+  try{
+    for(let i=0; i<todo.length; i+=400){
+      const batch = writeBatch(db);
+      todo.slice(i, i+400).forEach(r => {
+        const scores = { ...(r.ex ? (r.ex.data.scores||{}) : {}) };
+        const prev = scores[r.key] || {};
+        const merged = { test1:Number(prev.test1)||0, test2:Number(prev.test2)||0, test3:Number(prev.test3)||0, exam:Number(prev.exam)||0 };
+        merged[P.col] = r.val;
+        scores[r.key] = { ...prev, ...computeSubjectResult(merged) };      // keeps any existing position
+        const overall = computeOverall(scores);
+        const totals = { overallTotal: overall.overallTotal, average: overall.average, percentage: overall.percentage, overallGrade: overall.overallGrade };
+        if(r.ex){
+          batch.update(doc(db,'results', r.ex.id), { scores, ...totals, updatedAt: serverTimestamp() });
+        } else {
+          batch.set(doc(collection(db,'results')), {
+            studentId: r.stu.id, regNumber: r.stu.regNumber || '',
+            studentName: ((r.stu.firstName||'') + ' ' + (r.stu.lastName||'')).trim(),
+            session: P.session, term: P.term, class: P.cls, numInClass: P.total,
+            closingDate: '', nextTermBegins: '',
+            scores, affective: {}, psychomotor: {}, ...totals,
+            classTeacherRemark: '', principalRemark: '',
+            published: false, updatedAt: serverTimestamp()
+          });
+        }
+      });
+      await batch.commit();
+    }
+    resCache.results = null; resLoadedKey = '';
+    showToast(`Wrote ${todo.length} ${P.colName} score${todo.length===1?'':'s'} to ${P.subject}. Not published.`, 'success');
+    closeMo('moSendRes'); srPlan = null;
+  }catch(e){
+    console.error('Send-to-results failed:', e);
+    showToast('Writing failed part-way. Re-run the preview to see what was saved.', 'error');
+    srClear();
+  }
+}
+srEl('srCancel').addEventListener('click', ()=>closeMo('moSendRes'));
+srEl('srPreviewBtn').addEventListener('click', buildSrPlan);
+srEl('srApply').addEventListener('click', applySrPlan);
+['srSession','srTerm','srCol','srAttempt','srWhole','srSubject'].forEach(id => srEl(id).addEventListener('change', srClear));
+srEl('srClass').addEventListener('change', ()=>{ srFillExams(''); srFillSubjects(''); srClear(); });
+srEl('srExam').addEventListener('change', ()=>{
+  const e = srExams.find(x => x.id === srEl('srExam').value);
+  if(e){
+    if(e.subjectName) srFillSubjects(e.subjectName);
+    if(e.session){ if(![...srEl('srSession').options].some(o=>o.value===e.session)) srEl('srSession').add(new Option(e.session, e.session)); srEl('srSession').value = e.session; }
+    if(e.term) srEl('srTerm').value = e.term;
+  }
+  srClear();
+});
 
 /* ============ PAYMENTS ============ */
 let allPayments = [];
@@ -3840,17 +4275,20 @@ async function loadPayments(){
     .reduce((sum, p) => sum + (Number(p.amount)||0), 0);
   document.getElementById('s-payments').textContent = '₦' + totalSuccess.toLocaleString();
 
+  AF.addSessions(allPayments.map(p=>p.session));
+  AF.refresh();
   renderPayments();
 }
 
 window.renderPayments = function(){
-  const search = (document.getElementById('paySearch')?.value||'').toLowerCase();
-  const fTerm = document.getElementById('payFilterTerm')?.value||'';
-  const fClass = document.getElementById('payFilterClass')?.value||'';
+  const PF = AF.get('pay');
+  const search = PF.search;
 
   let filtered = allPayments.filter(p => {
-    if (fTerm && p.term !== fTerm) return false;
-    if (fClass && p.class !== fClass) return false;
+    if (!AF.mSession(p.session, PF.session)) return false;
+    if (!AF.mTerm(p.term, PF.term)) return false;
+    if (PF.cls && p.class !== PF.cls) return false;
+    if (PF.status && (p.status||'pending').toLowerCase() !== PF.status) return false;
     if (search) {
       const name = ((p.studentName||p.name||'')).toLowerCase();
       const reg = (p.regNumber||'').toLowerCase();
@@ -3865,10 +4303,12 @@ window.renderPayments = function(){
     .reduce((sum, p) => sum + (Number(p.amount)||0), 0);
   document.getElementById('payTotalAmt').textContent = '₦' + totalCollected.toLocaleString();
   document.getElementById('payCount').textContent = filtered.length;
+  const okAmts = filtered.filter(p => (p.status||'').toLowerCase()==='success').map(p => Number(p.amount)||0);
+  AF.info('pay', `Showing <strong>${filtered.length}</strong> of ${allPayments.length} payments`, AF.classSummary('pay', okAmts, {countLabel:'Paid', dec:0}));
 
   const tbody = document.getElementById('payTbody');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="11" class="empty"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><p>No payments found</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" class="empty"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>${AF.emptyHtml('pay','payments')}</td></tr>`;
     return;
   }
 
@@ -3978,6 +4418,21 @@ function formatDate(dStr){
   if(isNaN(d.getTime())) return dStr;
   return d.toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' });
 }
+
+/* ============ FILTER BARS (shared AF module) ============ */
+const afCap = x => String(x).charAt(0).toUpperCase() + String(x).slice(1);
+AF.mount('apps','afApps',{ section:'applications', fields:['status','class','search'],
+  statuses:[['pending','Pending'],['approved','Approved'],['rejected','Rejected']],
+  searchPlaceholder:'Search name or phone…', onChange:()=>renderApplications() });
+AF.mount('stu','afStu',{ section:'students', fields:['class','status','search'],
+  statuses:()=>{ const set = new Set(['active','graduated']); allStudents.forEach(x=>set.add(x.status||'active')); return [...set].map(v=>[v, afCap(v)]); },
+  searchPlaceholder:'Search name or reg number…', onChange:()=>renderStudents() });
+AF.mount('pay','afPay',{ section:'payments', fields:['session','term','class','status','search'], untagged:true,
+  statuses:[['success','Success'],['pending','Pending'],['needs_review','Needs review']],
+  searchPlaceholder:'Search name or reg number…', onChange:()=>window.renderPayments() });
+AF.mount('res','afResults',{ section:'results', fields:['session','term','class','status','search'],
+  statuses:[['published','Published'],['draft','Draft'],['none','Not started']],
+  searchPlaceholder:'Search name or reg number…', onChange:resOnFilter });
 </script>
 <script type="module" src="cbt-admin.js"></script>
 </body>

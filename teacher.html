@@ -332,6 +332,7 @@ tr:hover td{background:#f8fafc}
           <div><h2>My Exams</h2><p>Click the toggle to make an exam Active (students can write) or Inactive (hidden)</p></div>
           <button class="btn btn-p" id="openCreateExamBtn">＋ Create Exam</button>
         </div>
+        <div id="tfEx"></div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Title</th><th>Subject</th><th>Class</th><th>Duration</th><th>Questions</th><th>Availability</th><th>Actions</th></tr></thead>
@@ -378,6 +379,7 @@ tr:hover td{background:#f8fafc}
           <div><h2>Results</h2><p>View exam results for your classes</p></div>
           <button class="btn btn-print btn-sm" id="printBtn">🖨️ Print</button>
         </div>
+        <div id="tfRes"></div>
         <div class="s-bar">
           <input type="text" id="rSearch" placeholder="🔍 Search by student name..."/>
           <select id="rExamFilter"><option value="">All Exams</option></select>
@@ -416,6 +418,10 @@ tr:hover td{background:#f8fafc}
     <div class="form-group"><label>Exam Title</label><input type="text" id="eTitle" placeholder="e.g. First Term Mathematics Exam"/></div>
     <div class="form-group"><label>Subject</label><select id="eSubject"><option value="">— Select Subject —</option></select></div>
     <div class="form-group"><label>Duration (minutes)</label><input type="number" id="eDuration" placeholder="e.g. 60" min="5" max="300"/></div>
+    <div class="form-group"><label>Session</label><select id="eSession"></select></div>
+    <div class="form-group"><label>Term</label><select id="eTerm"></select></div>
+    <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="eShuffleQ" checked/> Shuffle question order</label></div>
+    <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="eShuffleO" checked/> Shuffle option order (A-D)</label></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="cancelExamBtn">Cancel</button>
       <button class="btn btn-p" id="saveExamBtn">Create Exam</button>
@@ -431,6 +437,10 @@ tr:hover td{background:#f8fafc}
     <input type="hidden" id="editExamId"/>
     <div class="form-group"><label>Exam Title</label><input type="text" id="editETitle"/></div>
     <div class="form-group"><label>Duration (minutes)</label><input type="number" id="editEDur" min="5" max="300"/></div>
+    <div class="form-group"><label>Session</label><select id="editESession"></select></div>
+    <div class="form-group"><label>Term</label><select id="editETerm"></select></div>
+    <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="editEShuffleQ"/> Shuffle question order</label></div>
+    <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="editEShuffleO"/> Shuffle option order (A-D)</label></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="cancelEditExamBtn">Cancel</button>
       <button class="btn btn-p" id="saveEditExamBtn">Save Changes</button>
@@ -752,6 +762,7 @@ async function loadHome(){
 
 /* EXAMS — all buttons created via DOM, zero inline onclick */
 async function loadExams(){
+  await tf.init();
   const tbody=document.getElementById("examsBody");
   tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">Loading...</td></tr>`;
   const[examSnap,qSnap]=await Promise.all([
@@ -766,7 +777,8 @@ async function loadExams(){
     const e=d.data(),id=d.id,isActive=e.isActive===true;
     const tr=document.createElement("tr");
     // Static cells
-    tr.innerHTML=`<td><strong>${e.title||"—"}</strong></td><td>${e.subjectName||"—"}</td><td><span class="badge b-gold">${e.className||"—"}</span></td><td>${e.duration||"—"} min</td><td><span class="badge b-blue">${qCount[id]||0} Qs</span></td><td></td><td></td>`;
+    tr.innerHTML=`<td><strong>${e.title||"—"}</strong><br><span style="font-size:.72rem;color:var(--muted)">${e.session?e.session+" · "+(e.term||"")+" Term":"Untagged session/term"}</span></td><td>${e.subjectName||"—"}</td><td><span class="badge b-gold">${e.className||"—"}</span></td><td>${e.duration||"—"} min</td><td><span class="badge b-blue">${qCount[id]||0} Qs</span></td><td></td><td></td>`;
+    tr.dataset.s=e.session||"";tr.dataset.t=e.term||"";tr.dataset.c=e.className||"";tr.dataset.q=`${e.title||""} ${e.subjectName||""}`.toLowerCase();
     // Toggle button in cell 5
     const tog=document.createElement("button");
     tog.className=isActive?"btn-active":"btn-inactive";
@@ -796,11 +808,77 @@ async function loadExams(){
     tr.cells[6].appendChild(actDiv);
     tbody.appendChild(tr);
   });
+  tf.addSessions(docs.map(d=>d.data().session));tf.addClasses(docs.map(d=>d.data().className));tf.fillAll();tf.apply("ex");
+}
+
+/* FILTERS — Session / Term / Class (+ search) on My Exams and Results; works on rows already loaded */
+const tf=(function(){
+  const NONE="__none",st={session:null,term:null,cls:"",q:""},cur={session:"2025/2026",term:"Second"},sessions=new Set(["2024/2025","2025/2026","2026/2027"]),classes=new Set();
+  const cfg={ex:{bar:"tfEx",body:"examsBody",cols:7,word:"exams",search:true},res:{bar:"tfRes",body:"resultsBody",cols:7,word:"results",search:false}};
+  const tk=v=>String(v||"").toLowerCase().replace(/term/g,"").replace(/[^a-z0-9]/g,"");
+  const o=(v,l,sel)=>`<option value="${v}"${sel?" selected":""}>${l}</option>`;
+  function fillOne(k){
+    const c=cfg[k],el=document.getElementById(c.bar);if(!el)return;
+    if(!el.firstChild){
+      el.innerHTML=`<div class="tf-bar"><select data-f="session"></select><select data-f="term"></select><select data-f="cls"></select>${c.search?'<input data-f="q" type="search" placeholder="Search title or subject…" autocomplete="off">':""}<button type="button" class="tf-reset">Reset filters</button></div><div class="tf-info" id="tfInfo-${k}"></div>`;
+      el.addEventListener("change",e=>{const f=e.target.getAttribute("data-f");if(f&&f!=="q"){st[f]=e.target.value;fillAll();applyAll();}});
+      el.addEventListener("input",e=>{if(e.target.getAttribute("data-f")==="q"){st.q=e.target.value.trim().toLowerCase();apply(k);}});
+      el.querySelector(".tf-reset").addEventListener("click",reset);
+    }
+    const se=[...sessions];if(st.session&&st.session!==NONE&&!sessions.has(st.session))se.push(st.session);se.sort().reverse();
+    el.querySelector('[data-f="session"]').innerHTML=o("","All sessions",st.session==="")+se.map(x=>o(x,x,st.session===x)).join("")+o(NONE,"Untagged",st.session===NONE);
+    el.querySelector('[data-f="term"]').innerHTML=o("","All terms",st.term==="")+[["First","First Term"],["Second","Second Term"],["Third","Third Term"]].map(([v,l])=>o(v,l,tk(st.term)===tk(v))).join("")+o(NONE,"Untagged",st.term===NONE);
+    el.querySelector('[data-f="cls"]').innerHTML=o("","All classes",st.cls==="")+[...classes].sort().map(x=>o(x,x,st.cls===x)).join("");
+  }
+  function fillAll(){fillOne("ex");fillOne("res");}
+  function describe(k){const p=[];if(st.session)p.push("Session "+(st.session===NONE?"Untagged":st.session));if(st.term)p.push("Term "+(st.term===NONE?"Untagged":st.term));if(st.cls)p.push("Class "+st.cls);if(k==="ex"&&st.q)p.push("search “"+st.q+"”");if(k==="res"){const s=document.getElementById("rSearch").value.trim(),e=document.getElementById("rExamFilter");if(s)p.push("search “"+s+"”");if(e.value)p.push("Exam "+e.options[e.selectedIndex].text);}return p.length?p.join(" · "):"no filters";}
+  function apply(k){
+    const c=cfg[k],body=document.getElementById(c.body);if(!body)return;
+    body.querySelectorAll(".tf-empty").forEach(x=>x.remove());
+    const rows=[...body.querySelectorAll("tr[data-s]")];let shown=0;
+    const q=k==="ex"?st.q:(document.getElementById("rSearch").value||"").trim().toLowerCase(),ex=k==="res"?document.getElementById("rExamFilter").value:"";
+    rows.forEach(r=>{
+      let ok=true;
+      if(st.session)ok=ok&&(st.session===NONE?!r.dataset.s:r.dataset.s===st.session);
+      if(st.term)ok=ok&&(st.term===NONE?!r.dataset.t:tk(r.dataset.t)===tk(st.term));
+      if(st.cls)ok=ok&&r.dataset.c===st.cls;
+      if(q)ok=ok&&r.dataset.q.includes(q);
+      if(ex)ok=ok&&r.dataset.e===ex;
+      r.style.display=ok?"":"none";if(ok)shown++;
+    });
+    const info=document.getElementById("tfInfo-"+k);if(info)info.textContent=rows.length?`Showing ${shown} of ${rows.length} ${c.word}`:"";
+    if(rows.length&&!shown){const tr=document.createElement("tr");tr.className="tf-empty";tr.innerHTML=`<td colspan="${c.cols}"><div class="empty-state"><div class="empty-icon">🔍</div><p>No ${c.word} for: <strong>${describe(k).replace(/</g,"&lt;")}</strong></p><p style="margin-top:8px"><button type="button" class="tf-link">Reset filters</button></p></div></td>`;tr.querySelector("button").addEventListener("click",reset);body.appendChild(tr);}
+  }
+  function applyAll(){apply("ex");apply("res");}
+  function reset(){st.session=cur.session;st.term=cur.term;st.cls="";st.q="";document.querySelectorAll(".tf-bar input").forEach(i=>i.value="");fillAll();applyAll();}
+  async function init(){
+    if(st.session!==null)return;
+    try{const sn=await getDoc(doc(db,"settings","academic"));if(sn.exists()){cur.session=sn.data().session||cur.session;cur.term=sn.data().term||cur.term;}}catch(e){}
+    st.session=cur.session;st.term=cur.term;sessions.add(cur.session);fillAll();
+  }
+  return{init,fillAll,apply,
+    addSessions:l=>{(l||[]).forEach(x=>{if(x)sessions.add(x);});},
+    addClasses:l=>{(l||[]).forEach(x=>{if(x)classes.add(x);});}};
+})();
+(function(){const c=document.createElement("style");c.textContent=".tf-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px}.tf-bar select,.tf-bar input{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:.82rem;background:#fff}.tf-reset{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.tf-info{font-size:.76rem;color:var(--muted);margin-bottom:10px}.tf-link{background:none;border:none;color:var(--navy2,#1d4ed8);text-decoration:underline;cursor:pointer;font:inherit}@media(max-width:520px){.tf-bar{grid-template-columns:1fr 1fr}.tf-bar input,.tf-reset{grid-column:1/-1}}";document.head.appendChild(c);})();
+
+/* SESSION / TERM helpers */
+const SESSION_LIST=["2024/2025","2025/2026","2026/2027"];
+const TERM_LIST=[["First","First Term"],["Second","Second Term"],["Third","Third Term"]];
+async function fillAcademic(sessId,termId,session,term){
+  let a={session:"2025/2026",term:"Second"};
+  try{const sn=await getDoc(doc(db,"settings","academic"));if(sn.exists()){a.session=sn.data().session||a.session;a.term=sn.data().term||a.term;}}catch(e){}
+  const sv=session||a.session,tv=term||a.term,list=[...SESSION_LIST];if(sv&&!list.includes(sv))list.push(sv);
+  const ss=document.getElementById(sessId),ts=document.getElementById(termId);
+  ss.innerHTML=list.map(x=>`<option value="${x}">${x}</option>`).join("");ss.value=sv;
+  ts.innerHTML=TERM_LIST.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");ts.value=tv;
 }
 
 /* CREATE EXAM */
 document.getElementById("openCreateExamBtn").addEventListener("click",async()=>{
-  await populateSubjectSel();openModal("examModal");
+  await populateSubjectSel();await fillAcademic("eSession","eTerm");
+  document.getElementById("eShuffleQ").checked=true;document.getElementById("eShuffleO").checked=true;
+  openModal("examModal");
 });
 document.getElementById("cancelExamBtn").addEventListener("click",()=>closeModal("examModal"));
 document.getElementById("saveExamBtn").addEventListener("click",async()=>{
@@ -816,6 +894,8 @@ document.getElementById("saveExamBtn").addEventListener("click",async()=>{
       title,subjectId:subId,subjectName:opt.dataset.subName||"",
       classId:opt.dataset.classId||"",className:opt.dataset.className||"",
       teacherId:userId,teacherName:userName,duration:dur,
+      session:document.getElementById("eSession").value,term:document.getElementById("eTerm").value,
+      shuffleQuestions:document.getElementById("eShuffleQ").checked,shuffleOptions:document.getElementById("eShuffleO").checked,
       isActive:false,createdAt:serverTimestamp()
     });
     toast(`Exam "${title}" created! Toggle Active when ready.`);
@@ -825,10 +905,13 @@ document.getElementById("saveExamBtn").addEventListener("click",async()=>{
 });
 
 /* EDIT EXAM */
-function openEditExam(id,data){
+async function openEditExam(id,data){
   document.getElementById("editExamId").value=id;
   document.getElementById("editETitle").value=data.title||"";
   document.getElementById("editEDur").value=data.duration||"";
+  await fillAcademic("editESession","editETerm",data.session||"",data.term||"");
+  document.getElementById("editEShuffleQ").checked=data.shuffleQuestions!==false;
+  document.getElementById("editEShuffleO").checked=data.shuffleOptions!==false;
   openModal("editExamModal");
 }
 document.getElementById("cancelEditExamBtn").addEventListener("click",()=>closeModal("editExamModal"));
@@ -839,7 +922,9 @@ document.getElementById("saveEditExamBtn").addEventListener("click",async()=>{
   if(!title||!dur){toast("Please fill all fields.","error");return;}
   const btn=document.getElementById("saveEditExamBtn");spin(btn,"Saving...");
   try{
-    await updateDoc(doc(db,"cbtExams",id),{title,duration:dur});
+    await updateDoc(doc(db,"cbtExams",id),{title,duration:dur,
+      session:document.getElementById("editESession").value,term:document.getElementById("editETerm").value,
+      shuffleQuestions:document.getElementById("editEShuffleQ").checked,shuffleOptions:document.getElementById("editEShuffleO").checked});
     toast("Exam updated!");closeModal("editExamModal");loadExams();
   }catch(err){toast("Failed to update.","error");}
   finally{unspin(btn,"Save Changes");}
@@ -974,7 +1059,7 @@ async function saveQuestion(closeAfter){
       examId:activeExamId,teacherId:userId,questionText:qt,
       options:{a,b,c,d},correctAnswer:ca,
       ...(imageUrl?{imageUrl}:{}),
-      createdAt:serverTimestamp()
+      order:Date.now(),createdAt:serverTimestamp()
     });
     _qModalCount++;
     document.getElementById("qModalNum").textContent=_qModalCount;
@@ -1060,10 +1145,11 @@ function parseBulkText(raw){
     // Detect by presence of at least two capital-letter option markers
     const multiOptMatch=line.match(/\b[A-D][\.]\s+.+\b[A-D][\.]\s+/);
 
+    if(!qMatch && !cur){ (questions.strays=questions.strays||[]).push({line:i+1,text:line}); continue; }
     if(qMatch){
       // Save previous question
       if(cur)questions.push(cur);
-      cur={text:qMatch[2].trim(),options:{},answer:"",errors:[]};
+      cur={text:qMatch[2].trim(),line:i+1,options:{},answer:"",errors:[]};
     }
     else if(cur && ansMatch){
       cur.answer=ansMatch[1].toLowerCase();
@@ -1139,7 +1225,9 @@ document.getElementById("bulkParseBtn").addEventListener("click",()=>{
   statusEl.textContent=valid===total
     ?`✅ ${total} question${total>1?"s":""} ready to save`
     :`⚠️ ${valid} of ${total} valid — questions with errors shown in red`;
-  statusEl.style.color=valid===total?"var(--ok)":"var(--warn)";
+  const _st=_bulkParsed.strays||[];
+  if(_st.length)statusEl.textContent+=` · ${_st.length} stray line${_st.length>1?"s":""} ignored before the first question (line ${_st.map(x=>x.line).join(", ")})`;
+  statusEl.style.color=(valid===total&&!_st.length)?"var(--ok)":"var(--warn)";
   document.getElementById("bulkSaveBtn").disabled=valid===0;
   // Render preview
   const list=document.getElementById("bulkPreviewList");
@@ -1152,7 +1240,7 @@ document.getElementById("bulkParseBtn").addEventListener("click",()=>{
       if(!q.options[k])return;
       optsHtml+=`<div class="bq-opt${q.answer===k?" correct":""}">${k.toUpperCase()}. ${q.options[k]}${q.answer===k?" ✓":""}</div>`;
     });
-    div.innerHTML=`<div class="bq-num">Q${i+1}</div><div class="bq-text">${q.text}</div><div class="bq-opts">${optsHtml||"<span style='color:var(--err);font-size:.75rem'>Options not parsed</span>"}</div>${q.errors.length?`<div class="bq-err-msg">⚠ ${q.errors.join(" · ")}</div>`:""}`;
+    div.innerHTML=`<div class="bq-num">Q${i+1}<br><span style="font-size:.62rem;font-weight:500">line ${q.line}</span></div><div class="bq-text">${q.text}</div><div class="bq-opts">${optsHtml||"<span style='color:var(--err);font-size:.75rem'>Options not parsed</span>"}</div>${q.errors.length?`<div class="bq-err-msg">⚠ Line ${q.line}: ${q.errors.join(" · ")}</div>`:""}`;
     list.appendChild(div);
   });
   document.getElementById("bulkPreview").style.display="block";
@@ -1166,10 +1254,11 @@ document.getElementById("bulkSaveBtn").addEventListener("click",async()=>{
   spin(btn,"Saving...");
   try{
     // Save all simultaneously — no lag regardless of question count
-    await Promise.all(valid.map(q=>addDoc(collection(db,"cbtQuestions"),{
+    const t0=Date.now();
+    await Promise.all(valid.map((q,i)=>addDoc(collection(db,"cbtQuestions"),{
       examId:activeExamId,teacherId:userId,
       questionText:q.text,options:q.options,correctAnswer:q.answer,
-      imageUrl:"",createdAt:serverTimestamp()
+      imageUrl:"",order:t0+i,createdAt:serverTimestamp()
     })));
     toast(`${valid.length} question${valid.length>1?"s":""} saved!`);
     closeModal("bulkModal");
@@ -1258,9 +1347,10 @@ document.getElementById("saveGroupBtn").addEventListener("click",async()=>{
   const btn=document.getElementById("saveGroupBtn");
   spin(btn,"Saving...");
   try{
-    for(const q of valid){
+    const gt0=Date.now();
+    for(const [gi,q] of valid.entries()){
       await addDoc(collection(db,"cbtQuestions"),{
-        examId:activeExamId,teacherId:userId,
+        examId:activeExamId,teacherId:userId,order:gt0+gi,
         questionText:q.qt,
         options:{a:q.a,b:q.b,c:q.c,d:q.d},
         correctAnswer:q.ca,
@@ -1317,6 +1407,7 @@ async function populateResultsFilter(){
   });
 }
 async function loadResults(){
+  await tf.init();
   const tbody=document.getElementById("resultsBody");
   const examId=document.getElementById("rExamFilter").value;
   const search=(document.getElementById("rSearch").value||"").toLowerCase();
@@ -1339,13 +1430,15 @@ async function loadResults(){
       try{await deleteDoc(doc(db,"cbtResults",d.id));toast("Result deleted.");loadResults();loadHome();}
       catch(err){toast("Failed to delete.","error");}
     }));
+    tr.dataset.s=r.session||"";tr.dataset.t=r.term||"";tr.dataset.c=r.className||"";tr.dataset.e=r.examId||"";tr.dataset.q=`${r.studentName||""} ${r.examTitle||""}`.toLowerCase();
     tr.innerHTML=`<td><strong>${r.studentName||"—"}</strong><br/><span style="font-size:.75rem;color:var(--muted)">${r.className||""}</span></td><td style="font-size:.82rem">${r.examTitle||"—"}</td><td><strong>${r.score}/${r.totalMarks}</strong></td><td><span style="color:${col};font-weight:600">${pct}%</span></td><td>${typeof mins==="number"?mins+" min":"—"}</td><td>${fmtDate(r.submittedAt)}</td><td></td>`;
     tr.cells[6].appendChild(delBtn);
     tbody.appendChild(tr);
   });
+  tf.addSessions(docs.map(d=>d.data().session));tf.addClasses(docs.map(d=>d.data().className));tf.fillAll();tf.apply("res");
 }
-document.getElementById("rSearch").addEventListener("input",loadResults);
-document.getElementById("rExamFilter").addEventListener("change",loadResults);
+document.getElementById("rSearch").addEventListener("input",()=>tf.apply("res"));
+document.getElementById("rExamFilter").addEventListener("change",()=>tf.apply("res"));
 document.getElementById("printBtn").addEventListener("click",()=>{
   document.getElementById("prtHdr").style.display="block";
   document.getElementById("prtDate").textContent="Printed: "+new Date().toLocaleString("en-GB");
