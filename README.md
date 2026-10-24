@@ -12,13 +12,13 @@ Firebase project: **veil-1-bd7b5** (config is already in every page).
 | teacher.html | teachers | exams, questions, live monitor, results — styled like Newton |
 | cbt.html + cbt.css | students | CBT exam hall, same reg number + password as the student portal |
 | cbt-admin.js | — | admin logic for the CBT group |
-| pwhash.js | — | salted password hashing, used by admin, student and cbt pages |
+| studentauth.js | — | student Firebase Auth helpers (login address, create login), used by admin, student and cbt pages |
 | firestore.rules | — | complete rules for every collection |
 
 ## Logins
 - **Admin:** Firebase Auth email/password **and** a doc in `admins/{uid}`. Accounts without it are signed out of admin.html.
 - **Teachers:** created in Admin > Teachers (Firebase Auth + `teachers/{uid}` doc). No password is stored in Firestore; reset by email from Edit Teacher. Deleting a teacher removes the doc and locks them out.
-- **Students:** registration number + password. The admin portal stores a salted PBKDF2-SHA256 hash (`password`, `passwordSalt`, `passwordIter`) via `pwhash.js`; the same login works on student.html and cbt.html. Older unsalted records still log in and are upgraded when you set a new password in Admin > Students.
+- **Students:** registration number + password, now on **Firebase Authentication** like teachers. Admin creates the login when a student is enrolled or created manually. The password is never written to Firestore. The same login works on student.html and cbt.html. Admin > Students > Edit > *Reset Password* gives a student a new password.
 
 ## One-time setup
 1. Authentication > Sign-in method > enable Email/Password. Add your site domain under Settings > Authorized domains.
@@ -53,3 +53,22 @@ Firebase project: **veil-1-bd7b5** (config is already in every page).
 - The last open section is restored after a reload.
 - New "Reload" button in both top bars: re-reads data from Firestore without reloading the page or signing out.
 - student portal / cbt.html: untouched.
+
+## Round 3 – student logins on Firebase Auth
+**What changed**
+- Enrolling an application and Admin > Students > Create Student now create a Firebase Auth user for the student (secondary app, so the admin stays signed in) and save `authUid` on the student record. No password or hash is stored in Firestore.
+- student.html and cbt.html sign in with Firebase Auth. The reg number is turned into a private login address (`na20267k3d9@students.newtownacademy.app`, never shown, no mail is sent). `studentLogins/{REGKEY}` stores only that address so the login page can find it.
+- **Reset Password** (Admin > Students > Edit): creates a fresh login for the student and unlinks the old one right away.
+- Deleting a student also removes their `studentLogins` doc. The Firebase Auth user itself can only be deleted in the Firebase Console (Authentication > Users); with the student record gone it opens nothing.
+- **Admin > Students > Secure logins (n)**: one-time move of existing students. Every student without a secure login gets a random password; the old hash fields are deleted. Passwords are shown once: download the CSV or copy them. The button disappears when everyone is done.
+- firestore.rules: `students` is no longer publicly readable. A student can read only their own record (and update only `totalExams` / `badges` on it). Teachers and admin still read all. `cbtResults` can only be created by the signed-in student who owns the record.
+- cbt.html no longer auto-logs in from sessionStorage keys; it needs a real sign-in. Sign-in lasts for the tab only (student.html survives a reload; cbt.html asks again, as before).
+- pwhash.js is removed (nothing uses it now).
+
+**Deploy in this order**
+1. Firebase > Authentication > Sign-in method: Email/Password must be on (already needed for teachers).
+2. Firestore > Rules: paste firestore.rules and Publish.
+3. Upload the site files.
+4. Admin > Students > **Secure logins** > Create secure logins > download the CSV. Students can log in once they have their new passwords. Existing students cannot log in before this step.
+- New passwords must be at least 6 characters (a Firebase Auth rule).
+- `payments`, `results` and `cbtExams` rules are unchanged this round.

@@ -21,6 +21,13 @@ service cloud.firestore {
     function ownsNew()      { return isTeacher() && request.resource.data.teacherId == request.auth.uid; }
     function teacherIdUnchanged() { return request.resource.data.teacherId == resource.data.teacherId; }
 
+    // Student = a signed-in user whose uid is stored as authUid on a students/{id} record
+    // (set by the admin when the student's login is created; see studentauth.js).
+    function ownsStudent(studentId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/students/$(studentId)).data.authUid == request.auth.uid;
+    }
+
     // ───────── identity ─────────
     match /admins/{uid} {
       allow get: if signedIn() && request.auth.uid == uid;
@@ -62,17 +69,27 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    // ───────── students (student login runs in the browser, not Firebase Auth) ─────────
+    // ───────── students (Firebase Auth, like teachers) ─────────
+    // Login address lookup: the student page reads studentLogins/{REGKEY} to learn the private login
+    // address for a reg number, then signs in with Firebase Auth. It holds only { email, ver }.
+    // Single documents can be read by key; listing is blocked, so reg numbers cannot be enumerated.
+    match /studentLogins/{key} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // A student can open ONLY their own record. Admin and teachers can read all (class lists).
+    // No password data is stored here any more; Firebase Authentication keeps it.
     match /students/{id} {
-      allow get: if true;                      // student.html / cbt.html open a known record
-      // Login looks a student up by regNumber with limit(1). Unlimited lists are admin/teacher only,
-      // so the public cannot download the whole class list.
-      allow list: if isAdmin() || isTeacher() || request.query.limit <= 1;
+      allow get, list: if isAdmin() || isTeacher()
+                       || (signedIn() && resource.data.authUid == request.auth.uid);
       allow create, delete: if isAdmin();
-      // The CBT hall may only update the streak / badge fields
+      // The CBT hall may only update the streak / badge fields, and only on the student's own record
       allow update: if isAdmin()
-                    || request.resource.data.diff(resource.data).affectedKeys()
-                         .hasOnly(['totalExams', 'badges']);
+                    || (signedIn() && resource.data.authUid == request.auth.uid
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['totalExams', 'badges']));
     }
 
     // Report cards: students only ever see published ones
@@ -118,8 +135,11 @@ service cloud.firestore {
 
     match /cbtResults/{id} {
       allow read: if true;
-      allow create: if request.resource.data.studentId is string
-                    && request.resource.data.examId is string;
+      // Only a signed-in student can submit, and only for their own record
+      allow create: if isAdmin()
+                    || (request.resource.data.studentId is string
+                        && request.resource.data.examId is string
+                        && ownsStudent(request.resource.data.studentId));
       allow update: if isAdmin();
       allow delete: if isAdmin() || ownsExisting();
     }

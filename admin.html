@@ -233,10 +233,16 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
       <div class="section" id="sec-students">
         <div class="sec-hdr">
           <div class="sec-hdr-l"><h2>Students</h2><p>Manage student records and enrollment</p></div>
-          <button class="btn btn-primary btn-sm" onclick="openCreateStudentModal()">
-            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Create Student
-          </button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-edit btn-sm" id="btnSecureLogins" style="display:none" onclick="openSecureLogins()">
+              <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Secure logins (<span id="secCount">0</span>)
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openCreateStudentModal()">
+              <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Student
+            </button>
+          </div>
         </div>
         <div id="afStu"></div>
         <div class="twrap">
@@ -985,9 +991,9 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
         <select id="stuReligion"><option value="">Select</option><option>Christianity</option><option>Islam</option><option>Other</option></select>
       </div>
       <div class="form-group">
-        <label>Password</label>
+        <label>Reset Password</label>
         <div class="pw-wrap">
-          <input type="password" id="stuPassword" placeholder="Leave blank to keep current" autocomplete="new-password"/>
+          <input type="password" id="stuPassword" placeholder="Leave blank to keep current (min 6 characters)" autocomplete="new-password"/>
           <button class="pw-toggle" type="button" onclick="togglePw('stuPassword',this)">
             <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -1210,6 +1216,15 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
   <div id="tcsvDone" style="display:none;margin-top:12px;display:none;gap:8px"><button class="btn btn-edit btn-sm" id="tcsvDl">⬇ Download credentials</button><button class="btn btn-edit btn-sm" id="tcsvCopy">Copy credentials</button></div>
 </div></div>
 
+<div class="mo" id="moStuSecure"><div class="mbox mbox-lg">
+  <h3>Secure student logins</h3>
+  <p class="mdesc">Moves students to Firebase Authentication, the same way teachers work. Every student listed below gets a new random password, and their old password data is deleted from Firestore. Passwords are shown once at the end, so download or copy them before closing.</p>
+  <div class="fs-summary show" id="ssInfo" style="margin-top:0"></div>
+  <div id="ssList" style="max-height:260px;overflow:auto;margin-top:12px"></div>
+  <div class="mactions"><button class="btn-cancel" id="ssClose">Close</button><button class="btn btn-p" id="ssRun">Create secure logins</button></div>
+  <div id="ssDone" style="display:none;margin-top:12px;gap:8px"><button class="btn btn-edit btn-sm" id="ssDl">⬇ Download credentials</button><button class="btn btn-edit btn-sm" id="ssCopy">Copy credentials</button></div>
+</div></div>
+
 <div class="mo" id="moCbExamSet"><div class="mbox">
   <h3>Exam settings</h3><p class="mdesc" id="cesTitle">Update subject, session, term and shuffling</p>
   <input type="hidden" id="cesId"/><input type="hidden" id="cesClass"/>
@@ -1380,8 +1395,8 @@ window.AF=(function(){
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, initializeAuth, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { hashPassword } from "./pwhash.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { regKey, genPassword, createStudentLogin } from "./studentauth.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy, where, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
   apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",
@@ -1404,6 +1419,12 @@ const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   ignoreUndefinedProperties: true
 });
+// Secondary Firebase app: used ONLY to create student logins, so the admin stays signed in
+// (same approach as teacher accounts in cbt-admin.js). Nothing is kept on the device.
+const stuSecApp = initializeApp(cfg, 'student-secondary');
+let stuSecAuth;
+try{ stuSecAuth = initializeAuth(stuSecApp, { persistence: inMemoryPersistence }); }
+catch(e){ stuSecAuth = getAuth(stuSecApp); }
 
 /* ══════════════════════════════════════════
    EMAILJS — approval-success email only
@@ -1443,10 +1464,19 @@ async function sendCredentialsEmail({toEmail, studentName, regNumber, password, 
   }
 }
 
-// Hash student login passwords before storing them, so the plaintext
-// password is never written to Firestore (the `students` collection is
-// publicly readable so the student portal can look students up by
-// regNumber — see firestore.rules note #1). Salted PBKDF2-SHA256 (see pwhash.js).
+// Student logins live in Firebase Authentication (like teachers). The password is never written to
+// Firestore. students/{id}.authUid links the record to the Auth user, and studentLogins/{REGKEY}
+// holds the private login address so the student login page can find it (see studentauth.js).
+function studentLoginDoc(login){ return { email: login.email, ver: login.ver, updatedAt: serverTimestamp() }; }
+function studentAuthFields(login){ return { authUid: login.uid, authEmail: login.email, authVer: login.ver }; }
+function studentAuthError(e){
+  const c = e && e.code || '';
+  if(c==='auth/operation-not-allowed') return 'Turn on Email/Password in Firebase > Authentication > Sign-in method first.';
+  if(c==='auth/weak-password') return 'Password is too weak (minimum 6 characters).';
+  if(c==='auth/too-many-requests') return 'Firebase is limiting sign-ups right now. Wait a few minutes and try again.';
+  if(c==='auth/network-request-failed') return 'No connection. Check your internet and try again.';
+  return '';
+}
 
 // Generates a reg number like NA/2026/7K3D9 — a random 5-character
 // alphanumeric code (uppercase letters + digits, no ambiguous 0/O/1/I)
@@ -2634,6 +2664,7 @@ window.confirmApprove = async function(){
   const cls = document.getElementById('apvClass').value;
   const pw  = document.getElementById('apvPassword').value.trim();
   if(!pw){ showToast('Please set a login password.','error'); return; }
+  if(pw.length<6){ showToast('Password must be at least 6 characters.','error'); return; }
 
   const subjects = getCheckedSubjects('apvSubjects');
   const a = allApplications.find(x=>x.id===currentAppId);
@@ -2644,6 +2675,8 @@ window.confirmApprove = async function(){
   try{
     // Random unique reg number, not tied to class or a running count
     regNumber = await generateUniqueRegNumber();
+    // Secure login (Firebase Auth) — created first, so a failure leaves no half-made student
+    const login = await createStudentLogin(stuSecAuth, regNumber, pw);
 
     const studentData = {
       firstName: a.firstName||'',
@@ -2681,7 +2714,7 @@ window.confirmApprove = async function(){
       medication: a.medication||'',
       regNumber,
       photo:     a.passportPhoto||'',
-      ...(await hashPassword(pw)),
+      ...studentAuthFields(login),
       subjects,
       status:    'active',
       applicationId: currentAppId,
@@ -2690,13 +2723,16 @@ window.confirmApprove = async function(){
 
     // Use regNumber as doc ID (URL-safe)
     const regId = regNumber.replace(/\//g,'-');
-    await setDoc(doc(db,'students',regId), studentData);
+    const wb = writeBatch(db);
+    wb.set(doc(db,'students',regId), studentData);
+    wb.set(doc(db,'studentLogins',regKey(regNumber)), studentLoginDoc(login));
+    await wb.commit();
     await updateDoc(doc(db,'applications',currentAppId), {status:'approved', regNumber});
     // Keep the public homepage student counter (index.html) in sync without
     // ever letting the public read the actual students collection.
     await setDoc(doc(db,'settings','publicStats'), { studentCount: increment(1) }, { merge:true });
   } catch(e){
-    console.error('Enrolment failed:', e); showToast('Enrolment failed. Please try again.', 'error');
+    console.error('Enrolment failed:', e); showToast(studentAuthError(e) || 'Enrolment failed. Please try again.', 'error');
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm &amp; Enrol';
     return;
@@ -2737,6 +2773,7 @@ async function loadStudents(){
     const snap = await getDocs(collection(db,'students'));
     allStudents = snap.docs.map(d=>({_docId:d.id,...d.data()}));
     allStudents.sort((a,b)=>(a.regNumber||'').localeCompare(b.regNumber||''));
+    updateSecureLoginsBtn();
     AF.refresh();
     renderStudents();
   } catch(e){
@@ -2844,17 +2881,28 @@ window.saveStudentEdits = async function(){
     medication: document.getElementById('stuMedication').value.trim(),
     updatedAt:  serverTimestamp()
   };
-  if(pw) Object.assign(payload, await hashPassword(pw));
+  if(pw && pw.length<6){ showToast('Password must be at least 6 characters.','error'); return; }
 
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Saving…';
   try{
-    await updateDoc(doc(db,'students',currentStuId), payload);
-    showToast('Student record updated','success');
+    // A new password = a new Firebase Auth login for this student. The old login is unlinked at once
+    // (Firestore rules only trust the authUid stored here), and any old password data is removed.
+    const stu = allStudents.find(x=>x._docId===currentStuId) || {};
+    let login = null;
+    if(pw){
+      login = await createStudentLogin(stuSecAuth, stu.regNumber, pw, (stu.authVer||0)+1);
+      Object.assign(payload, studentAuthFields(login), { password: deleteField(), passwordSalt: deleteField(), passwordIter: deleteField() });
+    }
+    const wb = writeBatch(db);
+    wb.update(doc(db,'students',currentStuId), payload);
+    if(login) wb.set(doc(db,'studentLogins',regKey(stu.regNumber)), studentLoginDoc(login));
+    await wb.commit();
+    showToast(login ? 'Student record updated — new password is active' : 'Student record updated','success');
     closeMo('moStudent');
     await loadStudents();
     loadOverviewStats();
   } catch(e){
-    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
+    console.error('Save failed:', e); showToast(studentAuthError(e) || 'Save failed. Please try again.', 'error');
   } finally{
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Changes';
@@ -2940,6 +2988,9 @@ async function deleteStudentAccountFully(s){
   }
 
   await deleteDoc(doc(db,'students', s._docId));
+  // Remove the login lookup too. (The Firebase Auth user itself can only be removed in the Firebase
+  // Console — with the student record gone it can no longer open anything.)
+  if(s.regNumber) await deleteDoc(doc(db,'studentLogins', regKey(s.regNumber))).catch(()=>{});
   if(s.applicationId){
     await deleteDoc(doc(db,'applications', s.applicationId)).catch(e=>
       console.warn('Linked application already gone or failed to delete:', e));
@@ -3052,6 +3103,7 @@ window.createStudentManually = async function(){
   if(isSeniorClass(cls) && !department) return showToast('Please select a department for this senior class', 'error');
   if(!phone)                  return showToast('Phone number is required', 'error');
   if(!password)               return showToast('Password is required', 'error');
+  if(password.length<6)       return showToast('Password must be at least 6 characters', 'error');
 
   const btn = document.getElementById('csCreateBtn');
   btn.disabled = true;
@@ -3061,6 +3113,8 @@ window.createStudentManually = async function(){
   try{
     // Random unique reg number, not tied to class or a running count
     regNumber = await generateUniqueRegNumber();
+    // Secure login (Firebase Auth) — created first, so a failure leaves no half-made student
+    const login = await createStudentLogin(stuSecAuth, regNumber, password);
 
     const session = document.getElementById('csSession').value;
     const payload = {
@@ -3081,16 +3135,19 @@ window.createStudentManually = async function(){
       email:      document.getElementById('csEmail').value.trim(),
       address:    document.getElementById('csAddress').value.trim(),
       subjects:   getCheckedSubjects('csSubjects'),
-      ...(await hashPassword(password)),
+      ...studentAuthFields(login),
       regNumber,
       photo:      csPassportBase64 || '',
       status:     'active',
       createdAt:  serverTimestamp()
     };
 
-    await addDoc(collection(db, 'students'), payload);
+    const wb = writeBatch(db);
+    wb.set(doc(collection(db, 'students')), payload);
+    wb.set(doc(db, 'studentLogins', regKey(regNumber)), studentLoginDoc(login));
+    await wb.commit();
   } catch(e){
-    console.error(e); showToast('Something went wrong. Please try again.', 'error');
+    console.error(e); showToast(studentAuthError(e) || 'Something went wrong. Please try again.', 'error');
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Create Student';
     return;
@@ -3115,6 +3172,94 @@ window.createStudentManually = async function(){
   }
 };
 
+
+/* ============ SECURE LOGINS (one-time move of existing students to Firebase Auth) ============ */
+function updateSecureLoginsBtn(){
+  const n = allStudents.filter(s=>!s.authUid).length;
+  const b = document.getElementById('btnSecureLogins');
+  if(!b) return;
+  document.getElementById('secCount').textContent = n;
+  b.style.display = n ? '' : 'none';
+}
+let ssRows = [], ssRan = false, ssBusy = false;
+const ssEsc = v => String(v??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function ssRender(){
+  const todo = ssRows.filter(r=>!r.status).length;
+  const made = ssRows.filter(r=>r.status==='done').length;
+  const bad  = ssRows.filter(r=>r.status==='failed').length;
+  document.getElementById('ssInfo').innerHTML = !ssRows.length
+    ? 'Every student already has a secure login.'
+    : ssRan ? `<strong>${made}</strong> secured${bad?`, <strong style="color:var(--err)">${bad} failed</strong> (close this, wait a minute, and run it again for those)`:''}.`
+            : `<strong>${todo}</strong> student${todo===1?'':'s'} still use the old login and will get a new password.`;
+  document.getElementById('ssList').innerHTML = ssRows.length
+    ? `<table style="width:100%;font-size:.78rem"><thead><tr><th>Reg Number</th><th>Name</th><th>Class</th><th>New password</th><th>Status</th></tr></thead><tbody>`+
+      ssRows.map(r=>{
+        const st = r.status==='done' ? '<span class="badge b-green">Secured</span>'
+                 : r.status==='working' ? '…'
+                 : r.status==='failed' ? `<span class="badge b-red">Failed [${ssEsc(r.err)}]</span>` : '';
+        return `<tr><td>${ssEsc(r.reg)}</td><td>${ssEsc(r.name)}</td><td>${ssEsc(r.cls)}</td><td style="font-family:monospace">${r.status==='done'?ssEsc(r.pw):'—'}</td><td>${st}</td></tr>`;
+      }).join('')+'</tbody></table>' : '';
+  document.getElementById('ssRun').disabled = ssBusy || ssRan || !todo;
+  document.getElementById('ssDone').style.display = made ? 'flex' : 'none';
+}
+window.openSecureLogins = function(){
+  ssRows = allStudents.filter(s=>!s.authUid).map(s=>({
+    id: s._docId, reg: s.regNumber||'', cls: s.class||'', pw: '', status: '', err: '',
+    name: `${s.firstName||''} ${s.lastName||''}`.trim() || '—'
+  }));
+  ssRan = false; ssBusy = false;
+  ssRender(); openMo('moStuSecure');
+};
+document.getElementById('ssClose').addEventListener('click', ()=>{ if(!ssBusy) closeMo('moStuSecure'); });
+document.getElementById('ssRun').addEventListener('click', async ()=>{
+  const btn = document.getElementById('ssRun');
+  ssBusy = true; btn.innerHTML = '<span class="spinner"></span>Securing…'; ssRender();
+  for(const r of ssRows){
+    if(r.status) continue;
+    if(!r.reg){ r.status='failed'; r.err='no reg number'; ssRender(); continue; }
+    r.status = 'working'; ssRender();
+    try{
+      r.pw = genPassword(8);
+      const login = await createStudentLogin(stuSecAuth, r.reg, r.pw);
+      const wb = writeBatch(db);
+      wb.update(doc(db,'students',r.id), {
+        ...studentAuthFields(login),
+        password: deleteField(), passwordSalt: deleteField(), passwordIter: deleteField(),
+        updatedAt: serverTimestamp()
+      });
+      wb.set(doc(db,'studentLogins',regKey(r.reg)), studentLoginDoc(login));
+      await wb.commit();
+      r.status = 'done';
+    }catch(e){
+      console.error('Secure login failed for', r.reg, e);
+      r.status = 'failed'; r.err = (e && (e.code||e.message)) || 'error'; r.pw = '';
+      if(e && (e.code==='auth/too-many-requests' || e.code==='auth/operation-not-allowed' || e.code==='auth/network-request-failed')){
+        // Stop early: every remaining student would hit the same wall
+        ssRender(); showToast(studentAuthError(e) || 'Stopped. Try again shortly.', 'error'); break;
+      }
+    }
+    ssRender();
+    await new Promise(res=>setTimeout(res, 250));   // gentle pace so Firebase does not rate-limit sign-ups
+  }
+  ssRows.forEach(r=>{ if(r.status==='working') r.status=''; });
+  ssRan = true; ssBusy = false;
+  btn.innerHTML = 'Create secure logins'; ssRender();
+  showToast('Done. Download or copy the passwords now — they are not stored anywhere.', 'success');
+  loadStudents();
+});
+const ssCreds = () => ssRows.filter(r=>r.status==='done');
+document.getElementById('ssDl').addEventListener('click', ()=>{
+  const q = v => `"${String(v).replace(/"/g,'""')}"`;
+  const csv = 'reg_number,name,class,password\n' + ssCreds().map(r=>[r.reg,r.name,r.cls,r.pw].map(q).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'student_credentials.csv'; a.click();
+});
+document.getElementById('ssCopy').addEventListener('click', async ()=>{
+  const t = ssCreds().map(r=>`${r.reg} | ${r.name} | ${r.cls} | ${r.pw}`).join('\n');
+  try{ await navigator.clipboard.writeText(t); showToast('Credentials copied.'); }
+  catch(e){ showToast('Could not copy. Use Download instead.', 'error'); }
+});
 
 function buildSubjectCheckboxes(containerId, checked, className){
   const wrap = document.getElementById(containerId);

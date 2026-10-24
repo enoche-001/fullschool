@@ -213,10 +213,14 @@
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,collection,doc,addDoc,getDoc,getDocs,updateDoc,query,where,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import{verifyPassword}from"./pwhash.js";
+import{initializeAuth,getAuth,inMemoryPersistence,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{regKey}from"./studentauth.js";
 
 const FC={apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",authDomain:"veil-1-bd7b5.firebaseapp.com",projectId:"veil-1-bd7b5",storageBucket:"veil-1-bd7b5.firebasestorage.app",messagingSenderId:"526021682048",appId:"1:526021682048:web:a52dae5b2650ca951ad765"};
 const app=initializeApp(FC);
+// Students sign in with Firebase Auth. Kept in memory only: reloading or closing the tab signs out,
+// same as before (nothing is left behind on a shared lab computer).
+let auth;try{auth=initializeAuth(app,{persistence:inMemoryPersistence});}catch(e){auth=getAuth(app);}
 const db=getFirestore(app);
 
 let userId="",userName="",classId="",className="",regNumber="";
@@ -237,12 +241,20 @@ document.getElementById("loginBtn").addEventListener("click",async()=>{
   if(!reg||!pw){showAlert("Please fill in all fields.");return;}
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Signing in...';
   try{
-    let snap=await getDocs(query(collection(db,"students"),where("regNumber","==",reg),limit(1)));
-    if(snap.empty){const rawReg=document.getElementById("regIn").value.trim();if(rawReg!==reg)snap=await getDocs(query(collection(db,"students"),where("regNumber","==",rawReg),limit(1)));}
-    if(snap.empty){showAlert("Registration number not found.");btn.disabled=false;btn.innerHTML="Sign In";return;}
+    const key=regKey(reg);
+    const ls=key?await getDoc(doc(db,"studentLogins",key)):null;
+    if(!ls||!ls.exists()){showAlert("Incorrect reg number or password.");btn.disabled=false;btn.innerHTML="Sign In";return;}
+    let cred;
+    try{cred=await signInWithEmailAndPassword(auth,ls.data().email,pw);}
+    catch(e){
+      const bad=["auth/invalid-credential","auth/wrong-password","auth/user-not-found","auth/invalid-email"].includes(e.code);
+      showAlert(bad?"Incorrect reg number or password.":e.code==="auth/too-many-requests"?"Too many attempts. Please wait a few minutes and try again.":"Login failed.");
+      btn.disabled=false;btn.innerHTML="Sign In";return;
+    }
+    const snap=await getDocs(query(collection(db,"students"),where("authUid","==",cred.user.uid),limit(1)));
+    if(snap.empty){try{await signOut(auth);}catch(_){}showAlert("This account is not set up yet. Please contact the school office.");btn.disabled=false;btn.innerHTML="Sign In";return;}
     const ds=snap.docs[0],d=ds.data();
-    if(!(await verifyPassword(pw,d))){showAlert("Incorrect reg number or password.");btn.disabled=false;btn.innerHTML="Sign In";return;}
-    if((d.status||"active")!=="active"){showAlert("Your account is not active. Please contact the school office.");btn.disabled=false;btn.innerHTML="Sign In";return;}
+    if((d.status||"active")!=="active"){try{await signOut(auth);}catch(_){}showAlert("Your account is not active. Please contact the school office.");btn.disabled=false;btn.innerHTML="Sign In";return;}
     userId=ds.id;userName=`${d.firstName||""} ${d.lastName||""}`.trim()||d.regNumber||"Student";classId=d.class||"";className=d.class||"";regNumber=d.regNumber||reg;
     mySubj=new Set((Array.isArray(d.subjects)?d.subjects:[]).map(norm));electiveSet=new Set();
     try{const cs=await getDoc(doc(db,"classes",classId));if(cs.exists())(cs.data().elective||[]).forEach(n=>electiveSet.add(norm(n)));}catch(_){}
@@ -466,6 +478,7 @@ document.getElementById("dlgSignOutConfirm").addEventListener("click",async()=>{
   document.removeEventListener("contextmenu",blk);document.removeEventListener("copy",blk);document.removeEventListener("cut",blk);document.removeEventListener("visibilitychange",onVis);
   try{document.exitFullscreen?.();}catch(e){}
   userId="";userName="";classId="";className="";regNumber="";submitted=false;
+  try{await signOut(auth);}catch(e){}
   ["uid","name","classId","className","reg"].forEach(k=>sessionStorage.removeItem("mf_cbt_"+k));
   document.getElementById("examHall").classList.remove("open");
   document.getElementById("resultScreen").classList.remove("open");
@@ -476,19 +489,7 @@ document.getElementById("dlgSignOutConfirm").addEventListener("click",async()=>{
 });
 document.getElementById("dlgSignOutCancel").addEventListener("click",()=>closeDlg("dlgSignOut"));
 
-// ── AUTO-LOGIN from Student Portal session ──
-// Runs last so Firebase (db) and all functions are fully initialised
-(function(){
-  const uid=sessionStorage.getItem("mf_cbt_uid");
-  const name=sessionStorage.getItem("mf_cbt_name");
-  const cid=sessionStorage.getItem("mf_cbt_classId");
-  const cname=sessionStorage.getItem("mf_cbt_className");
-  const reg=sessionStorage.getItem("mf_cbt_reg");
-  if(uid&&name&&cid){
-    userId=uid;userName=name;classId=cid;className=cname||"";regNumber=reg||"";
-    openHall();
-  }
-})();
+// (The old sessionStorage auto-login was removed: the exam hall now requires a real Firebase sign-in.)
 </script>
 </body>
 </html>

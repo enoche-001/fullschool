@@ -7,6 +7,9 @@
 <title>Newtown Academy — Student Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="student.css"/>
+<script>try{if(sessionStorage.getItem('studentSession'))document.documentElement.classList.add('restoring');}catch(e){}
+setTimeout(function(){document.documentElement.classList.remove('restoring');},8000);</script>
+<style>.restoring #loginScreen{display:none!important}</style>
 </head>
 <body>
 
@@ -372,7 +375,8 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { verifyPassword } from "./pwhash.js";
+import { getAuth, initializeAuth, inMemoryPersistence, browserSessionPersistence, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { regKey } from "./studentauth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============ CONFIG ============ */
@@ -386,6 +390,11 @@ const cfg = {
   appId:"1:526021682048:web:a52dae5b2650ca951ad765"
 };
 const app = initializeApp(cfg);
+// Students sign in with Firebase Auth (like teachers). Session-only: closing the tab signs out,
+// and a page reload silently restores the login.
+let auth;
+try{ auth = initializeAuth(app, { persistence: [browserSessionPersistence, inMemoryPersistence] }); }
+catch(e){ auth = getAuth(app); }
 // Persistent local cache (IndexedDB) — repeat visits and flaky mobile data
 // read from device storage first instead of waiting on the network.
 const db = initializeFirestore(app, {
@@ -459,19 +468,26 @@ async function showPortal(){
 
 (function init(){
   const existing = loadSession();
-  if(existing && existing.studentId){
-    student = {
-      id: existing.studentId,
-      regNumber: existing.regNumber,
-      name: existing.name,
-      class: existing.class,
-      subjects: existing.subjects||[],
-      parentEmail: existing.parentEmail||''
-    };
-    showPortal();
-  } else {
-    showLogin();
-  }
+  const un = onAuthStateChanged(auth, user=>{
+    un();
+    document.documentElement.classList.remove('restoring');
+    if(user && existing && existing.studentId && existing.uid === user.uid){
+      student = {
+        id: existing.studentId,
+        regNumber: existing.regNumber,
+        name: existing.name,
+        class: existing.class,
+        subjects: existing.subjects||[],
+        parentEmail: existing.parentEmail||''
+      };
+      showPortal();
+    } else {
+      // No valid Firebase login behind the saved session -> start clean
+      if(user){ signOut(auth).catch(()=>{}); }
+      clearSession();
+      showLogin();
+    }
+  });
 })();
 
 /* ============ LOGIN ============ */
@@ -488,19 +504,39 @@ window.doLogin = async function(){
 
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
   try{
-    const snap = await getDocs(query(collection(db,'students'), where('regNumber','==',reg), limit(1)));
-    if(snap.empty){
+    // 1) find this student's private login address, 2) sign in with Firebase Auth
+    const key = regKey(reg);
+    const loginSnap = key ? await getDoc(doc(db,'studentLogins',key)) : null;
+    if(!loginSnap || !loginSnap.exists()){
       showLAlert('Incorrect registration number or password.');
+      return;
+    }
+    let cred;
+    try{
+      cred = await signInWithEmailAndPassword(auth, loginSnap.data().email, pw);
+    }catch(err){
+      if(['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(err.code)){
+        showLAlert('Incorrect registration number or password.');
+        return;
+      }
+      if(err.code === 'auth/too-many-requests'){
+        showLAlert('Too many attempts. Please wait a few minutes and try again.');
+        return;
+      }
+      throw err;
+    }
+    // 3) open the student record linked to this login (rules only allow the student's own record)
+    const snap = await getDocs(query(collection(db,'students'), where('authUid','==',cred.user.uid), limit(1)));
+    if(snap.empty){
+      await signOut(auth).catch(()=>{});
+      showLAlert('This account is not set up yet. Please contact the school office.');
       return;
     }
     const docSnap = snap.docs[0];
     const data = docSnap.data();
 
-    if(!(await verifyPassword(pw, data))){
-      showLAlert('Incorrect registration number or password.');
-      return;
-    }
     if((data.status||'active') !== 'active'){
+      await signOut(auth).catch(()=>{});
       showLAlert(data.status==='graduated'
         ? 'This account has graduated and no longer has portal access.'
         : 'Your account is not active. Please contact the school office.');
@@ -509,6 +545,7 @@ window.doLogin = async function(){
 
     const name = `${data.firstName||''} ${data.lastName||''}`.trim() || data.regNumber;
     const sessionData = {
+      uid: cred.user.uid,
       studentId: docSnap.id,
       regNumber: data.regNumber||reg,
       name,
@@ -542,6 +579,7 @@ window.doLogout = function(){
     closeDlg();
     clearSession();
     student = null;
+    signOut(auth).catch(()=>{});
     showLogin();
   });
 };
