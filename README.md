@@ -72,3 +72,37 @@ Firebase project: **veil-1-bd7b5** (config is already in every page).
 4. Admin > Students > **Secure logins** > Create secure logins > download the CSV. Students can log in once they have their new passwords. Existing students cannot log in before this step.
 - New passwords must be at least 6 characters (a Firebase Auth rule).
 - `payments`, `results` and `cbtExams` rules are unchanged this round.
+
+## Round 4 – organised document storage (Cloudinary)
+
+**Where documents live.** Registration documents upload straight from the browser to Cloudinary (cloud `yf5zq0cw`, unsigned preset `school_docs`). Only the returned links are saved in Firestore; the files themselves never go into Firestore.
+
+**Folder layout.** One folder per applicant, named from the registration form, and every file inside is labelled by document type:
+
+```
+students/Tunde-Samuel-Adebayo_K7Q3/
+    passport_x1y2.jpg
+    last-result_p3q4.pdf
+    birth-certificate_a9b8.pdf
+    lga-certificate_c5d6.jpg
+    medical-report_e7f8.pdf      (only when health challenges were noted)
+```
+- `Tunde-Samuel-Adebayo` = the student's full name as typed on the form (first, middle if given, last); `K7Q3` = random 4-character code so two students with the same name never clash.
+- The folder is created when the first file is chosen (after the name is typed) and stays fixed for that application, even if the name is edited later or the page is reloaded (it is kept in the saved draft).
+- If first/last name are empty, uploads are refused with a clear message.
+
+**What is saved on the application** (`applications/{id}`): the existing link fields (`passportPhoto`, `lastSchoolResult`, `birthCertificate`, `lgaCertificate`, `medicalReport`) unchanged, plus `docFolder` (folder path) and `docPublicIds` (Cloudinary id of each file). `docFolder` is copied to `students/{reg}` when the application is enrolled. Admin > Applications > View shows the folder with a Copy button. Older applications without `docFolder` still open normally.
+
+**Accepted files.** JPG, PNG, WEBP and PDF. Anything else (including Word files) is rejected before upload with: "This file type isn't supported…save it as PDF first." Size caps: passport 5 MB (compressed to ~400px), other images 8 MB (compressed to ~1400px), PDFs 8 MB (last result 5 MB).
+
+**Deleting.** The app cannot delete from Cloudinary (it needs the API secret, i.e. a server). Deleting a student in admin removes the Firestore records and then shows the student's folder name. In Cloudinary: Media Library > search the folder name > delete the folder (one action removes all of that student's files).
+
+**Cloudinary account setup (one time).**
+1. Settings > Upload > Upload presets > preset `school_docs`: **Signing mode = Unsigned**, **"Use filename or externally defined Public ID" = On**, folder left blank, allowed formats `jpg, png, webp, pdf`.
+2. Settings > Security > tick **"PDF and ZIP files delivery"** (blocked by default on new accounts, otherwise PDFs upload but will not open).
+3. The code sends both `public_id` (full folder path) and `asset_folder`, so it works on accounts with fixed or dynamic folders. If a fixed-folder account rejects `asset_folder`, the upload retries once without it.
+4. Never put the Cloudinary API Secret in any page.
+
+**Free plan limits (Cloudinary).** 25 credits per month shared by storage, bandwidth and transformations (1 credit = 1 GB stored, or 1 GB delivered, or 1,000 transformations). Max 10 MB per image/raw file. Check Dashboard > Usage now and then.
+
+firestore.rules: unchanged (the new fields fit the existing `applications` create rule).

@@ -2446,7 +2446,7 @@ window.viewApplication = function(id){
         : '');
 
   const documentsSection = (passportPreview || lastResultChip || birthCertChip || lgaCertChip || medicalReportChip)
-    ? `<div class="doc-section">${passportPreview}<div class="doc-chip-row">${lastResultChip}${birthCertChip}${lgaCertChip}${medicalReportChip}</div></div>`
+    ? `<div class="doc-section">${passportPreview}<div class="doc-chip-row">${lastResultChip}${birthCertChip}${lgaCertChip}${medicalReportChip}</div>${a.docFolder ? `<div class="doc-chip-empty" style="margin-top:10px;text-align:left">Cloudinary folder: <b>${escapeHtml(a.docFolder)}</b> <button type="button" class="btn btn-sm" style="padding:3px 10px;margin-left:6px" onclick="copyDocFolder('${escapeHtml(a.docFolder)}')">Copy</button></div>` : ''}</div>`
     : `<div class="doc-section"><div class="doc-chip-empty">No documents uploaded</div></div>`;
 
   document.getElementById('moAppViewBody').innerHTML = `
@@ -2714,6 +2714,7 @@ window.confirmApprove = async function(){
       medication: a.medication||'',
       regNumber,
       photo:     a.passportPhoto||'',
+      docFolder: a.docFolder||'',
       ...studentAuthFields(login),
       subjects,
       status:    'active',
@@ -2931,30 +2932,46 @@ window.triggerDeactivate = function(){
   );
 };
 
+// Copies the Cloudinary folder name so it can be pasted into the Media Library search box.
+window.copyDocFolder = function(folder){
+  const done = () => showToast('Folder name copied', 'success');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(folder).then(done).catch(()=>window.prompt('Copy this folder name:', folder));
+  } else { window.prompt('Copy this folder name:', folder); }
+};
+
 // Permanently deletes a student's account: their student record and the
 // original application it came from. NOTE: this does NOT delete the
 // uploaded files from Cloudinary — that requires a signed request using
 // the Cloudinary API secret, which can only run safely on a server (a
 // Cloud Function), and that needs Firebase's paid Blaze plan. Until that's
-// set up, this surfaces the leftover file links so they can be deleted
-// manually from the Cloudinary Media Library instead.
+// set up, this shows the student's Cloudinary folder name (all their files
+// live in that one folder) so it can be deleted in one action from the
+// Cloudinary Media Library.
 window.triggerDeleteAccount = function(){
   const s = allStudents.find(x=>x._docId===currentStuId);
   if(!s) return;
   const name = `${s.firstName||''} ${s.lastName||''}`.trim() || 'this student';
   showDlg(
     `Permanently delete ${name}'s account?`,
-    'This removes the student record and their original application from the database. Their uploaded files (passport, birth certificate, LGA certificate, medical report, last school result) will still exist in Cloudinary — you\'ll get a list of links to delete them manually afterward. This cannot be undone.',
+    'This removes the student record and their original application from the database. Their uploaded files (passport, birth certificate, LGA certificate, medical report, last school result) stay in Cloudinary, all in one folder — you\'ll be shown the folder name so you can delete it from the Media Library in one step. This cannot be undone.',
     async ()=>{
       try{
-        const leftoverUrls = await deleteStudentAccountFully(s);
+        const leftover = await deleteStudentAccountFully(s);
+        const leftoverUrls = leftover.urls;
         showToast('Student account deleted', 'success');
         closeMo('moStudent');
         await loadStudents();
         loadOverviewStats();
-        if(leftoverUrls.length){
+        if(leftover.folder){
           window.prompt(
-            `Records deleted. ${leftoverUrls.length} uploaded file(s) still remain in Cloudinary (this app can't delete them automatically — see the note in chat). Copy these links to remove them manually from your Cloudinary Media Library:`,
+            `Records deleted. Their files are still in Cloudinary (this app can't delete them automatically). Open Media Library, search for this folder name and delete the folder:`,
+            leftover.folder
+          );
+        } else if(leftoverUrls.length){
+          // Older students registered before folders existed: fall back to the file links.
+          window.prompt(
+            `Records deleted. ${leftoverUrls.length} uploaded file(s) still remain in Cloudinary (this app can't delete them automatically). Copy these links to remove them manually from your Cloudinary Media Library:`,
             leftoverUrls.join('\n')
           );
         }
@@ -2972,6 +2989,7 @@ async function deleteStudentAccountFully(s){
   // record and (if still present) the original application it was created
   // from, so the admin has a complete list to clean up in Cloudinary.
   const urls = new Set();
+  let folder = s.docFolder || '';
   if(s.photo) urls.add(s.photo);
 
   let appData = null;
@@ -2982,6 +3000,7 @@ async function deleteStudentAccountFully(s){
     }catch(e){ console.warn('Could not load linked application for cleanup:', e); }
   }
   if(appData){
+    if(!folder && appData.docFolder) folder = appData.docFolder;
     ['passportPhoto','lastSchoolResult','birthCertificate','lgaCertificate','medicalReport'].forEach(f=>{
       if(appData[f]) urls.add(appData[f]);
     });
@@ -2997,7 +3016,7 @@ async function deleteStudentAccountFully(s){
   }
   await setDoc(doc(db,'settings','publicStats'), { studentCount: increment(-1) }, { merge:true });
 
-  return Array.from(urls);
+  return { folder, urls: Array.from(urls) };
 }
 
 /* ============ MANUAL STUDENT CREATION ============ */
