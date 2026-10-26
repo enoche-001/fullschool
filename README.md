@@ -108,3 +108,7 @@ students/Tunde-Samuel-Adebayo_K7Q3/
 **Free plan limits (Cloudinary).** 25 credits per month shared by storage, bandwidth and transformations (1 credit = 1 GB stored, or 1 GB delivered, or 1,000 transformations). Max 10 MB per image/raw file. Check Dashboard > Usage now and then.
 
 firestore.rules: unchanged (the new fields fit the existing `applications` create rule).
+
+## Round 5 — own server for payments and email
+- Paystack verification and the parent login-details email now run on our own Vercel project (`fullschoolapi.vercel.app`): `/api/verify` and `/api/send-credentials`.
+- EmailJS was removed from `admin.html`. The email endpoint only accepts a signed-in admin's Firebase token and sends through Gmail.

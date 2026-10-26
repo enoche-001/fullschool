@@ -18,7 +18,6 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
   .subj-suggest-item:hover,.subj-suggest-item:active{background:#eef0ff;color:#3b3fdb}
   .tag-input-row{position:relative}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
@@ -1427,40 +1426,33 @@ try{ stuSecAuth = initializeAuth(stuSecApp, { persistence: inMemoryPersistence }
 catch(e){ stuSecAuth = getAuth(stuSecApp); }
 
 /* ══════════════════════════════════════════
-   EMAILJS — approval-success email only
+   EMAIL — approval-success email, sent by our own Vercel server
    ══════════════════════════════════════════
-   Scoped to application approvals only (not manual student creation,
-   not announcements) to conserve your free-tier send limit. */
-const EMAILJS_SERVICE_ID           = "service_jtplief";
-const EMAILJS_TEMPLATE_CREDENTIALS = "template_wjtty6l";
-const EMAILJS_PUBLIC_KEY           = "RieT2E2Hj35a24vbB";
+   The server (api/send-credentials) sends through Gmail. It only accepts
+   requests from a signed-in admin, so we pass the admin's Firebase token. */
+const EMAIL_ENDPOINT = "https://fullschoolapi.vercel.app/api/send-credentials";
 const SCHOOL_NAME = "Newtown Academy";
 
-if(window.emailjs){
-  window.emailjs.init(EMAILJS_PUBLIC_KEY);
-}
-
 // Sends the reg number + password to a parent's email after an
-// application is approved. Fails silently (with a toast) if the parent
-// has no email on file or the send fails — must never block enrollment.
+// application is approved. Never blocks enrollment: on failure it only
+// shows a toast with the real reason.
 async function sendCredentialsEmail({toEmail, studentName, regNumber, password, className}){
   if(!toEmail) return;
-  if(!window.emailjs){
-    console.warn('EmailJS SDK not loaded — skipping credentials email.');
-    return;
-  }
   try{
-    await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CREDENTIALS, {
-      to_email: toEmail,
-      student_name: studentName,
-      reg_number: regNumber,
-      password: password,
-      class_name: className,
-      school_name: SCHOOL_NAME
+    const u = auth.currentUser;
+    if(!u) throw new Error('Not signed in');
+    const token = await u.getIdToken();
+    const r = await fetch(EMAIL_ENDPOINT, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+      body: JSON.stringify({ toEmail, studentName, regNumber, password, className })
     });
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || !j.ok) throw new Error(j.message || ('Server error '+r.status));
+    showToast('Login details emailed to the parent.', 'success');
   } catch(e){
-    console.warn('Credentials email failed:', e.text || e.message || e);
-    showToast('Enrolled, but the email notification failed to send.', 'error');
+    console.warn('Credentials email failed:', e);
+    showToast('Enrolled, but the email failed: '+(e.message||'unknown error'), 'error');
   }
 }
 
