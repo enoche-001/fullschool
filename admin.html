@@ -74,6 +74,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
         <div class="uav" id="sbAv">A</div>
         <div><div class="un" id="sbName">Admin</div><div class="ur">Administrator</div></div>
       </div>
+      <button class="btn-out" style="margin-bottom:8px" onclick="testEmail()">Send test email</button>
       <button class="btn-out" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
@@ -1437,24 +1438,45 @@ const SCHOOL_NAME = "Newtown Academy";
 // application is approved. Never blocks enrollment: on failure it only
 // shows a toast with the real reason.
 async function sendCredentialsEmail({toEmail, studentName, regNumber, password, className}){
-  if(!toEmail) return;
+  if(!toEmail) return false;
   try{
     const u = auth.currentUser;
     if(!u) throw new Error('Not signed in');
     const token = await u.getIdToken();
-    const r = await fetch(EMAIL_ENDPOINT, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-      body: JSON.stringify({ toEmail, studentName, regNumber, password, className })
-    });
+    let r;
+    try{
+      r = await fetch(EMAIL_ENDPOINT, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body: JSON.stringify({ toEmail, studentName, regNumber, password, className })
+      });
+    }catch(netErr){
+      // The browser never got a reply: server down/crashed, wrong address, or blocked by CORS.
+      throw new Error('Could not reach the email server ('+EMAIL_ENDPOINT+'). Open that address in your browser: it should show a small JSON message. If it shows an error page, the server needs a redeploy.');
+    }
     const j = await r.json().catch(()=>({}));
     if(!r.ok || !j.ok) throw new Error(j.message || ('Server error '+r.status));
     showToast('Login details emailed to the parent.', 'success');
+    return true;
   } catch(e){
     console.warn('Credentials email failed:', e);
     showToast('Enrolled, but the email failed: '+(e.message||'unknown error'), 'error');
+    return false;
   }
 }
+
+// "Send test email" button: tries the whole email path with sample details,
+// so you can test without filling a registration form each time.
+window.testEmail = async function(){
+  const to = (prompt('Send a test email to which address?') || '').trim();
+  if(!to) return;
+  showToast('Sending test email…');
+  const ok = await sendCredentialsEmail({
+    toEmail: to, studentName: 'Test Student', regNumber: 'TEST/0001',
+    password: 'Test1234', className: 'JSS 1'
+  });
+  if(ok) showToast('Test email sent to '+to+'. Check the inbox and spam folder.', 'success');
+};
 
 // Student logins live in Firebase Authentication (like teachers). The password is never written to
 // Firestore. students/{id}.authUid links the record to the Auth user, and studentLogins/{REGKEY}
