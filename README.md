@@ -112,3 +112,5 @@ firestore.rules: unchanged (the new fields fit the existing `applications` creat
 ## Round 5 — own server for payments and email
 - Paystack verification and the parent login-details email now run on our own Vercel project (`fullschoolapi.vercel.app`): `/api/verify` and `/api/send-credentials`.
 - EmailJS was removed from `admin.html`. The email endpoint only accepts a signed-in admin's Firebase token and sends through Gmail.
+- Applications screen: approved applications now have a "Reset password & email parent" button. Original passwords are never stored, so this issues a NEW password, activates it, and emails it to the parent (if the email fails, the new password is shown to copy).
+- Admin sidebar: "Send test email" tests the email path without a registration.

@@ -751,6 +751,11 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
     <h3 id="moAppViewTitle">Application Details</h3>
     <p class="mdesc" id="moAppViewSub"></p>
     <div id="moAppViewBody"></div>
+    <div class="mactions" id="moAppResendRow" style="display:none;margin-bottom:-12px">
+      <button class="btn btn-edit" id="moAppResendBtn" onclick="resendLoginEmail()" style="flex:1;justify-content:center;padding:11px">
+        Reset password &amp; email parent
+      </button>
+    </div>
     <div class="mactions">
       <button class="btn-cancel" onclick="closeMo('moAppView')">Close</button>
       <button class="btn btn-danger btn-sm" id="moAppRejectBtn" onclick="triggerReject()" style="flex:1;justify-content:center;padding:11px">
@@ -2522,6 +2527,8 @@ window.viewApplication = function(id){
   const isPending = status==='pending';
   document.getElementById('moAppApproveBtn').style.display = isPending?'':'none';
   document.getElementById('moAppRejectBtn').style.display  = isPending?'':'none';
+  const _stuForApp = allStudents.find(x=>x.applicationId===id || (a.regNumber && x.regNumber===a.regNumber));
+  document.getElementById('moAppResendRow').style.display = (status==='approved' && _stuForApp) ? 'flex' : 'none';
 
   openMo('moAppView');
 };
@@ -2926,6 +2933,53 @@ window.saveStudentEdits = async function(){
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Changes';
   }
+};
+
+// Applications screen -> "Reset password & email parent".
+// The original password is never stored, so it cannot be re-sent. This gives the student a NEW
+// password (the old one stops working) and emails it to the parent.
+window.resendLoginEmail = async function(){
+  const a = allApplications.find(x=>x.id===currentAppId);
+  if(!a) return;
+  const stu = allStudents.find(x=>x.applicationId===currentAppId || (a.regNumber && x.regNumber===a.regNumber));
+  if(!stu){ showToast('No student record found for this application.','error'); return; }
+  const to = (stu.parentEmail || a.parentEmail || '').trim();
+  if(!to){ showToast('This application has no parent email.','error'); return; }
+  if(!confirm('Give '+(stu.firstName||'this student')+' a NEW password and email it to '+to+'?\n\nThe old password will stop working.')) return;
+
+  const btn = document.getElementById('moAppResendBtn');
+  const label = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Working…';
+  let pw = '';
+  try{
+    pw = genPassword(8);
+    const login = await createStudentLogin(stuSecAuth, stu.regNumber, pw, (stu.authVer||0)+1);
+    const wb = writeBatch(db);
+    wb.update(doc(db,'students',stu._docId), {
+      ...studentAuthFields(login),
+      password: deleteField(), passwordSalt: deleteField(), passwordIter: deleteField(),
+      updatedAt: serverTimestamp()
+    });
+    wb.set(doc(db,'studentLogins',regKey(stu.regNumber)), studentLoginDoc(login));
+    await wb.commit();
+  } catch(e){
+    console.error('Password reset failed:', e);
+    showToast(studentAuthError(e) || 'Could not reset the password. Please try again.', 'error');
+    btn.disabled = false; btn.innerHTML = label;
+    return;
+  }
+  // New password is now active. Try to email it.
+  const ok = await sendCredentialsEmail({
+    toEmail: to,
+    studentName: `${stu.firstName||''} ${stu.lastName||''}`.trim(),
+    regNumber: stu.regNumber, password: pw, className: stu.class || ''
+  });
+  if(!ok){
+    // The password is not stored anywhere, so show it now or it is lost.
+    prompt('The email did not go through. The NEW password is active. Copy it and give it to the parent:', stu.regNumber+' | '+pw);
+  }
+  btn.disabled = false; btn.innerHTML = label;
+  loadStudents();
 };
 
 window.triggerDeactivate = function(){
