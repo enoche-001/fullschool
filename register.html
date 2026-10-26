@@ -625,7 +625,7 @@ let currentPanel = 1; // guided flow: 1 Applicant, 2 Guardian, 3 Health & Intere
    The folder path is saved on the application as `docFolder`, so admin can
    search for it in the Cloudinary Media Library.
    ══════════════════════════════════════════ */
-const CLOUDINARY_CLOUD_NAME   = 'yf5zq0cw';
+const CLOUDINARY_CLOUD_NAME   = 'llpxkh9f';
 const CLOUDINARY_UPLOAD_PRESET = 'school_docs';
 const DOC_ROOT_FOLDER = 'students';
 let pendingUploads = 0;   // in-flight uploads — submission is blocked until they finish
@@ -675,13 +675,13 @@ function uploadToCloudinary(fileOrBlob, filename, onProgress, docKey){
       } else {
         const msg = (data && data.error && data.error.message) || '';
         console.error('Cloudinary upload failed:', xhr.status, msg);
-        const err = new Error('Upload failed. Please check your connection and try again.');
+        const err = new Error('Upload failed' + (xhr.status ? ' (' + xhr.status + (msg ? ': ' + msg : '') + ')' : '') + '. Please try again.');
         // Older "fixed folder" accounts reject asset_folder — retry once without it.
         err.retryWithoutAssetFolder = withAssetFolder && /asset_folder/i.test(msg);
         reject(err);
       }
     };
-    xhr.onerror = function(){ reject(new Error('Network error during upload. Please try again.')); };
+    xhr.onerror = function(){ console.error('Cloudinary unreachable — check cloud name and connection'); reject(new Error('Network error: could not reach the upload server. Check your internet connection and try again.')); };
     const fd = new FormData();
     fd.append('file', fileOrBlob, filename || 'upload');
     fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
