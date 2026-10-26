@@ -75,7 +75,7 @@ Firebase project: **veil-1-bd7b5** (config is already in every page).
 
 ## Round 4 – organised document storage (Cloudinary)
 
-**Where documents live.** Registration documents upload straight from the browser to Cloudinary (cloud `yf5zq0cw`, unsigned preset `school_docs`). Only the returned links are saved in Firestore; the files themselves never go into Firestore.
+**Where documents live.** Registration documents upload straight from the browser to Cloudinary (cloud `llpxkh9f`, unsigned preset `school_docs`). Only the returned links are saved in Firestore; the files themselves never go into Firestore.
 
 **Folder layout.** One folder per applicant, named from the registration form, and every file inside is labelled by document type:
 
@@ -93,6 +93,8 @@ students/Tunde-Samuel-Adebayo_K7Q3/
 
 **What is saved on the application** (`applications/{id}`): the existing link fields (`passportPhoto`, `lastSchoolResult`, `birthCertificate`, `lgaCertificate`, `medicalReport`) unchanged, plus `docFolder` (folder path) and `docPublicIds` (Cloudinary id of each file). `docFolder` is copied to `students/{reg}` when the application is enrolled. Admin > Applications > View shows the folder with a Copy button. Older applications without `docFolder` still open normally.
 
+**When files upload.** Choosing a file does not touch Cloudinary: the compressed file is held in memory and the form shows it as ready. Files are uploaded only after Paystack payment succeeds (inside `verifyAndSubmit`, 3 tries per file), then the application is saved. Abandoned or unpaid registrations leave nothing in Cloudinary. If a file still fails after payment, the application is saved anyway (the fee is paid) with `docUploadFailed: [labels]`, and admin sees a warning on the application. If the page is reloaded mid-form, the passport photo and last school result are restored; Birth Certificate, LGA Certificate and Medical Report must be selected again.
+
 **Accepted files.** JPG, PNG, WEBP and PDF. Anything else (including Word files) is rejected before upload with: "This file type isn't supported…save it as PDF first." Size caps: passport 5 MB (compressed to ~400px), other images 8 MB (compressed to ~1400px), PDFs 8 MB (last result 5 MB).
 
 **Deleting.** The app cannot delete from Cloudinary (it needs the API secret, i.e. a server). Deleting a student in admin removes the Firestore records and then shows the student's folder name. In Cloudinary: Media Library > search the folder name > delete the folder (one action removes all of that student's files).
@@ -100,7 +102,7 @@ students/Tunde-Samuel-Adebayo_K7Q3/
 **Cloudinary account setup (one time).**
 1. Settings > Upload > Upload presets > preset `school_docs`: **Signing mode = Unsigned**, **"Use filename or externally defined Public ID" = On**, folder left blank, allowed formats `jpg, png, webp, pdf`.
 2. Settings > Security > tick **"PDF and ZIP files delivery"** (blocked by default on new accounts, otherwise PDFs upload but will not open).
-3. The code sends both `public_id` (full folder path) and `asset_folder`, so it works on accounts with fixed or dynamic folders. If a fixed-folder account rejects `asset_folder`, the upload retries once without it.
+3. Each file is sent with `public_id` = `students/<Name>_<code>/<document>_<id>`, `asset_folder` = `students/<Name>_<code>`, a tag equal to the student's folder name, and context `student` / `document`. Find one student's files by the folder tree, by filtering on the tag, or by searching the name. If `asset_folder` is rejected the upload retries once without it.
 4. Never put the Cloudinary API Secret in any page.
 
 **Free plan limits (Cloudinary).** 25 credits per month shared by storage, bandwidth and transformations (1 credit = 1 GB stored, or 1 GB delivered, or 1,000 transformations). Max 10 MB per image/raw file. Check Dashboard > Usage now and then.
