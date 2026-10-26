@@ -2445,9 +2445,13 @@ window.viewApplication = function(id){
         ? `<div class="doc-chip-warn">${docWarnIcon}No Medical Report uploaded — health challenges were noted</div>`
         : '');
 
-  const documentsSection = (passportPreview || lastResultChip || birthCertChip || lgaCertChip || medicalReportChip)
+  let documentsSection = (passportPreview || lastResultChip || birthCertChip || lgaCertChip || medicalReportChip)
     ? `<div class="doc-section">${passportPreview}<div class="doc-chip-row">${lastResultChip}${birthCertChip}${lgaCertChip}${medicalReportChip}</div>${a.docFolder ? `<div class="doc-chip-empty" style="margin-top:10px;text-align:left">Cloudinary folder: <b>${escapeHtml(a.docFolder)}</b> <button type="button" class="btn btn-sm" style="padding:3px 10px;margin-left:6px" onclick="copyDocFolder('${escapeHtml(a.docFolder)}')">Copy</button></div>` : ''}</div>`
     : `<div class="doc-section"><div class="doc-chip-empty">No documents uploaded</div></div>`;
+
+  if(Array.isArray(a.docUploadFailed) && a.docUploadFailed.length){
+    documentsSection += `<div class="doc-chip-warn" style="margin-top:8px">${docWarnIcon}These documents failed to upload after payment — ask the parent to resend: ${escapeHtml(a.docUploadFailed.join(', '))}</div>`;
+  }
 
   document.getElementById('moAppViewBody').innerHTML = `
     <div class="section-sub" style="margin-top:0">Personal Information</div>

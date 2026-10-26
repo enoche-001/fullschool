@@ -651,16 +651,65 @@ function ensureDocFolder(){
 }
 function shortId(){ return Math.random().toString(36).slice(2,6); }
 
+/* ── Deferred upload ──────────────────────────────────────────────
+   Choosing a file does NOT touch Cloudinary. The (already compressed) file
+   is kept in memory in `pendingFiles` and the form just remembers a
+   placeholder ('local:<docKey>'). Files are uploaded only AFTER the payment
+   succeeds, inside verifyAndSubmit(), so abandoned or unpaid registrations
+   never leave anything in Cloudinary. */
+const pendingFiles = {}; // { docKey: { blob, name } }
+
+function queueFile(fileOrBlob, filename, onProgress, docKey){
+  pendingFiles[docKey] = { blob: fileOrBlob, name: filename || 'upload' };
+  if(onProgress) onProgress(100);
+  return Promise.resolve('local:' + docKey);
+}
+
+function b64ToBlob(dataUrl){
+  const parts = String(dataUrl).split(',');
+  const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/octet-stream';
+  const bin = atob(parts[1] || '');
+  const u8 = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+  return new Blob([u8], { type: mime });
+}
+
+/* Uploads every queued file (3 tries each). Returns the labels of any that
+   still failed — the application is saved anyway (the fee is already paid)
+   and flagged with docUploadFailed so admin can chase the missing files. */
+async function uploadQueuedDocs(){
+  const slots = [
+    { key:'passport',          label:'Passport photo',     get:()=>passportUrl,          set:u=>{ passportUrl = u; } },
+    { key:'last-result',       label:'Last school result', get:()=>lastResultUrl,        set:u=>{ lastResultUrl = u; } },
+    { key:'birth-certificate', label:'Birth certificate',  get:()=>docUrls.birthCert,    set:u=>{ docUrls.birthCert = u; } },
+    { key:'lga-certificate',   label:'LGA certificate',    get:()=>docUrls.lgaCert,      set:u=>{ docUrls.lgaCert = u; } },
+    { key:'medical-report',    label:'Medical report',     get:()=>docUrls.medicalReport,set:u=>{ docUrls.medicalReport = u; } }
+  ];
+  const failed = [];
+  for(const sl of slots){
+    const cur = sl.get();
+    if(!cur || !String(cur).startsWith('local:')) continue;   // nothing chosen, or already a real URL
+    const f = pendingFiles[sl.key];
+    if(!f){ sl.set(null); failed.push(sl.label); continue; }
+    let url = null;
+    for(let attempt=1; attempt<=3 && !url; attempt++){
+      try{ url = await uploadToCloudinary(f.blob, f.name, null, sl.key); }
+      catch(e){ console.warn('Upload attempt', attempt, 'failed for', sl.key, e.message); if(attempt<3) await new Promise(r=>setTimeout(r, 1200*attempt)); }
+    }
+    if(url){ sl.set(url); delete pendingFiles[sl.key]; }
+    else   { sl.set(null); failed.push(sl.label); }
+  }
+  return failed;
+}
+
 /* docKey is one of: passport, last-result, birth-certificate, lga-certificate, medical-report */
 function uploadToCloudinary(fileOrBlob, filename, onProgress, docKey){
   const folder = ensureDocFolder();
   if(!folder){
     return Promise.reject(new Error("Please enter the applicant's first and last name (Personal Information) before uploading documents."));
   }
-  const publicId = `${folder}/${docKey || 'document'}_${shortId()}`;
   pendingUploads++;
-
-  const send = (withAssetFolder) => new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`);
     xhr.upload.onprogress = function(e){
@@ -670,29 +719,28 @@ function uploadToCloudinary(fileOrBlob, filename, onProgress, docKey){
       let data = null;
       try{ data = JSON.parse(xhr.responseText); }catch(e){}
       if(xhr.status >= 200 && xhr.status < 300 && data && data.secure_url){
-        publicIdByUrl[data.secure_url] = data.public_id || publicId;
+        publicIdByUrl[data.secure_url] = data.public_id || '';
         resolve(data.secure_url);
       } else {
         const msg = (data && data.error && data.error.message) || '';
         console.error('Cloudinary upload failed:', xhr.status, msg);
-        const err = new Error('Upload failed' + (xhr.status ? ' (' + xhr.status + (msg ? ': ' + msg : '') + ')' : '') + '. Please try again.');
-        // Older "fixed folder" accounts reject asset_folder — retry once without it.
-        err.retryWithoutAssetFolder = withAssetFolder && /asset_folder/i.test(msg);
-        reject(err);
+        reject(new Error('Upload failed' + (xhr.status ? ' (' + xhr.status + (msg ? ': ' + msg : '') + ')' : '') + '. Please try again.'));
       }
     };
-    xhr.onerror = function(){ console.error('Cloudinary unreachable — check cloud name and connection'); reject(new Error('Network error: could not reach the upload server. Check your internet connection and try again.')); };
+    xhr.onerror = function(){
+      console.error('Cloudinary unreachable — check cloud name and connection');
+      reject(new Error('Network error: could not reach the upload server. Check your internet connection and try again.'));
+    };
     const fd = new FormData();
     fd.append('file', fileOrBlob, filename || 'upload');
     fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    fd.append('public_id', publicId);                 // full path: works in every folder mode
-    if(withAssetFolder) fd.append('asset_folder', folder); // shows the folder in the Media Library (new accounts)
+    // Unsigned presets only allow public_id / folder / tags / context. `folder`
+    // creates the real folder in the Media Library (fixed AND dynamic modes);
+    // public_id is just the file's own name inside it.
+    fd.append('folder', folder);
+    fd.append('public_id', `${docKey || 'document'}_${shortId()}`);
     xhr.send(fd);
-  });
-
-  return send(true)
-    .catch(err => err.retryWithoutAssetFolder ? send(false) : Promise.reject(err))
-    .finally(() => { pendingUploads--; });
+  }).finally(() => { pendingUploads--; });
 }
 
 /* Generic document-upload field: handles a dropzone (image or image+PDF),
@@ -784,7 +832,7 @@ window.handleDocSelect = function(id, input){
     document.getElementById(`${id}FileSize`).textContent = sizeLabel;
     preview.style.display = 'flex';
 
-    uploadToCloudinary(blobOrFile, file.name, pct => {
+    queueFile(blobOrFile, file.name, pct => {
       document.getElementById(`${id}FileName`).textContent = `${file.name} — uploading ${pct}%`;
     }, DOC_KEYS[id]).then(url => {
       docUrls[id] = url;
@@ -839,6 +887,7 @@ window.handleDocSelect = function(id, input){
 };
 
 window.clearDocField = function(id){
+  delete pendingFiles[DOC_KEYS[id]];
   docUrls[id] = null;
   document.getElementById(`${id}FileInput`).value = '';
   document.getElementById(`${id}Preview`).style.display = 'none';
@@ -1069,7 +1118,7 @@ window.handlePassportSelect = function(input){
 
       // Upload the compressed image to Cloudinary — this is what actually gets saved
       canvas.toBlob(blob => {
-        uploadToCloudinary(blob, file.name, pct => {
+        queueFile(blob, file.name, pct => {
           document.getElementById('passportFileName').textContent = `${file.name} — uploading ${pct}%`;
         }, 'passport').then(url => {
           passportUrl = url;
@@ -1092,6 +1141,7 @@ window.handlePassportSelect = function(input){
 };
 
 window.clearPassport = function(){
+  delete pendingFiles['passport'];
   passportBase64 = null;
   passportUrl = null;
   document.getElementById('passportFileInput').value = '';
@@ -1161,7 +1211,7 @@ window.handleLastResultSelect = function(input){
         saveDraft();
 
         canvas.toBlob(blob => {
-          uploadToCloudinary(blob, file.name, pct => {
+          queueFile(blob, file.name, pct => {
             document.getElementById('lastResultFileName').textContent = `${file.name} — uploading ${pct}%`;
           }, 'last-result').then(url => {
             lastResultUrl = url;
@@ -1188,7 +1238,7 @@ window.handleLastResultSelect = function(input){
       showLastResultPreview();
       saveDraft();
 
-      uploadToCloudinary(file, file.name, pct => {
+      queueFile(file, file.name, pct => {
         document.getElementById('lastResultFileName').textContent = `${file.name} — uploading ${pct}%`;
       }, 'last-result').then(url => {
         lastResultUrl = url;
@@ -1231,6 +1281,7 @@ function showLastResultPreview(){
 }
 
 window.clearLastResult = function(){
+  delete pendingFiles['last-result'];
   lastResultBase64 = null;
   lastResultUrl = null;
   lastResultMime = '';
@@ -1517,6 +1568,9 @@ async function verifyAndSubmit(reference){
 
     // Always proceed to submit application regardless of verify outcome
     // (Paystack already charged successfully; we must not lose the application)
+    // Payment is confirmed: NOW upload the documents to Cloudinary (3 tries each).
+    btn.innerHTML = '<span class="spinner"></span> Uploading documents…';
+    const failedDocs = await uploadQueuedDocs();
     btn.innerHTML = '<span class="spinner"></span> Submitting application…';
 
     const d = getFormData();
@@ -1566,6 +1620,7 @@ async function verifyAndSubmit(reference){
       birthCertificate: docUrls.birthCert || null,
       lgaCertificate:   docUrls.lgaCert || null,
       medicalReport:    docUrls.medicalReport || null,
+      docUploadFailed:  failedDocs,          // labels of any document that could not upload (empty = all good)
       docFolder:        docFolder || null,   // Cloudinary folder holding every file for this applicant
       docPublicIds:     (function(){         // { documentField: cloudinary public_id } for clean-up
         const m = {};
@@ -1821,7 +1876,8 @@ function restoreDraft(draft){
   // Passport photo
   if(draft.passportBase64){
     passportBase64 = draft.passportBase64;
-    passportUrl = draft.passportUrl || null; // restores the already-uploaded Cloudinary URL, no re-upload needed
+    passportUrl = draft.passportUrl || null;
+    if(String(passportUrl||'').startsWith('local:')) pendingFiles['passport'] = { blob: b64ToBlob(passportBase64), name: draft.passportFileName || 'passport.jpg' };
     const preview = document.getElementById('passportPreview');
     document.getElementById('passportThumb').src = passportBase64;
     document.getElementById('passportFileName').textContent = draft.passportFileName || 'Saved photo';
@@ -1836,16 +1892,19 @@ function restoreDraft(draft){
   if(draft.lastResultBase64){
     lastResultBase64  = draft.lastResultBase64;
     lastResultUrl      = draft.lastResultUrl || null;
+    if(String(lastResultUrl||'').startsWith('local:')) pendingFiles['last-result'] = { blob: b64ToBlob(lastResultBase64), name: draft.lastResultFileName || 'result' };
     lastResultMime     = draft.lastResultMime || 'image';
     lastResultFileName = draft.lastResultFileName || 'Saved result';
     showLastResultPreview();
   }
 
   // Birth Certificate / LGA Certificate / Medical Report
+  const needReselect = [];
   if(draft.docUrls){
     Object.keys(draft.docUrls).forEach(id => {
       const url = draft.docUrls[id];
       if(!url) return;
+      if(String(url).startsWith('local:')){ needReselect.push(id); return; } // files are only held in memory until payment
       docUrls[id] = url;
       const thumb = document.getElementById(`${id}Thumb`);
       const pdfIcon = document.getElementById(`${id}PdfIcon`);
@@ -1858,6 +1917,11 @@ function restoreDraft(draft){
     });
   }
 
+  if(needReselect.length){
+    const names = { birthCert:'Birth Certificate', lgaCert:'LGA Certificate', medicalReport:'Medical Report' };
+    setTimeout(() => showToast('Documents are only uploaded when you pay, so please re-select: ' + needReselect.map(i => names[i] || i).join(', '), 'warning'), 600);
+  }
+
   // Jump to the panel they were last on
   const panel = draft.currentPanel && draft.currentPanel >= 1 && draft.currentPanel <= 4 ? draft.currentPanel : 1;
   showPanel(panel);
@@ -1868,6 +1932,7 @@ function restoreDraft(draft){
    ══════════════════════════════════════════ */
 window.resetForm = function(){
   docFolder = null; // next applicant gets a fresh folder
+  Object.keys(pendingFiles).forEach(k => delete pendingFiles[k]);
   // Clear inputs
   ['firstName','middleName','lastName','dob','gender','stateOfOrigin','lga',
    'bloodGroup','genotype','classApplied','prevSchool','lastClass',
