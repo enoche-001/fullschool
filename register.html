@@ -1527,6 +1527,7 @@ window.initiatePayment = function(){
     amount:   REGISTRATION_FEE_KOBO,
     currency: 'NGN',
     metadata: {
+      purpose:       'registration',
       applicantName: fullName,
       classApplied:  d.classApplied,
       phone:         d.primaryPhone
@@ -2008,5 +2009,6 @@ function scrollToTop(){
 window.showToast = showToast;
 
 </script>
+<script src="scrollbar.js"></script>
 </body>
 </html>

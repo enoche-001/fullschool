@@ -4,7 +4,17 @@
 <script>try{if(sessionStorage.getItem('nt_teacher_hint'))document.documentElement.classList.add('restoring');}catch(e){}
 setTimeout(function(){document.documentElement.classList.remove('restoring');},8000);</script>
 <style>.restoring #loginScreen{display:none!important}.restoring body::before{content:"Restoring your session\2026";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font:600 .9rem system-ui,sans-serif;color:#64748b;background:#f8fafc;z-index:99999}
-.rl-spin{display:inline-block;animation:rlspin .8s linear infinite}@keyframes rlspin{to{transform:rotate(360deg)}}</style>
+.rl-spin{display:inline-block;animation:rlspin .8s linear infinite}@keyframes rlspin{to{transform:rotate(360deg)}}
+/* ── Visible scrollbar (wider, higher contrast) ── */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(13,31,60,.07)}
+::-webkit-scrollbar-thumb{background:rgba(13,31,60,.45);border-radius:10px;border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(184,144,42,.9);border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports (-moz-appearance:none){*{scrollbar-width:auto;scrollbar-color:rgba(13,31,60,.5) rgba(13,31,60,.07)}}
+.sidebar::-webkit-scrollbar-track{background:rgba(255,255,255,.06)}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4);border:1px solid transparent;background-clip:padding-box}
+</style>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Newtown Academy — Teacher Portal</title>
@@ -174,7 +184,6 @@ tr:hover td{background:#f8fafc}
 .sb-ov.open{display:block}
 @media print{.sidebar,.topbar,.sec-hdr .btn,.act-btns,.s-bar,.btn-print,.modal-overlay,#pwModal,.toast,.hamburger,.sb-ov{display:none!important}body{background:#fff!important;overflow:auto!important}.main{width:100%!important}.content{padding:10px!important}}
 .print-hdr{display:none}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(13,31,60,.15);border-radius:10px}
 @media(max-width:768px){
   body{overflow:auto}
   .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:240px;z-index:10;transition:left .3s ease;height:100vh}
@@ -1521,5 +1530,6 @@ document.querySelectorAll(".modal-overlay").forEach(ov=>{
   ov.addEventListener("click",e=>{if(e.target===ov)ov.classList.remove("open");});
 });
 </script>
+<script src="scrollbar.js"></script>
 </body>
 </html>

@@ -168,9 +168,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .dlg-btn-secondary:hover{border-color:var(--P);color:var(--P)}
 .dlg-btn-danger{background:#fff;border:1.5px solid #fecaca;color:var(--err)}
 .dlg-btn-danger:hover{background:var(--err);color:#fff}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(13,31,60,.15);border-radius:10px}
 @media(max-width:768px){
   .hall-wrap{padding:20px 14px}.exams-grid{grid-template-columns:1fr}
   .exam-body{flex-direction:column;padding:16px;gap:16px}.q-grid{width:100%}.qgw{grid-template-columns:repeat(8,1fr)}
   .exam-topbar,.exam-nav{padding:10px 14px;flex-wrap:wrap;gap:8px}.rstats{gap:8px}.toast{bottom:14px;right:14px;left:14px}
 }
+
+/* ── Visible scrollbar (wider, higher contrast) ── */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(13,31,60,.07)}
+::-webkit-scrollbar-thumb{background:rgba(13,31,60,.45);border-radius:10px;border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(184,144,42,.9);border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports (-moz-appearance:none){*{scrollbar-width:auto;scrollbar-color:rgba(13,31,60,.5) rgba(13,31,60,.07)}}

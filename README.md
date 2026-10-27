@@ -114,3 +114,11 @@ firestore.rules: unchanged (the new fields fit the existing `applications` creat
 - EmailJS was removed from `admin.html`. The email endpoint only accepts a signed-in admin's Firebase token and sends through Gmail.
 - Applications screen: approved applications now have a "Reset password & email parent" button. Original passwords are never stored, so this issues a NEW password, activates it, and emails it to the parent (if the email fails, the new password is shown to copy).
 - Admin sidebar: "Send test email" tests the email path without a registration.
+
+## Round 6 — payment receipts
+`register.html` and `student.html` now send `purpose` (and student name/class for school fees) to Paystack as metadata. The server's `/api/paystack-webhook` uses it to email a receipt for every successful payment.
+
+## Round 7 — visible scrollbars
+- All pages: scrollbars were 4-5px wide at about 15% opacity, so they were nearly invisible. They are now 10px with a clear thumb (gold on hover); Firefox gets the equivalent standard properties.
+- New `scrollbar.js` (loaded by every page): phones hide scrollbars after a second, so it draws a slim bar on the right edge that stays visible whenever the page or the main panel can scroll.
+- Round 7b: `scrollbar.js` now covers every scrolling area (popups, results tables incl. sideways scroll, lists, text boxes), and draws nothing where the device already shows a real scrollbar. Native bars are 8px wide (6px thumb).

@@ -801,10 +801,6 @@ body{
 /* ══════════════════════════════════════════════════════
    SCROLLBAR
 ══════════════════════════════════════════════════════ */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(13,31,60,.14);border-radius:10px}
-
 /* ══════════════════════════════════════════════════════
    REDUCED MOTION
 ══════════════════════════════════════════════════════ */
@@ -895,3 +891,11 @@ nav#mainNav{
 .draft-modal-note{
   font-size:.7rem;color:var(--muted);margin-top:12px;opacity:.8;
 }
+
+/* ── Visible scrollbar (wider, higher contrast) ── */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(13,31,60,.07)}
+::-webkit-scrollbar-thumb{background:rgba(13,31,60,.45);border-radius:10px;border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(184,144,42,.9);border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports (-moz-appearance:none){*{scrollbar-width:auto;scrollbar-color:rgba(13,31,60,.5) rgba(13,31,60,.07)}}

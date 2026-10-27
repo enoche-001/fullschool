@@ -392,10 +392,6 @@ tbody tr:hover{background:var(--surface2)}
 .sb-ov.open{display:block}
 
 /* Scrollbar */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(13,27,46,.13);border-radius:10px}
-
 /* ── Info grid (profile & receipt) ── */
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px}
 .info-item label{
@@ -687,3 +683,13 @@ tbody tr:hover{background:var(--surface2)}
   .rc-domains-wrap,.rc-remarks-wrap{grid-template-columns:1fr 1fr}
   .rc-student-grid{grid-template-columns:repeat(4,1fr)}
 }
+
+/* ── Visible scrollbar (wider, higher contrast) ── */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(13,31,60,.07)}
+::-webkit-scrollbar-thumb{background:rgba(13,31,60,.45);border-radius:10px;border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(184,144,42,.9);border:1px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports (-moz-appearance:none){*{scrollbar-width:auto;scrollbar-color:rgba(13,31,60,.5) rgba(13,31,60,.07)}}
+.sidebar::-webkit-scrollbar-track{background:rgba(255,255,255,.06)}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4);border:1px solid transparent;background-clip:padding-box}
