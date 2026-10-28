@@ -14,6 +14,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
 @supports (-moz-appearance:none){*{scrollbar-width:auto;scrollbar-color:rgba(13,31,60,.5) rgba(13,31,60,.07)}}
 .sidebar::-webkit-scrollbar-track{background:rgba(255,255,255,.06)}
 .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4);border:1px solid transparent;background-clip:padding-box}
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 14px}.ai-note{font-size:.78rem;color:#64748b;margin-top:6px}.ai-q{background:#f8fafc;border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:12px}.ai-q textarea,.ai-q input,.ai-q select{width:100%;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:8px;font:inherit;font-size:.84rem;background:#fff;margin-bottom:6px}.ai-q .ai-opt{display:flex;gap:6px;align-items:center}.ai-q .ai-opt b{width:20px}.ai-svg{max-width:340px;background:#fff;border:1px solid var(--bdr);border-radius:8px;padding:6px;margin:6px 0}.ai-svg svg{width:100%;height:auto;display:block}.ai-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
 </style>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
@@ -304,6 +305,7 @@ tr:hover td{background:#f8fafc}
       <div class="nav-label">Exams</div>
       <div class="nav-item" id="ni-exams" data-sec="exams"><span class="ni">📋</span> My Exams</div>
       <div class="nav-item" id="ni-questions" data-sec="questions"><span class="ni">❓</span> Add Questions</div>
+      <div class="nav-item" id="ni-aigen" data-sec="aigen"><span class="ni">✨</span> AI Generator</div>
       <div class="nav-item" id="ni-monitor" data-sec="monitor"><span class="ni">🔴</span> Live Monitor</div>
       <div class="nav-label">Results</div>
       <div class="nav-item" id="ni-results" data-sec="results"><span class="ni">📊</span> Results</div>
@@ -336,6 +338,38 @@ tr:hover td{background:#f8fafc}
         <div class="table-wrap">
           <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);font-size:.88rem;font-weight:700;color:var(--P)">📢 School Announcements</div>
           <div id="annList"><div class="empty-state"><div class="empty-icon">📢</div><p>No announcements</p></div></div>
+        </div>
+      </div>
+
+      <!-- AI GENERATOR -->
+      <div class="section" id="section-aigen">
+        <div class="sec-hdr"><div><h2>✨ AI Question Generator</h2><p>Upload your teaching material, get multiple-choice questions with answers. Maths questions can include shapes. Always review before saving.</p></div></div>
+        <div class="table-wrap" style="padding:20px;margin-bottom:20px">
+          <div class="ai-grid">
+            <div class="form-group"><label>Subject &amp; Class</label><select id="aiSub"><option value="">— Select —</option></select></div>
+            <div class="form-group"><label>Topic / focus (optional if you upload material)</label><input type="text" id="aiTopicT" placeholder="e.g. Circle theorems, Photosynthesis"/></div>
+            <div class="form-group"><label>Number of questions</label><input type="number" id="aiCnt" value="10" min="1" max="40"/></div>
+            <div class="form-group"><label>Difficulty</label><select id="aiDiff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option><option value="mixed">Mixed</option></select></div>
+          </div>
+          <div class="form-group"><label>Teaching material (PDF, Word .docx or text — you can pick several)</label><input type="file" id="aiFiles" accept=".pdf,.docx,.txt,.md" multiple/><div id="aiFileInfo" class="ai-note"></div></div>
+          <div class="form-group"><label>Or paste notes here</label><textarea id="aiPaste" rows="4" placeholder="Paste lesson notes..."></textarea></div>
+          <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500;text-transform:none;font-size:.85rem"><input type="checkbox" id="aiDiag" style="width:auto"/> Include diagrams for shapes / geometry questions (Maths, Physics, etc.)</label></div>
+          <button class="btn btn-p" id="aiGoBtn">✨ Generate Questions</button>
+          <div id="aiStatus" class="ai-note" style="margin-top:10px"></div>
+        </div>
+        <div id="aiPreviewWrap" style="display:none">
+          <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+            <div style="font-weight:700;color:var(--P);margin-bottom:12px" id="aiPrevTitle">Review questions</div>
+            <div class="ai-grid">
+              <div class="form-group"><label>Save into</label><select id="aiTarget"></select></div>
+              <div class="form-group aiNew"><label>New exam title</label><input type="text" id="aiNewTitle" placeholder="e.g. Mathematics Test 1"/></div>
+              <div class="form-group aiNew"><label>Duration (minutes)</label><input type="number" id="aiNewDur" value="30" min="5" max="300"/></div>
+              <div class="form-group aiNew"><label>Session</label><select id="aiSess"></select></div>
+              <div class="form-group aiNew"><label>Term</label><select id="aiTerm"></select></div>
+            </div>
+            <button class="btn btn-p" id="aiSaveBtn">💾 Save Questions to Exam</button>
+          </div>
+          <div id="aiPrevList"></div>
         </div>
       </div>
 
@@ -628,6 +662,7 @@ tr:hover td{background:#f8fafc}
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,initializeAuth,inMemoryPersistence,browserSessionPersistence,onAuthStateChanged,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import{getFirestore,collection,doc,addDoc,getDoc,getDocs,deleteDoc,updateDoc,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{generate as aiGenerate,extractText as aiExtract,safeSvg}from"./ai-client.js";
 
 const FC={apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",authDomain:"veil-1-bd7b5.firebaseapp.com",projectId:"veil-1-bd7b5",storageBucket:"veil-1-bd7b5.firebasestorage.app",messagingSenderId:"526021682048",appId:"1:526021682048:web:a52dae5b2650ca951ad765"};
 const app=initializeApp(FC);
@@ -754,6 +789,7 @@ const TITLES={
   home:["Dashboard","Here's your teaching overview"],
   exams:["My Exams","Click the toggle button to make an exam Active or Inactive"],
   questions:["Add Questions","Select an exam and add questions to it"],
+  aigen:["AI Generator","Generate questions from your teaching material"],
   monitor:["Live Monitor","Track student progress during active exams"],
   results:["Results","View exam results for your classes"],
 };
@@ -778,6 +814,7 @@ function loadSection(name){
   if(name==="home")return loadHome();
   if(name==="exams")return loadExams();
   if(name==="questions")return populateExamSelQ();
+  if(name==="aigen")return initAiGen();
   if(name==="monitor")return populateMonSel();
   if(name==="results"){populateResultsFilter();return loadResults();}
 }
@@ -792,6 +829,119 @@ document.getElementById("reloadBtn").addEventListener("click",async()=>{
   finally{btn.disabled=false;ic.classList.remove("rl-spin");}
 });
 window.addEventListener("popstate",e=>{const s=e.state?.sec||"home";showSection(s);history.pushState({sec:s},"","");});
+
+/* ═══ AI QUESTION GENERATOR (OpenRouter via school server) ═══ */
+let _aiQs=[],_aiSubs=[],_aiBusy=false;
+const aiEsc=t=>String(t??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+async function initAiGen(){
+  const sel=document.getElementById("aiSub");
+  if(!_aiSubs.length||sel.options.length<2){
+    const snap=await getDocs(query(collection(db,"cbtSubjects"),where("teacherId","==",userId)));
+    _aiSubs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    sel.innerHTML='<option value="">— Select —</option>'+_aiSubs.map(s=>`<option value="${s.id}">${aiEsc(s.name)} — ${aiEsc(s.className||"")}</option>`).join("");
+    if(!_aiSubs.length)document.getElementById("aiStatus").textContent="No subjects are assigned to you yet. Ask the admin to assign your subjects.";
+  }
+}
+document.getElementById("aiSub").addEventListener("change",function(){
+  const s=_aiSubs.find(x=>x.id===this.value);
+  document.getElementById("aiDiag").checked=!!(s&&/math|geometry|further|physics|technical|basic science/i.test(s.name||""));
+});
+document.getElementById("aiFiles").addEventListener("change",function(){
+  const n=[...this.files].map(f=>f.name+" ("+Math.round(f.size/1024)+" KB)").join(", ");
+  document.getElementById("aiFileInfo").textContent=n?("Selected: "+n):"";
+});
+document.getElementById("aiGoBtn").addEventListener("click",async()=>{
+  if(_aiBusy)return;
+  const sub=_aiSubs.find(x=>x.id===document.getElementById("aiSub").value);
+  if(!sub){toast("Select a subject first.","error");return;}
+  const topic=document.getElementById("aiTopicT").value.trim();
+  const total=Math.max(1,Math.min(40,parseInt(document.getElementById("aiCnt").value)||10));
+  const diff=document.getElementById("aiDiff").value,diagrams=document.getElementById("aiDiag").checked;
+  const btn=document.getElementById("aiGoBtn"),st=document.getElementById("aiStatus");
+  _aiBusy=true;spin(btn,"Working...");
+  try{
+    st.textContent="Reading your material...";
+    let material="";
+    for(const f of document.getElementById("aiFiles").files){ material+="\n\n"+await aiExtract(f); }
+    material=(material+"\n\n"+document.getElementById("aiPaste").value).trim();
+    if(document.getElementById("aiFiles").files.length&&material.length<80)throw new Error("No readable text found in the file. Scanned/photo PDFs cannot be read; use a text-based PDF, Word file or paste the notes.");
+    if(!topic&&!material)throw new Error("Enter a topic or add teaching material.");
+    let note="";if(material.length>24000){material=material.slice(0,24000);note=" (only the first part of a long file was used)";}
+    const batch=diagrams?6:10,got=[];let failMsg="";
+    while(got.length<total){
+      const need=Math.min(batch,total-got.length);
+      st.textContent=`Generating questions ${got.length+1}–${got.length+need} of ${total}${note}... this can take up to a minute per batch.`;
+      try{
+        const qs=await aiGenerate(auth,{subject:sub.name,className:sub.className||"",topic,material,count:need,difficulty:diff,diagrams,style:"WAEC/JAMB style",avoid:got.map(q=>q.questionText.slice(0,60))});
+        got.push(...qs.slice(0,need));
+      }catch(e){failMsg=e.message;break;}
+    }
+    if(!got.length)throw new Error(failMsg||"No questions were generated.");
+    _aiQs=got;renderAiPreview(sub,topic);
+    st.textContent=failMsg?`Generated ${got.length} of ${total}. Stopped: ${failMsg}`:`Done: ${got.length} questions. Review them below before saving.`;
+    toast(`${got.length} questions generated.`);
+  }catch(e){console.error(e);st.textContent="";toast(e.message||"Generation failed.","error");}
+  finally{_aiBusy=false;unspin(btn,"✨ Generate Questions");}
+});
+function aiQCard(q,i){
+  const d=document.createElement("div");d.className="ai-q";
+  d.innerHTML=`<div style="font-weight:700;font-size:.78rem;color:var(--P);margin-bottom:6px">Question ${i+1}</div>
+  <textarea rows="3" data-f="questionText">${aiEsc(q.questionText)}</textarea>
+  <div class="ai-dg"></div>
+  ${["a","b","c","d"].map(k=>`<div class="ai-opt"><b>${k.toUpperCase()}</b><input data-o="${k}" value="${aiEsc(q.options[k])}"/></div>`).join("")}
+  <div class="ai-bar"><label style="font-size:.78rem;font-weight:600">Correct:</label><select data-f="correctAnswer" style="width:70px;margin:0">${["a","b","c","d"].map(k=>`<option value="${k}"${q.correctAnswer===k?" selected":""}>${k.toUpperCase()}</option>`).join("")}</select></div>
+  <textarea rows="2" data-f="explanation" placeholder="Explanation (optional)" style="margin-top:6px">${aiEsc(q.explanation||"")}</textarea>
+  <div class="ai-bar"><button class="btn btn-edit btn-sm" data-act="svg">✏️ Edit drawing</button><button class="btn btn-warn btn-sm" data-act="nosvg">Remove drawing</button><button class="btn btn-danger btn-sm" data-act="del">🗑️ Remove question</button></div>
+  <textarea rows="5" data-f="diagramSvg" style="display:none;font-family:monospace;font-size:.72rem;margin-top:6px" placeholder="SVG code (leave empty for no drawing)">${aiEsc(q.diagramSvg||"")}</textarea>`;
+  const dg=d.querySelector(".ai-dg"),code=d.querySelector('[data-f="diagramSvg"]');
+  const paint=()=>{const s=q.diagramSvg?safeSvg(q.diagramSvg):"";dg.innerHTML=s?`<div class="ai-svg">${s}</div>`:"";d.querySelector('[data-act="nosvg"]').style.display=q.diagramSvg?"":"none";d.querySelector('[data-act="svg"]').textContent=q.diagramSvg?"✏️ Edit drawing":"➕ Add drawing code";};
+  d.querySelectorAll("[data-f]").forEach(el=>el.addEventListener("input",()=>{q[el.dataset.f]=el.value;if(el.dataset.f==="diagramSvg")paint();}));
+  d.querySelectorAll("[data-o]").forEach(el=>el.addEventListener("input",()=>{q.options[el.dataset.o]=el.value;}));
+  d.querySelector('[data-act="svg"]').addEventListener("click",()=>{code.style.display=code.style.display==="none"?"block":"none";});
+  d.querySelector('[data-act="nosvg"]').addEventListener("click",()=>{q.diagramSvg="";code.value="";paint();});
+  d.querySelector('[data-act="del"]').addEventListener("click",()=>{_aiQs.splice(_aiQs.indexOf(q),1);renderAiPreview(null,null,true);});
+  paint();return d;
+}
+async function renderAiPreview(sub,topic,keep){
+  const list=document.getElementById("aiPrevList");list.innerHTML="";
+  _aiQs.forEach((q,i)=>list.appendChild(aiQCard(q,i)));
+  document.getElementById("aiPrevTitle").textContent=`${_aiQs.length} question${_aiQs.length!==1?"s":""} — review, edit, then save`;
+  document.getElementById("aiPreviewWrap").style.display=_aiQs.length?"block":"none";
+  if(keep)return;
+  document.getElementById("aiNewTitle").value=`${sub.name}${topic?" — "+topic:""}`;
+  const tg=document.getElementById("aiTarget");
+  const es=await getDocs(query(collection(db,"cbtExams"),where("teacherId","==",userId)));
+  tg.innerHTML='<option value="__new">➕ Create a new exam</option>'+es.docs.filter(d=>d.data().subjectId===sub.id||d.data().subjectName===sub.name).map(d=>`<option value="${d.id}">${aiEsc(d.data().title)} (${aiEsc(d.data().className||"—")})</option>`).join("");
+  await fillAcademic("aiSess","aiTerm");aiTargetChange();
+  document.getElementById("aiPreviewWrap").dataset.sub=sub.id;
+  document.getElementById("aiPreviewWrap").scrollIntoView({behavior:"smooth"});
+}
+function aiTargetChange(){const isNew=document.getElementById("aiTarget").value==="__new";document.querySelectorAll(".aiNew").forEach(e=>e.style.display=isNew?"":"none");}
+document.getElementById("aiTarget").addEventListener("change",aiTargetChange);
+document.getElementById("aiSaveBtn").addEventListener("click",async()=>{
+  const valid=_aiQs.filter(q=>q.questionText?.trim()&&["a","b","c","d"].every(k=>q.options[k]?.trim())&&["a","b","c","d"].includes(q.correctAnswer));
+  if(!valid.length){toast("No complete questions to save.","error");return;}
+  const sub=_aiSubs.find(x=>x.id===document.getElementById("aiPreviewWrap").dataset.sub);
+  if(!sub){toast("Subject missing. Generate again.","error");return;}
+  const btn=document.getElementById("aiSaveBtn");spin(btn,"Saving...");
+  try{
+    let eid=document.getElementById("aiTarget").value;
+    if(eid==="__new"){
+      const title=document.getElementById("aiNewTitle").value.trim(),dur=parseInt(document.getElementById("aiNewDur").value);
+      if(!title||!dur)throw new Error("Enter the new exam title and duration.");
+      const r=await addDoc(collection(db,"cbtExams"),{title,subjectId:sub.id,subjectName:sub.name||"",classId:sub.classId||"",className:sub.className||"",teacherId:userId,teacherName:userName,duration:dur,session:document.getElementById("aiSess").value,term:document.getElementById("aiTerm").value,shuffleQuestions:true,shuffleOptions:true,isActive:false,source:"ai",createdAt:serverTimestamp()});
+      eid=r.id;
+    }
+    const t0=Date.now();
+    await Promise.all(valid.map((q,i)=>{
+      const svg=q.diagramSvg?safeSvg(q.diagramSvg):"";
+      return addDoc(collection(db,"cbtQuestions"),{examId:eid,teacherId:userId,questionText:q.questionText.trim(),options:{a:q.options.a.trim(),b:q.options.b.trim(),c:q.options.c.trim(),d:q.options.d.trim()},correctAnswer:q.correctAnswer,explanation:(q.explanation||"").trim(),imageUrl:"",...(svg?{diagramSvg:svg}:{}),order:t0+i,createdAt:serverTimestamp()});
+    }));
+    toast(`${valid.length} questions saved! Open My Exams to activate.`);
+    _aiQs=[];document.getElementById("aiPreviewWrap").style.display="none";document.getElementById("aiStatus").textContent="";
+  }catch(e){console.error(e);toast(e.message||"Failed to save.","error");}
+  finally{unspin(btn,"💾 Save Questions to Exam");}
+});
 
 /* HOME */
 async function loadHome(){
@@ -1051,7 +1201,7 @@ async function renderQuestions(eid){
       ? `${q.groupLabel?`<div class="q-group-banner">📊 ${q.groupLabel}</div>`:""}
          <img src="${q.groupImage}" class="q-group-img" alt="passage"/>`
       : (q.imageUrl?`<img src="${q.imageUrl}" class="q-image" alt="diagram"/>`:"");
-    body.innerHTML=`<div class="q-num">Question ${num}</div>${imgHtml}<div style="font-size:.88rem;margin-bottom:8px">${q.questionText||""}</div><div class="q-opts">${optsHtml}</div>`;
+    body.innerHTML=`<div class="q-num">Question ${num}</div>${imgHtml}${q.diagramSvg?`<div class="ai-svg">${safeSvg(q.diagramSvg)}</div>`:""}<div style="font-size:.88rem;margin-bottom:8px">${q.questionText||""}</div><div class="q-opts">${optsHtml}</div>`;
     inner.appendChild(body);inner.appendChild(actDiv);item.appendChild(inner);
     el.appendChild(item);num++;
   });

@@ -122,3 +122,12 @@ firestore.rules: unchanged (the new fields fit the existing `applications` creat
 - All pages: scrollbars were 4-5px wide at about 15% opacity, so they were nearly invisible. They are now 10px with a clear thumb (gold on hover); Firefox gets the equivalent standard properties.
 - New `scrollbar.js` (loaded by every page): phones hide scrollbars after a second, so it draws a slim bar on the right edge that stays visible whenever the page or the main panel can scroll.
 - Round 7b: `scrollbar.js` now covers every scrolling area (popups, results tables incl. sideways scroll, lists, text boxes), and draws nothing where the device already shows a real scrollbar. Native bars are 8px wide (6px thumb).
+
+## Round 5 – AI via OpenRouter (admin + teachers)
+- **Teacher portal > ✨ AI Generator** (new). Pick your subject, upload teaching material (PDF, Word .docx, text, or paste notes), choose count/difficulty, tick "Include diagrams" for Maths/Physics, then Generate. Questions arrive in batches, shown for review: edit text, options, answer, explanation; edit or remove a drawing; remove a question. Save into an existing exam of that subject or create a new (inactive) exam.
+- **Admin > AI Exam Generator** now uses the same server. The browser prompt for an API key is gone; no AI key is stored in the browser or the code. Diagrams are automatic for Maths/Physics-type subjects.
+- **Shapes:** the AI draws an SVG (triangles, circles, parallel lines, angles...) saved on the question as `diagramSvg`. Every drawing is re-cleaned in the browser (`safeSvg` in ai-client.js: whitelisted shapes only, no scripts or links) before it is shown to teachers, admin or students. Students see it above the question in cbt.html.
+- **Always review:** AI maths and drawings can be wrong. The preview exists so the teacher checks the answer and the figure before saving.
+- Scanned/photo PDFs cannot be read (no text inside). Use a text-based PDF, a Word file, or paste the notes.
+- New file: `ai-client.js` (upload it with the other files). Changed: teacher.html, cbt-admin.js, cbt.html, README.md.
+- firestore.rules: unchanged. If your server is not at `fullschoolapi.vercel.app`, change `AI_ENDPOINT` at the top of ai-client.js.

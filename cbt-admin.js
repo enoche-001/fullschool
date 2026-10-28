@@ -9,6 +9,8 @@ import { getApp, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, deleteField, query, where, orderBy, limit, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import { generate as aiGenerate, safeSvg } from "./ai-client.js";
+
 const app = getApp();                 // same Firebase app the admin page already created
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -28,15 +30,7 @@ async function getClasses(){
   }catch(e){ classCache = FALLBACK_CLASSES; }
   return classCache;
 }
-// The AI key is NOT stored in the code. The admin pastes it once; it is kept only in this browser.
-function getAIKey(){
-  let k=""; try{k=localStorage.getItem("cbt_ai_key")||"";}catch(_){}
-  if(!k){
-    k=(prompt("Paste your OpenRouter API key (saved only in this browser):")||"").trim();
-    if(k){try{localStorage.setItem("cbt_ai_key",k);}catch(_){}}
-  }
-  return k;
-}
+// AI runs on the school server (OpenRouter). No API key is kept in the browser.
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -674,40 +668,20 @@ window.generateQuestions=async function(){
   document.getElementById("qPreviewWrap").style.display="none";
   document.getElementById("aiGenMsg").textContent=`AI is crafting ${count} ${difficulty} ${subject} questions on "${topic}"...`;
 
-  const prompt=`You are an expert JAMB examination setter for Nigerian secondary school students. 
-Generate exactly ${count} multiple-choice questions for ${subject}, focused on the topic: "${topic}".
-Difficulty: ${difficulty}. Style: ${style}.
-Requirements:
-- Each question must be clearly worded in JAMB format
-- Each question has exactly 4 options (A, B, C, D)
-- One option is clearly correct
-- Include a brief 1-sentence explanation for the correct answer
-Respond ONLY with valid JSON in this exact format (no markdown, no preamble):
-{
-  "questions": [
-    {
-      "questionText": "The question text here",
-      "options": {"a": "Option A text", "b": "Option B text", "c": "Option C text", "d": "Option D text"},
-      "correctAnswer": "a",
-      "explanation": "Brief explanation of why this is correct"
-    }
-  ]
-}`;
-
   try{
-    const aiKey=getAIKey();
-    if(!aiKey)throw new Error("An OpenRouter API key is required.");
-    const resp=await fetch("https://openrouter.ai/api/v1/chat/completions",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":`Bearer ${aiKey}`},
-      body:JSON.stringify({model:"deepseek/deepseek-r1",max_tokens:8000,messages:[{role:"user",content:prompt}]})
-    });
-    const data=await resp.json();
-    if(data.error){ if(resp.status===401){try{localStorage.removeItem("cbt_ai_key");}catch(_){}} throw new Error(data.error.message||"API error"); }
-    const text=data.choices?.[0]?.message?.content||"";
-    const cleaned=text.replace(/```json/g,"").replace(/```/g,"").trim();
-    const parsed=JSON.parse(cleaned);
-    generatedQuestions=parsed.questions||[];
+    const diagrams=/math|geometry|further|physics|technical|basic science/i.test(subject);
+    const batch=diagrams?6:10,got=[];let failMsg="";
+    while(got.length<count){
+      const need=Math.min(batch,count-got.length);
+      document.getElementById("aiGenMsg").textContent=`AI is crafting questions ${got.length+1}-${got.length+need} of ${count} on "${topic}"...`;
+      try{
+        const qs=await aiGenerate(auth,{subject,topic,count:need,difficulty,style,diagrams,avoid:got.map(q=>q.questionText.slice(0,60))});
+        got.push(...qs.slice(0,need));
+      }catch(e){failMsg=e.message;break;}
+    }
+    if(!got.length)throw new Error(failMsg||"No questions generated.");
+    if(failMsg)toast(`Only ${got.length} of ${count} generated: ${failMsg}`,"error");
+    generatedQuestions=got;
     if(!generatedQuestions.length)throw new Error("No questions generated. Try a different topic.");
     renderQPreview(subject,topic,count);
     toast(`✅ ${generatedQuestions.length} questions generated!`);
@@ -733,6 +707,7 @@ function renderQPreview(subject,topic,count){
         <textarea class="q-text-edit" data-qi="${i}" onchange="updateQ(${i},'questionText',this.value)">${q.questionText}</textarea>
         <button class="q-del-btn" onclick="deleteQ(${i})">✕ Remove</button>
       </div>
+      ${q.diagramSvg?`<div style="max-width:320px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;margin:6px 0 10px 36px">${safeSvg(q.diagramSvg)}</div>`:""}
       <div class="q-opts">
         ${["a","b","c","d"].map(k=>`<div class="q-opt-row"><div class="q-opt-label">${k.toUpperCase()}</div><input class="q-opt-input" value="${q.options[k]||""}" onchange="updateQOpt(${i},'${k}',this.value)" placeholder="Option ${k.toUpperCase()}"></div>`).join("")}
       </div>
@@ -772,7 +747,7 @@ window.publishExam=async function(){
     const t0=Date.now();
     for(let i=0;i<generatedQuestions.length;i++){
       const q=generatedQuestions[i];
-      await addDoc(collection(db,"cbtQuestions"),{examId:examRef.id,questionText:q.questionText,options:q.options,correctAnswer:q.correctAnswer,explanation:q.explanation||"",imageUrl:"",order:t0+i,createdAt:serverTimestamp()});
+      await addDoc(collection(db,"cbtQuestions"),{examId:examRef.id,questionText:q.questionText,options:q.options,correctAnswer:q.correctAnswer,explanation:q.explanation||"",imageUrl:"",...(q.diagramSvg&&safeSvg(q.diagramSvg)?{diagramSvg:safeSvg(q.diagramSvg)}:{}),order:t0+i,createdAt:serverTimestamp()});
     }
     toast(`🚀 Exam published with ${generatedQuestions.length} questions!`);
     document.getElementById("qPreviewWrap").style.display="none";generatedQuestions=[];
