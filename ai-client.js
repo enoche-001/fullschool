@@ -18,6 +18,29 @@ export async function generate(auth, payload){
   return d.questions || [];
 }
 
+/* Keeps asking until `total` questions are collected. A short batch is topped up. When the AI is busy or a free
+   per-minute limit is hit, it waits (15s, 30s, 45s, 60s...) and tries again, up to 5 failures in a row.
+   Gives back whatever was collected plus the last error, if any. onProgress(have, need, fails, waitSeconds) */
+export async function generateMany(auth, base, total, batch, onProgress){
+  const got=[], seen=(base.avoid||[]).slice(); let failMsg="", fails=0, attempts=0;
+  while(got.length<total && attempts<total+12){
+    const need=Math.min(batch,total-got.length); attempts++;
+    if(onProgress) onProgress(got.length,need,fails,0);
+    try{
+      const avoid=seen.concat(got.map(q=>q.questionText.slice(0,60))).slice(-40);
+      const qs=await generate(auth,Object.assign({},base,{count:need,avoid}));
+      got.push(...qs.slice(0,need)); fails=0; failMsg="";
+    }catch(e){
+      fails++; failMsg=e.message;
+      if(fails>=5 || /sign in|Only admins|not set up|Too many AI|API key|out of credit|rejected/i.test(e.message)) break;
+      const wait=Math.min(60,fails*15);
+      if(onProgress) onProgress(got.length,need,fails,wait);
+      await new Promise(r=>setTimeout(r,wait*1000));
+    }
+  }
+  return {got,failMsg};
+}
+
 function loadScript(src){
   return new Promise((res,rej)=>{
     if(document.querySelector('script[data-src="'+src+'"]')) return res();

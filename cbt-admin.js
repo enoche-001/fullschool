@@ -9,7 +9,7 @@ import { getApp, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, deleteField, query, where, orderBy, limit, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { generate as aiGenerate, safeSvg } from "./ai-client.js";
+import { generateMany as aiMany, safeSvg } from "./ai-client.js";
 
 const app = getApp();                 // same Firebase app the admin page already created
 const auth = getAuth(app);
@@ -670,15 +670,9 @@ window.generateQuestions=async function(){
 
   try{
     const diagrams=/math|geometry|further|physics|technical|basic science/i.test(subject);
-    const batch=diagrams?6:10,got=[];let failMsg="";
-    while(got.length<count){
-      const need=Math.min(batch,count-got.length);
-      document.getElementById("aiGenMsg").textContent=`AI is crafting questions ${got.length+1}-${got.length+need} of ${count} on "${topic}"...`;
-      try{
-        const qs=await aiGenerate(auth,{subject,topic,count:need,difficulty,style,diagrams,avoid:got.map(q=>q.questionText.slice(0,60))});
-        got.push(...qs.slice(0,need));
-      }catch(e){failMsg=e.message;break;}
-    }
+    const {got,failMsg}=await aiMany(auth,{subject,topic,difficulty,style,diagrams},count,diagrams?6:10,(have,need,fails,wait)=>{
+      document.getElementById("aiGenMsg").textContent=wait?`AI is busy or at its free limit. Waiting ${wait}s then retrying (${fails}/5)... ${have} questions so far.`:`AI is crafting questions ${have+1}-${have+need} of ${count} on "${topic}"...`;
+    });
     if(!got.length)throw new Error(failMsg||"No questions generated.");
     if(failMsg)toast(`Only ${got.length} of ${count} generated: ${failMsg}`,"error");
     generatedQuestions=got;

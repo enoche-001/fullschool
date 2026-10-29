@@ -356,6 +356,7 @@ tr:hover td{background:#f8fafc}
           <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500;text-transform:none;font-size:.85rem"><input type="checkbox" id="aiDiag" style="width:auto"/> Include diagrams for shapes / geometry questions (Maths, Physics, etc.)</label></div>
           <button class="btn btn-p" id="aiGoBtn">✨ Generate Questions</button>
           <div id="aiStatus" class="ai-note" style="margin-top:10px"></div>
+          <button class="btn btn-edit btn-sm" id="aiMoreBtn" style="display:none;margin-top:8px"></button>
         </div>
         <div id="aiPreviewWrap" style="display:none">
           <div class="table-wrap" style="padding:20px;margin-bottom:16px">
@@ -662,7 +663,7 @@ tr:hover td{background:#f8fafc}
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,initializeAuth,inMemoryPersistence,browserSessionPersistence,onAuthStateChanged,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import{getFirestore,collection,doc,addDoc,getDoc,getDocs,deleteDoc,updateDoc,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import{generate as aiGenerate,extractText as aiExtract,safeSvg}from"./ai-client.js";
+import{generateMany as aiMany,extractText as aiExtract,safeSvg}from"./ai-client.js";
 
 const FC={apiKey:"AIzaSyAA4FrgXKF8SDYvS3jnTj8wmyX4AzqZWpU",authDomain:"veil-1-bd7b5.firebaseapp.com",projectId:"veil-1-bd7b5",storageBucket:"veil-1-bd7b5.firebasestorage.app",messagingSenderId:"526021682048",appId:"1:526021682048:web:a52dae5b2650ca951ad765"};
 const app=initializeApp(FC);
@@ -850,15 +851,18 @@ document.getElementById("aiFiles").addEventListener("change",function(){
   const n=[...this.files].map(f=>f.name+" ("+Math.round(f.size/1024)+" KB)").join(", ");
   document.getElementById("aiFileInfo").textContent=n?("Selected: "+n):"";
 });
-document.getElementById("aiGoBtn").addEventListener("click",async()=>{
+let _aiWant=0;
+async function runAiGen(append){
   if(_aiBusy)return;
   const sub=_aiSubs.find(x=>x.id===document.getElementById("aiSub").value);
   if(!sub){toast("Select a subject first.","error");return;}
   const topic=document.getElementById("aiTopicT").value.trim();
-  const total=Math.max(1,Math.min(40,parseInt(document.getElementById("aiCnt").value)||10));
+  const asked=Math.max(1,Math.min(40,parseInt(document.getElementById("aiCnt").value)||10));
+  if(!append)_aiWant=asked;
+  const total=append?Math.max(1,_aiWant-_aiQs.length):asked;
   const diff=document.getElementById("aiDiff").value,diagrams=document.getElementById("aiDiag").checked;
-  const btn=document.getElementById("aiGoBtn"),st=document.getElementById("aiStatus");
-  _aiBusy=true;spin(btn,"Working...");
+  const btn=document.getElementById("aiGoBtn"),more=document.getElementById("aiMoreBtn"),st=document.getElementById("aiStatus");
+  _aiBusy=true;spin(btn,"Working...");more.style.display="none";
   try{
     st.textContent="Reading your material...";
     let material="";
@@ -867,22 +871,23 @@ document.getElementById("aiGoBtn").addEventListener("click",async()=>{
     if(document.getElementById("aiFiles").files.length&&material.length<80)throw new Error("No readable text found in the file. Scanned/photo PDFs cannot be read; use a text-based PDF, Word file or paste the notes.");
     if(!topic&&!material)throw new Error("Enter a topic or add teaching material.");
     let note="";if(material.length>24000){material=material.slice(0,24000);note=" (only the first part of a long file was used)";}
-    const batch=diagrams?6:10,got=[];let failMsg="";
-    while(got.length<total){
-      const need=Math.min(batch,total-got.length);
-      st.textContent=`Generating questions ${got.length+1}–${got.length+need} of ${total}${note}... this can take up to a minute per batch.`;
-      try{
-        const qs=await aiGenerate(auth,{subject:sub.name,className:sub.className||"",topic,material,count:need,difficulty:diff,diagrams,style:"WAEC/JAMB style",avoid:got.map(q=>q.questionText.slice(0,60))});
-        got.push(...qs.slice(0,need));
-      }catch(e){failMsg=e.message;break;}
-    }
-    if(!got.length)throw new Error(failMsg||"No questions were generated.");
-    _aiQs=got;renderAiPreview(sub,topic);
-    st.textContent=failMsg?`Generated ${got.length} of ${total}. Stopped: ${failMsg}`:`Done: ${got.length} questions. Review them below before saving.`;
-    toast(`${got.length} questions generated.`);
-  }catch(e){console.error(e);st.textContent="";toast(e.message||"Generation failed.","error");}
+    const base=_aiQs.length&&append?_aiQs.length:0;
+    const {got,failMsg}=await aiMany(auth,{subject:sub.name,className:sub.className||"",topic,material,difficulty:diff,diagrams,style:"WAEC/JAMB style",avoid:append?_aiQs.map(q=>q.questionText.slice(0,60)):[]},total,diagrams?6:10,(have,need,fails,wait)=>{
+      st.textContent=wait?`The AI is busy or at its free limit. Waiting ${wait}s then retrying (${fails}/5)... Questions so far: ${base+have}.`:`Generating questions ${base+have+1}–${base+have+need} of ${_aiWant}${note}. This can take up to a minute per batch.`;
+    });
+    if(!got.length&&!append)throw new Error(failMsg||"No questions were generated.");
+    _aiQs=append?_aiQs.concat(got):got;
+    await renderAiPreview(sub,topic,append);
+    const missing=_aiWant-_aiQs.length;
+    st.textContent=missing>0?`You have ${_aiQs.length} of ${_aiWant} questions.${failMsg?" Stopped because: "+failMsg:""}`:`Done: ${_aiQs.length} questions. Review them below before saving.`;
+    if(missing>0){more.textContent=`➕ Generate the missing ${missing}`;more.style.display="inline-block";}
+    toast(`${got.length} question${got.length!==1?"s":""} added.`);
+  }catch(e){console.error(e);st.textContent="";toast(e.message||"Generation failed.","error");
+    const missing=_aiWant-_aiQs.length;if(append&&missing>0){more.textContent=`➕ Generate the missing ${missing}`;more.style.display="inline-block";}}
   finally{_aiBusy=false;unspin(btn,"✨ Generate Questions");}
-});
+}
+document.getElementById("aiGoBtn").addEventListener("click",()=>runAiGen(false));
+document.getElementById("aiMoreBtn").addEventListener("click",()=>runAiGen(true));
 function aiQCard(q,i){
   const d=document.createElement("div");d.className="ai-q";
   d.innerHTML=`<div style="font-weight:700;font-size:.78rem;color:var(--P);margin-bottom:6px">Question ${i+1}</div>
