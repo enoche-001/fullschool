@@ -19,6 +19,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
   .tag-input-row{position:relative}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="sessions.js"></script>
 </head>
 <body>
 
@@ -1263,7 +1264,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
    Everything is filtered in the browser from data already loaded. */
 window.AF=(function(){
   var NONE='__none';
-  var DEF_SESSIONS=['2024/2025','2025/2026','2026/2027'];
+  var DEF_SESSIONS=(window.SESSIONS||['2024/2025','2025/2026','2026/2027']).slice(0,4);
   var TERMS=[['First','First Term'],['Second','Second Term'],['Third','Third Term']];
   var cur={session:'2025/2026',term:'Second'};
   var sh={session:null,term:null,cls:''};
@@ -4363,7 +4364,7 @@ window.openSendToResults = async function(pre){
   const session = clean(exam?.session) || clean(pre.session) || F.session || CURRENT_SESSION;
   const term = clean(exam?.term) || clean(pre.term) || F.term || CURRENT_TERM;
   const cls = (exam && (exam.classId || exam.className)) || clean(pre.cls) || F.cls || CLASS_NAMES[0] || '';
-  const sessions = [...new Set(['2024/2025','2025/2026','2026/2027', CURRENT_SESSION, session])];
+  const sessions = [...new Set([...(window.SESSIONS||['2024/2025','2025/2026','2026/2027']), CURRENT_SESSION, session])];
   srEl('srSession').innerHTML = sessions.map(x=>`<option value="${escapeAttr(x)}">${escapeHtml(x)}</option>`).join('');
   srEl('srSession').value = session;
   srEl('srTerm').innerHTML = [['First','First Term'],['Second','Second Term'],['Third','Third Term']].map(([v,l])=>`<option value="${v}">${l}</option>`).join('');

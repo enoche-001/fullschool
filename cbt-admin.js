@@ -9,7 +9,7 @@ import { getApp, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, deleteField, query, where, orderBy, limit, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { generateMany as aiMany, safeSvg } from "./ai-client.js";
+import { generate as aiGenerate, safeSvg } from "./ai-client.js";
 
 const app = getApp();                 // same Firebase app the admin page already created
 const auth = getAuth(app);
@@ -70,7 +70,7 @@ async function getClassData(){
   snap.forEach(d=>{const x=d.data();o[d.id]={compulsory:(x.compulsory||[]).map(String),elective:(x.elective||[]).map(String)};});
   return o;
 }
-const SESSION_LIST=["2024/2025","2025/2026","2026/2027"];
+const SESSION_LIST=window.SESSIONS||["2024/2025","2025/2026","2026/2027"];
 const TERM_LIST=[["First","First Term"],["Second","Second Term"],["Third","Third Term"]];
 async function fillAcademic(sessId,termId,session,term){
   let a={session:"2025/2026",term:"Second"};
@@ -670,9 +670,15 @@ window.generateQuestions=async function(){
 
   try{
     const diagrams=/math|geometry|further|physics|technical|basic science/i.test(subject);
-    const {got,failMsg}=await aiMany(auth,{subject,topic,difficulty,style,diagrams},count,diagrams?6:10,(have,need,fails,wait)=>{
-      document.getElementById("aiGenMsg").textContent=wait?`AI is busy or at its free limit. Waiting ${wait}s then retrying (${fails}/5)... ${have} questions so far.`:`AI is crafting questions ${have+1}-${have+need} of ${count} on "${topic}"...`;
-    });
+    const batch=diagrams?6:10,got=[];let failMsg="";
+    while(got.length<count){
+      const need=Math.min(batch,count-got.length);
+      document.getElementById("aiGenMsg").textContent=`AI is crafting questions ${got.length+1}-${got.length+need} of ${count} on "${topic}"...`;
+      try{
+        const qs=await aiGenerate(auth,{subject,topic,count:need,difficulty,style,diagrams,avoid:got.map(q=>q.questionText.slice(0,60))});
+        got.push(...qs.slice(0,need));
+      }catch(e){failMsg=e.message;break;}
+    }
     if(!got.length)throw new Error(failMsg||"No questions generated.");
     if(failMsg)toast(`Only ${got.length} of ${count} generated: ${failMsg}`,"error");
     generatedQuestions=got;
