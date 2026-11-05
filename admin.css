@@ -1121,3 +1121,9 @@ tbody tr:hover{background:#f7f9fd}
 @supports (-moz-appearance:none){*{scrollbar-width:auto;scrollbar-color:rgba(13,31,60,.5) rgba(13,31,60,.07)}}
 .sidebar::-webkit-scrollbar-track{background:rgba(255,255,255,.06)}
 .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4);border:1px solid transparent;background-clip:padding-box}
+
+/* copy-fees helpers */
+.fs-also{display:flex;flex-wrap:wrap;gap:8px 18px;margin:8px 0 4px}
+.fs-also label{display:flex;gap:6px;align-items:center;font-size:.85rem;cursor:pointer}
+.fs-mini{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+.fs-hr{border:0;border-top:1px solid var(--border);margin:18px 0}

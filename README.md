@@ -131,3 +131,9 @@ firestore.rules: unchanged (the new fields fit the existing `applications` creat
 - Scanned/photo PDFs cannot be read (no text inside). Use a text-based PDF, a Word file, or paste the notes.
 - New file: `ai-client.js` (upload it with the other files). Changed: teacher.html, cbt-admin.js, cbt.html, README.md.
 - firestore.rules: unchanged. If your server is not at `fullschoolapi.vercel.app`, change `AI_ENDPOINT` at the top of ai-client.js.
+
+## Round 8 – session dropdowns, copy classes, copy fees
+- `sessions.js` (new, loaded by admin, teacher and student pages): every session dropdown now lists 2 past, the current and 9 future sessions, plus "Other (type manually)…" (type 2031 or 2031/2032).
+- **Classes:** *Copy* button on each class (new class with the same subjects); "Copy subjects from…" in Add Class; Add Class accepts several names at once (JSS1B, JSS1C, JSS1D). Names with / or \ are refused.
+- **Fee Settings:** "Copy fees you already entered" (from another class/term/session into the form), "Also save these fees to other classes" (same level / all / none), and "Copy a whole term" (every class's fees to another term; due dates are not copied).
+- firestore.rules: unchanged. cbt.html / cbt.css are no longer in the hosted site (exams run on the offline CBT server).
