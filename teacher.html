@@ -263,6 +263,7 @@ tr:hover td{background:#f8fafc}
 
 </style>
 <script src="sessions.js"></script>
+<script src="grading.js"></script>
 </head>
 <body>
 
@@ -468,6 +469,8 @@ tr:hover td{background:#f8fafc}
     <div class="form-group"><label>Duration (minutes)</label><input type="number" id="eDuration" placeholder="e.g. 60" min="5" max="300"/></div>
     <div class="form-group"><label>Session</label><select id="eSession"></select></div>
     <div class="form-group"><label>Term</label><select id="eTerm"></select></div>
+    <div class="form-group"><label>Questions per student <span style="color:var(--muted);font-weight:400">(optional)</span></label><input type="number" id="eQPer" min="1" placeholder="Blank = every student gets all questions"/><small style="color:var(--muted)">Add a big bank of questions; each student gets this many, picked at random.</small></div>
+    <div class="form-group"><label>Counts as</label><select id="eCountsAs"></select><small style="color:var(--muted)">Scores are converted to this column's maximum from the admin's Result Settings.</small></div>
     <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="eShuffleQ" checked/> Shuffle question order</label></div>
     <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="eShuffleO" checked/> Shuffle option order (A-D)</label></div>
     <div class="modal-actions">
@@ -487,6 +490,8 @@ tr:hover td{background:#f8fafc}
     <div class="form-group"><label>Duration (minutes)</label><input type="number" id="editEDur" min="5" max="300"/></div>
     <div class="form-group"><label>Session</label><select id="editESession"></select></div>
     <div class="form-group"><label>Term</label><select id="editETerm"></select></div>
+    <div class="form-group"><label>Questions per student <span style="color:var(--muted);font-weight:400">(optional)</span></label><input type="number" id="editEQPer" min="1" placeholder="Blank = every student gets all questions"/><small style="color:var(--muted)">Add a big bank of questions; each student gets this many, picked at random.</small></div>
+    <div class="form-group"><label>Counts as</label><select id="editECountsAs"></select><small style="color:var(--muted)">Scores are converted to this column's maximum from the admin's Result Settings.</small></div>
     <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="editEShuffleQ"/> Shuffle question order</label></div>
     <div class="form-group"><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="editEShuffleO"/> Shuffle option order (A-D)</label></div>
     <div class="modal-actions">
@@ -982,7 +987,7 @@ async function loadExams(){
     const e=d.data(),id=d.id,isActive=e.isActive===true;
     const tr=document.createElement("tr");
     // Static cells
-    tr.innerHTML=`<td><strong>${e.title||"—"}</strong><br><span style="font-size:.72rem;color:var(--muted)">${e.session?e.session+" · "+(e.term||"")+" Term":"Untagged session/term"}</span></td><td>${e.subjectName||"—"}</td><td><span class="badge b-gold">${e.className||"—"}</span></td><td>${e.duration||"—"} min</td><td><span class="badge b-blue">${qCount[id]||0} Qs</span></td><td></td><td></td>`;
+    tr.innerHTML=`<td><strong>${e.title||"—"}</strong><br><span style="font-size:.72rem;color:var(--muted)">${e.session?e.session+" · "+(e.term||"")+" Term":"Untagged session/term"}</span>${examNote(e)}</td><td>${e.subjectName||"—"}</td><td><span class="badge b-gold">${e.className||"—"}</span></td><td>${e.duration||"—"} min</td><td><span class="badge b-blue">${qCount[id]||0} Qs</span></td><td></td><td></td>`;
     tr.dataset.s=e.session||"";tr.dataset.t=e.term||"";tr.dataset.c=e.className||"";tr.dataset.q=`${e.title||""} ${e.subjectName||""}`.toLowerCase();
     // Toggle button in cell 5
     const tog=document.createElement("button");
@@ -1067,6 +1072,22 @@ const tf=(function(){
 })();
 (function(){const c=document.createElement("style");c.textContent=".tf-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px}.tf-bar select,.tf-bar input{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--bdr);border-radius:8px;font:inherit;font-size:.82rem;background:#fff}.tf-reset{padding:9px 12px;border:1px solid var(--bdr);border-radius:8px;background:#fff;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.tf-info{font-size:.76rem;color:var(--muted);margin-bottom:10px}.tf-link{background:none;border:none;color:var(--navy2,#1d4ed8);text-decoration:underline;cursor:pointer;font:inherit}@media(max-width:520px){.tf-bar{grid-template-columns:1fr 1fr}.tf-bar input,.tf-reset{grid-column:1/-1}}";document.head.appendChild(c);})();
 
+/* QUESTIONS-PER-STUDENT + MARKS (uses the admin's Result Settings) */
+let _RS=null;
+async function loadRS(){ if(_RS) return _RS; try{const sn=await getDoc(doc(db,"settings","resultSettings"));_RS=sn.exists()?sn.data():{};}catch(e){_RS={};} return _RS; }
+async function fillCountsAs(selId,cur){
+  const S=CBTGrade.settingsOf(await loadRS()),sel=document.getElementById(selId);
+  sel.innerHTML='<option value="">— Not linked (show % only) —</option>'+Object.keys(CBTGrade.COLS).map(k=>`<option value="${k}">${CBTGrade.COLS[k].name} (out of ${S.assessment[CBTGrade.COLS[k].key]})</option>`).join("");
+  sel.value=cur||"";
+}
+const parseQPer=v=>{const n=parseInt(v);return n>0?n:null;};
+function examNote(e){const a=[];if(e.questionsPerStudent>0)a.push(e.questionsPerStudent+" per student");if(e.countsAs&&CBTGrade.COLS[e.countsAs])a.push("counts as "+CBTGrade.COLS[e.countsAs].name);return a.length?`<br><span style="font-size:.72rem;color:var(--ok)">${a.join(" · ")}</span>`:"";}
+function scoreNote(r,pct){
+  const g=r.grade||CBTGrade.gradeFor(_RS||{},pct).grade;
+  const conv=r.countsAs&&r.convertedScore!=null?`${r.convertedScore}/${r.columnMax} ${(CBTGrade.COLS[r.countsAs]||{}).name||""} · `:"";
+  return `<br/><span style="font-size:.72rem;color:var(--muted)">${conv}${g}</span>`;
+}
+
 /* SESSION / TERM helpers */
 const SESSION_LIST=window.SESSIONS||["2024/2025","2025/2026","2026/2027"];
 const TERM_LIST=[["First","First Term"],["Second","Second Term"],["Third","Third Term"]];
@@ -1082,7 +1103,7 @@ async function fillAcademic(sessId,termId,session,term){
 /* CREATE EXAM */
 document.getElementById("openCreateExamBtn").addEventListener("click",async()=>{
   await populateSubjectSel();await fillAcademic("eSession","eTerm");
-  document.getElementById("eShuffleQ").checked=true;document.getElementById("eShuffleO").checked=true;
+  document.getElementById("eShuffleQ").checked=true;document.getElementById("eShuffleO").checked=true;document.getElementById("eQPer").value="";await fillCountsAs("eCountsAs","");
   openModal("examModal");
 });
 document.getElementById("cancelExamBtn").addEventListener("click",()=>closeModal("examModal"));
@@ -1101,6 +1122,7 @@ document.getElementById("saveExamBtn").addEventListener("click",async()=>{
       teacherId:userId,teacherName:userName,duration:dur,
       session:document.getElementById("eSession").value,term:document.getElementById("eTerm").value,
       shuffleQuestions:document.getElementById("eShuffleQ").checked,shuffleOptions:document.getElementById("eShuffleO").checked,
+      questionsPerStudent:parseQPer(document.getElementById("eQPer").value),countsAs:document.getElementById("eCountsAs").value||"",
       isActive:false,createdAt:serverTimestamp()
     });
     toast(`Exam "${title}" created! Toggle Active when ready.`);
@@ -1116,7 +1138,7 @@ async function openEditExam(id,data){
   document.getElementById("editEDur").value=data.duration||"";
   await fillAcademic("editESession","editETerm",data.session||"",data.term||"");
   document.getElementById("editEShuffleQ").checked=data.shuffleQuestions!==false;
-  document.getElementById("editEShuffleO").checked=data.shuffleOptions!==false;
+  document.getElementById("editEShuffleO").checked=data.shuffleOptions!==false;document.getElementById("editEQPer").value=data.questionsPerStudent||"";await fillCountsAs("editECountsAs",data.countsAs||"");
   openModal("editExamModal");
 }
 document.getElementById("cancelEditExamBtn").addEventListener("click",()=>closeModal("editExamModal"));
@@ -1129,7 +1151,8 @@ document.getElementById("saveEditExamBtn").addEventListener("click",async()=>{
   try{
     await updateDoc(doc(db,"cbtExams",id),{title,duration:dur,
       session:document.getElementById("editESession").value,term:document.getElementById("editETerm").value,
-      shuffleQuestions:document.getElementById("editEShuffleQ").checked,shuffleOptions:document.getElementById("editEShuffleO").checked});
+      shuffleQuestions:document.getElementById("editEShuffleQ").checked,shuffleOptions:document.getElementById("editEShuffleO").checked,
+      questionsPerStudent:parseQPer(document.getElementById("editEQPer").value),countsAs:document.getElementById("editECountsAs").value||""});
     toast("Exam updated!");closeModal("editExamModal");loadExams();
   }catch(err){toast("Failed to update.","error");}
   finally{unspin(btn,"Save Changes");}
@@ -1612,7 +1635,7 @@ async function populateResultsFilter(){
   });
 }
 async function loadResults(){
-  await tf.init();
+  await tf.init();await loadRS();
   const tbody=document.getElementById("resultsBody");
   const examId=document.getElementById("rExamFilter").value;
   const search=(document.getElementById("rSearch").value||"").toLowerCase();
@@ -1636,7 +1659,7 @@ async function loadResults(){
       catch(err){toast("Failed to delete.","error");}
     }));
     tr.dataset.s=r.session||"";tr.dataset.t=r.term||"";tr.dataset.c=r.className||"";tr.dataset.e=r.examId||"";tr.dataset.q=`${r.studentName||""} ${r.examTitle||""}`.toLowerCase();
-    tr.innerHTML=`<td><strong>${r.studentName||"—"}</strong><br/><span style="font-size:.75rem;color:var(--muted)">${r.className||""}</span></td><td style="font-size:.82rem">${r.examTitle||"—"}</td><td><strong>${r.score}/${r.totalMarks}</strong></td><td><span style="color:${col};font-weight:600">${pct}%</span></td><td>${typeof mins==="number"?mins+" min":"—"}</td><td>${fmtDate(r.submittedAt)}</td><td></td>`;
+    tr.innerHTML=`<td><strong>${r.studentName||"—"}</strong><br/><span style="font-size:.75rem;color:var(--muted)">${r.className||""}</span></td><td style="font-size:.82rem">${r.examTitle||"—"}</td><td><strong>${r.score}/${r.totalMarks}</strong>${scoreNote(r,pct)}</td><td><span style="color:${col};font-weight:600">${pct}%</span></td><td>${typeof mins==="number"?mins+" min":"—"}</td><td>${fmtDate(r.submittedAt)}</td><td></td>`;
     tr.cells[6].appendChild(delBtn);
     tbody.appendChild(tr);
   });

@@ -617,7 +617,7 @@ function cbtFiltered(key,extra){
 async function loadResults(force){
   const tbody=$("cbResBody");
   if(force||!cbResAll)tbody.innerHTML=loadingRow(6);
-  try{await ensureCbtResults(force);}catch(e){console.error(e);tbody.innerHTML=emptyRow(6,"⚠️","Could not load CBT results. Please refresh.");return;}
+  try{await ensureCbtResults(force);await loadRS();}catch(e){console.error(e);tbody.innerHTML=emptyRow(6,"⚠️","Could not load CBT results. Please refresh.");return;}
   renderResults();
 }
 function renderResults(){
@@ -633,7 +633,7 @@ function renderResults(){
     const pct=r.totalMarks?Math.round((r.score/r.totalMarks)*100):0;
     const cls=pct>=70?"b-green":pct>=50?"b-gold":"b-red";
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td><strong>${esc(r.studentName||"—")}</strong><br/><span style="font-size:.75rem;color:var(--muted)">${esc(r.regNumber||"")} ${esc(r.className||"")}</span></td><td>${esc(r.examTitle||"—")}</td><td>${esc(r.subjectName||"—")}</td><td><span class="badge ${cls}">${r.score}/${r.totalMarks} (${pct}% · ${calcGrade(pct)})</span></td><td>${fmtDate(r.submittedAt)}</td><td></td>`;
+    tr.innerHTML=`<td><strong>${esc(r.studentName||"—")}</strong><br/><span style="font-size:.75rem;color:var(--muted)">${esc(r.regNumber||"")} ${esc(r.className||"")}</span></td><td>${esc(r.examTitle||"—")}</td><td>${esc(r.subjectName||"—")}</td><td><span class="badge ${cls}">${r.score}/${r.totalMarks} (${pct}% · ${gradeText(r,pct)})${convText(r)}</span></td><td>${fmtDate(r.submittedAt)}</td><td></td>`;
     const del=document.createElement("button");del.className="btn btn-danger btn-sm";del.textContent="🗑️ Delete";
     del.addEventListener("click",()=>requirePw(`Delete result for "${r.studentName}"`,async()=>{await deleteDoc(doc(db,"cbtResults",r.id));toast("CBT result deleted.");loadResults(true);}));
     tr.cells[5].appendChild(del);tbody.appendChild(tr);
@@ -984,6 +984,16 @@ async function renderExams(){
   }
 }
 
+// ─── Marks / grades from the admin's Result Settings ───
+let _RS=null;
+async function loadRS(){ if(_RS) return _RS; try{const sn=await getDoc(doc(db,"settings","resultSettings"));_RS=sn.exists()?sn.data():{};}catch(e){_RS={};} return _RS; }
+async function fillCountsAs(selId,cur){
+  const S=CBTGrade.settingsOf(await loadRS()),sel=$(selId);
+  sel.innerHTML='<option value="">— Not linked (show % only) —</option>'+Object.keys(CBTGrade.COLS).map(k=>`<option value="${k}">${CBTGrade.COLS[k].name} (out of ${S.assessment[CBTGrade.COLS[k].key]})</option>`).join("");
+  sel.value=cur||"";
+}
+const gradeText=(r,pct)=>r.grade||CBTGrade.gradeFor(_RS||{},pct).grade;
+const convText=r=>r.countsAs&&r.convertedScore!=null?` → ${r.convertedScore}/${r.columnMax} ${(CBTGrade.COLS[r.countsAs]||{}).name||""}`:"";
 // ─── EXAM SETTINGS (subject, session, term, shuffling) ───
 async function openExamSettings(id,r){
   $("cesId").value=id;$("cesClass").value=r.classId||"";
@@ -991,13 +1001,14 @@ async function openExamSettings(id,r){
   await Promise.all([fillSubjectSel("cesSubject",r.classId||"",r.subjectName||""),fillAcademic("cesSession","cesTerm",r.session||"",r.term||"")]);
   $("cesShuffleQ").checked=r.shuffleQuestions!==false;
   $("cesShuffleO").checked=r.shuffleOptions!==false;
+  $("cesQPer").value=r.questionsPerStudent||"";await fillCountsAs("cesCountsAs",r.countsAs||"");
   openMo("moCbExamSet");
 }
 $("cesCancel").addEventListener("click",()=>closeMo("moCbExamSet"));
 $("cesSave").addEventListener("click",async()=>{
   const btn=$("cesSave");spin(btn,"Saving...");
   try{
-    await updateDoc(doc(db,"cbtExams",$("cesId").value),{subjectName:$("cesSubject").value||"",session:$("cesSession").value,term:$("cesTerm").value,shuffleQuestions:$("cesShuffleQ").checked,shuffleOptions:$("cesShuffleO").checked});
+    await updateDoc(doc(db,"cbtExams",$("cesId").value),{subjectName:$("cesSubject").value||"",session:$("cesSession").value,term:$("cesTerm").value,shuffleQuestions:$("cesShuffleQ").checked,shuffleOptions:$("cesShuffleO").checked,questionsPerStudent:(parseInt($("cesQPer").value)>0?parseInt($("cesQPer").value):null),countsAs:$("cesCountsAs").value||""});
     toast("Exam settings saved.");closeMo("moCbExamSet");loadExams(true);
   }catch(e){console.error(e);toast("Could not save settings.","error");}
   finally{unspin(btn,"Save");}

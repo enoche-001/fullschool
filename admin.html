@@ -20,6 +20,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="sessions.js"></script>
+<script src="grading.js"></script>
 </head>
 <body>
 
@@ -1275,6 +1276,8 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
     <div class="form-group"><label>Term</label><select id="cesTerm"></select></div></div>
   <label class="toggle-wrap" style="margin-bottom:10px"><input type="checkbox" id="cesShuffleQ"><span>Shuffle question order</span></label>
   <label class="toggle-wrap"><input type="checkbox" id="cesShuffleO"><span>Shuffle option order (A-D)</span></label>
+  <div class="form-group" style="margin-top:14px"><label>Questions per student <span style="color:var(--soft);font-weight:400">(optional)</span></label><input type="number" id="cesQPer" min="1" placeholder="Blank = every student gets all questions"/></div>
+  <div class="form-group"><label>Counts as</label><select id="cesCountsAs"></select></div>
   <div class="mactions"><button class="btn-cancel" id="cesCancel">Cancel</button><button class="btn btn-p" id="cesSave">Save</button></div>
 </div></div>
 
@@ -4695,6 +4698,7 @@ srEl('srExam').addEventListener('change', ()=>{
     if(e.subjectName) srFillSubjects(e.subjectName);
     if(e.session){ if(![...srEl('srSession').options].some(o=>o.value===e.session)) srEl('srSession').add(new Option(e.session, e.session)); srEl('srSession').value = e.session; }
     if(e.term) srEl('srTerm').value = e.term;
+    if(e.countsAs && [...srEl('srCol').options].some(o=>o.value===e.countsAs)) srEl('srCol').value = e.countsAs;   // column chosen by the teacher
   }
   srClear();
 });

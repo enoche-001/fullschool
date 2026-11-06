@@ -137,3 +137,10 @@ firestore.rules: unchanged (the new fields fit the existing `applications` creat
 - **Classes:** *Copy* button on each class (new class with the same subjects); "Copy subjects from…" in Add Class; Add Class accepts several names at once (JSS1B, JSS1C, JSS1D). Names with / or \ are refused.
 - **Fee Settings:** "Copy fees you already entered" (from another class/term/session into the form), "Also save these fees to other classes" (same level / all / none), and "Copy a whole term" (every class's fees to another term; due dates are not copied).
 - firestore.rules: unchanged. cbt.html / cbt.css are no longer in the hosted site (exams run on the offline CBT server).
+
+## Round 9 – questions per student + marks from Result Settings
+- New exam settings (teacher: Create/Edit Exam; admin: Manage Exams > Settings): **Questions per student** (random subset of a bigger bank) and **Counts as** (Test 1/2/3/Exam).
+- `grading.js` (new, loaded by teacher.html and admin.html): converts a CBT percentage to the chosen column's maximum from settings/resultSettings and finds the grade from the admin's grading bands.
+- Teacher exam list shows "10 per student · counts as Test 1". Teacher Results and Admin CBT Results show the grade and, for results from the offline server, the converted mark (e.g. 14/20).
+- Admin > Send to Results pre-selects the column the teacher chose for the exam.
+- firestore.rules: unchanged (new fields live on existing cbtExams / cbtResults documents).
