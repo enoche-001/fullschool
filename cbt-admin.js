@@ -643,7 +643,7 @@ $("cbResSend").addEventListener("click",()=>{const f=AF.get("cbres");if(window.o
 $("cbResPrint").addEventListener("click",()=>{
   const w=window.open("","_blank");
   const rows=[...$("cbResBody").querySelectorAll("tr")].map(tr=>[...tr.cells].slice(0,5).map(c=>`<td style="border:1px solid #ccc;padding:6px 8px">${c.innerText}</td>`).join("")).map(r=>`<tr>${r}</tr>`).join("");
-  w.document.write(`<html><head><title>CBT Results</title></head><body style="font-family:Arial,sans-serif"><h2>Newtown Academy — CBT Results</h2><p>${new Date().toDateString()}</p><table style="border-collapse:collapse;width:100%;font-size:13px"><tr><th style="border:1px solid #ccc;padding:6px">Student</th><th style="border:1px solid #ccc;padding:6px">Exam</th><th style="border:1px solid #ccc;padding:6px">Subject</th><th style="border:1px solid #ccc;padding:6px">Score</th><th style="border:1px solid #ccc;padding:6px">Date</th></tr>${rows}</table></body></html>`);
+  w.document.write(`<html><head><title>CBT Results</title></head><body style="font-family:Arial,sans-serif"><h2>Bisssfa International School — CBT Results</h2><p>${new Date().toDateString()}</p><table style="border-collapse:collapse;width:100%;font-size:13px"><tr><th style="border:1px solid #ccc;padding:6px">Student</th><th style="border:1px solid #ccc;padding:6px">Exam</th><th style="border:1px solid #ccc;padding:6px">Subject</th><th style="border:1px solid #ccc;padding:6px">Score</th><th style="border:1px solid #ccc;padding:6px">Date</th></tr>${rows}</table></body></html>`);
   w.document.close(); w.focus(); w.print();
 });
 

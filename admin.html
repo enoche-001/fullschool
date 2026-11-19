@@ -8,7 +8,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="robots" content="noindex,nofollow"/>
-<title>Newtown Academy — Admin Portal</title>
+<title>Bisssfa International School — Admin Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="admin.css"/>
 <style>
@@ -27,8 +27,8 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-mark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy"/></div>
-    <h1 class="login-title">Newtown Academy</h1>
+    <div class="login-mark"><img src="assets/newtown-academy-logo.jpg" alt="Bisssfa International School"/></div>
+    <h1 class="login-title">Bisssfa International School</h1>
     <p class="login-tagline">Admin Portal — log in to your admin account with your valid details.</p>
     <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
     <div class="fg"><input type="email" id="emailIn" placeholder="Email address" autocomplete="off"/></div>
@@ -41,8 +41,8 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
 <div id="portalScreen">
   <div class="sidebar" id="sidebar">
     <div class="sb-brand">
-      <div class="sb-mark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest"/></div>
-      <div class="sb-brand-text"><h2>Newtown Academy</h2><span>Admin Dashboard</span></div>
+      <div class="sb-mark"><img src="assets/newtown-academy-logo.jpg" alt="Bisssfa International School crest"/></div>
+      <div class="sb-brand-text"><h2>Bisssfa International School</h2><span>Admin Dashboard</span></div>
     </div>
     <nav class="sb-nav">
       <div class="nav-label">Overview</div>
@@ -99,7 +99,7 @@ setTimeout(function(){document.documentElement.classList.remove('restoring');},8
         <div class="ov-hero">
           <div class="ov-hero-l">
             <h2>Welcome back, <span id="ovWelcomeName">Admin</span></h2>
-            <p id="ovWelcomeDate">Here's what's happening at Newtown Academy today.</p>
+            <p id="ovWelcomeDate">Here's what's happening at Bisssfa International School today.</p>
             <div class="ov-term-row">
               <span class="ov-term-pill" id="ovTermChip">— Term · —</span>
               <button type="button" class="ov-term-edit" onclick="openTermSettings()" title="Change current term/session">
@@ -1477,7 +1477,7 @@ catch(e){ stuSecAuth = getAuth(stuSecApp); }
    The server (api/send-credentials) sends through Gmail. It only accepts
    requests from a signed-in admin, so we pass the admin's Firebase token. */
 const EMAIL_ENDPOINT = "https://fullschoolapi.vercel.app/api/send-credentials";
-const SCHOOL_NAME = "Newtown Academy";
+const SCHOOL_NAME = "Bisssfa International School";
 
 // Sends the reg number + password to a parent's email after an
 // application is approved. Never blocks enrollment: on failure it only
@@ -1668,7 +1668,7 @@ onAuthStateChanged(auth, async user=>{
     const welcomeName = document.getElementById('ovWelcomeName');
     if(welcomeName) welcomeName.textContent = user.email.split('@')[0];
     const welcomeDate = document.getElementById('ovWelcomeDate');
-    if(welcomeDate) welcomeDate.textContent = "Here's what's happening at Newtown Academy — " + new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    if(welcomeDate) welcomeDate.textContent = "Here's what's happening at Bisssfa International School — " + new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
     loadAll();
     if(isAdminUser === null) setTimeout(()=>showToast('Could not reach the server. Showing saved data — use Reload when you are back online.','error'), 900);
     // after a page reload, go back to the section the admin was on
